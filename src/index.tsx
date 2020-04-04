@@ -91,7 +91,7 @@ const ToolbarBtn = styled(Button)<{ isActive?: boolean }>`
   border: none;
 `;
 
-const StyledTool = styled.div`
+const ToolBox = styled.div`
   background: white;
   overflow: hidden;
   border-radius: 3px;
@@ -162,9 +162,9 @@ function LinkBtn(props: { children: React.ReactNode }) {
         {({ ref, style, placement, arrowProps }) => (
           <div ref={ref} style={style} data-placement={placement}>
             {showLinkConfig && (
-              <StyledTool>
+              <ToolBox>
                 <input autoFocus data-slate-editor></input>
-              </StyledTool>
+              </ToolBox>
             )}
             <div ref={arrowProps.ref} style={arrowProps.style} />
           </div>
@@ -176,9 +176,9 @@ function LinkBtn(props: { children: React.ReactNode }) {
 
 function HoveringToolbars() {
   return (
-    <StyledTool>
+    <ToolBox>
       <TextFormatTools />
-    </StyledTool>
+    </ToolBox>
   );
 }
 
@@ -234,7 +234,7 @@ function BlockInsert() {
           {({ ref, style, placement, arrowProps }) => (
             <div ref={ref} style={style} data-placement={placement}>
               {
-                <StyledTool>
+                <ToolBox>
                   <ToolbarBtn
                     onClick={() => {
                       RichEditor.insertHeader(editor, "heading-1");
@@ -243,9 +243,23 @@ function BlockInsert() {
                   >
                     H1
                   </ToolbarBtn>
-                  <ToolbarBtn>H2</ToolbarBtn>
-                  <ToolbarBtn>H3</ToolbarBtn>
-                </StyledTool>
+                  <ToolbarBtn
+                    onClick={() => {
+                      RichEditor.insertHeader(editor, "heading-2");
+                      ReactEditor.focus(editor);
+                    }}
+                  >
+                    H2
+                  </ToolbarBtn>
+                  <ToolbarBtn
+                    onClick={() => {
+                      RichEditor.insertHeader(editor, "heading-3");
+                      ReactEditor.focus(editor);
+                    }}
+                  >
+                    H3
+                  </ToolbarBtn>
+                </ToolBox>
               }
               <div ref={arrowProps.ref} style={arrowProps.style} />
             </div>
