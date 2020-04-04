@@ -8659,7 +8659,7 @@ recursive-readdir@2.2.2:
   dependencies:
     minimatch "3.0.4"
 
-"redia-aedior@link:..":
+"redia-aeditor@link:..":
   version "0.0.0"
   uid ""
 

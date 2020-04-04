@@ -1,13 +1,13 @@
-# redia-aedior
+# redia-aeditor
 
 > Redia WYSIWYG
 
-[![NPM](https://img.shields.io/npm/v/redia-aedior.svg)](https://www.npmjs.com/package/redia-aedior) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/npm/v/redia-aeditor.svg)](https://www.npmjs.com/package/redia-aeditor) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 ## Install
 
 ```bash
-npm install --save redia-aedior
+npm install --save redia-aeditor
 ```
 
 ## Usage
@@ -15,16 +15,14 @@ npm install --save redia-aedior
 ```tsx
 import React, { Component } from 'react'
 
-import MyComponent from 'redia-aedior'
-import 'redia-aedior/dist/index.css'
+import Aeditor from 'redia-aeditor'
+import 'redia-aeditor/dist/index.css'
 
 class Example extends Component {
   render() {
-    return <MyComponent />
+    return <Aeditor />
   }
 }
 ```
 
-## License
-
-MIT © [kledk](https://github.com/kledk)
+© [Redia](https://redia.dk)

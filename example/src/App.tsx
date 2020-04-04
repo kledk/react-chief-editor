@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
-import { Aeditor } from "redia-aedior";
+import { Aeditor } from "redia-aeditor";
 import { Node } from "slate";
 
 function App() {

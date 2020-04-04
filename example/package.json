@@ -1,13 +1,13 @@
 {
-  "name": "redia-aedior-example",
-  "homepage": "https://kledk.github.io/redia-aedior",
+  "name": "redia-aeditor-example",
+  "homepage": "https://kledk.github.io/redia-aeditor",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
     "react": "link:../node_modules/react",
     "react-dom": "link:../node_modules/react-dom",
     "react-scripts": "link:../node_modules/react-scripts",
-    "redia-aedior": "link:.."
+    "redia-aeditor": "link:.."
   },
   "scripts": {
     "start": "node ../node_modules/react-scripts/bin/react-scripts.js start",
