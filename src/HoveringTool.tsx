@@ -3,6 +3,7 @@ import { ReactEditor, useSlate } from "slate-react";
 import { Editor, Range } from "slate";
 import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
+import { useLastFocused } from "./utils";
 
 class VirtualReference implements VirtualElement {
   getBoundingClientRect() {
@@ -33,12 +34,19 @@ export const HoveringTool = (
   const { children, ...otherProps } = props;
   const editor = useSlate();
   const { selection } = editor;
-  const enabled = !(
-    !selection ||
-    !ReactEditor.isFocused(editor) ||
-    Range.isCollapsed(selection) ||
-    Editor.string(editor, selection) === ""
-  );
+  const lastFocused = useLastFocused(editor);
+  if (lastFocused.node) {
+    const el = ReactEditor.toDOMNode(editor, lastFocused.node);
+    // console.log(el)
+  }
+  
+  // console.log(lastFocused);
+  const enabled =
+    selection &&
+    ReactEditor.isFocused(editor) &&
+    !Range.isCollapsed(selection) &&
+    Editor.string(editor, selection) !== "";
+
   if (!enabled) {
     return null;
   }

@@ -1,5 +1,17 @@
+import {
+  isBlockEmpty,
+  isNodeActive,
+  getActiveNode,
+  useOnClickOutside
+} from "./utils";
 import {} from "./HoveringTool";
-import React, { useMemo, useState, useCallback, useEffect } from "react";
+import React, {
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef
+} from "react";
 import {
   withReact,
   RenderElementProps,
@@ -10,7 +22,16 @@ import {
   ReactEditor
 } from "slate-react";
 import { withHistory } from "slate-history";
-import { createEditor, Node, Editor, Text, Transforms } from "slate";
+import {
+  createEditor,
+  Node,
+  Editor,
+  Text,
+  Transforms,
+  Range,
+  Point,
+  NodeEntry
+} from "slate";
 import { Elements } from "./Elements";
 import { Leafs } from "./Leafs";
 import { HoveringTool } from "./HoveringTool";
@@ -33,8 +54,19 @@ type Heading =
   | "heading-5"
   | "heading-6";
 
+type Link = "link";
+
+type BlockType = Heading | Link | "paragraph";
+
 const isTextFormat = (editor: Editor, formatType: TextFormat) => {
   const [match] = Editor.nodes(editor, { match: n => n[formatType] });
+  return Boolean(match);
+};
+
+const isHeadingType = (editor: Editor, header: Heading) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => n.type === header
+  });
   return Boolean(match);
 };
 
@@ -48,11 +80,36 @@ const RichEditor = {
       { match: n => Text.isText(n), split: true }
     );
   },
+  toggleHeading(editor: Editor, heading: Heading) {
+    const isHeaderOfType = isHeadingType(editor, heading);
+    if (isHeaderOfType) {
+      Transforms.setNodes(editor, {
+        type: "paragraph"
+      });
+    } else {
+      Transforms.setNodes(editor, {
+        type: heading
+      });
+    }
+  },
   insertHeader(editor: Editor, heading: Heading) {
     Transforms.insertNodes(editor, {
       type: heading,
       children: [{ text: "" }]
     });
+  },
+  insertBlock(editor: Editor, blockType: BlockType) {
+    if (!isNodeActive(editor, blockType)) {
+      Transforms.setNodes(editor, {
+        type: blockType,
+        children: [{ text: "" }]
+      });
+    } else {
+      Transforms.insertNodes(editor, {
+        type: blockType,
+        children: [{ text: "" }]
+      });
+    }
   }
 };
 
@@ -68,9 +125,26 @@ const Button = styled.button`
 `;
 
 const BlockInsertBtn = styled(Button)`
-  padding: 8px;
+  user-select: none;
   border: none;
   background: transparent;
+  display: block;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #ccc;
+  border-radius: ${25 / 2}px;
+  span {
+    font-size: 28px;
+    color: #ccc;
+    position: absolute;
+    top: -6px;
+    left: 4px;
+    padding: 0;
+    margin: 0;
+    &:hover {
+      color: #808080;
+    }
+  }
 `;
 
 const ToolbarBtn = styled(Button)<{ isActive?: boolean }>`
@@ -128,6 +202,22 @@ function FormatBtn(props: {
   );
 }
 
+function HeadingBtn(props: {
+  headingType: Heading;
+  children: React.ReactNode;
+}) {
+  const editor = useSlate();
+  const isActive = isHeadingType(editor, props.headingType);
+  return (
+    <ToolbarBtn
+      isActive={isActive}
+      onClick={() => RichEditor.toggleHeading(editor, props.headingType)}
+    >
+      {props.children}
+    </ToolbarBtn>
+  );
+}
+
 function TextFormatTools() {
   return (
     <TextFormatToolsWrapper>
@@ -135,6 +225,9 @@ function TextFormatTools() {
       <FormatBtn formatType="italic">I</FormatBtn>
       <FormatBtn formatType="underline">U</FormatBtn>
       <FormatBtn formatType="strikethrough">S</FormatBtn>
+      <ToolDivider></ToolDivider>
+      <HeadingBtn headingType="heading-1">H1</HeadingBtn>
+      <HeadingBtn headingType="heading-2">H2</HeadingBtn>
       <ToolDivider></ToolDivider>
       <LinkBtn>Link</LinkBtn>
     </TextFormatToolsWrapper>
@@ -185,80 +278,139 @@ function HoveringToolbars() {
 function BlockInsert() {
   const editor = useSlate();
   const { selection } = editor;
+  const activenode = getActiveNode(editor);
 
   const [coords, setCoords] = useState([-1000, -1000]);
   const [showMenu, setShowMenu] = useState(false);
+
+  const toolboxRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(toolboxRef, () => {
+    setShowMenu(false);
+  });
 
   const handleBlockInsert = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event.preventDefault();
       event.stopPropagation();
+      ReactEditor.focus(editor);
       setShowMenu(!showMenu);
     },
     [showMenu]
   );
 
   useEffect(() => {
+    setShowMenu(false);
     if (!ReactEditor.isFocused(editor)) {
       return;
     }
-    setShowMenu(false);
-    if (selection) {
-      const domRange = ReactEditor.toDOMRange(editor, selection);
-      const rect = domRange?.getBoundingClientRect();
-      const top = rect.top + window.pageYOffset;
-      setCoords([top]);
+    if (activenode) {
+      const [rootNode] = Editor.nodes(editor, {
+        at: Editor.start(editor, [0, 0])
+      });
+      if (rootNode.length > 0 && Node.isNode(rootNode[0])) {
+        const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode[0]);
+        const activeDOMNode = ReactEditor.toDOMNode(editor, activenode);
+        const rect = activeDOMNode.getBoundingClientRect();
+        const top = rect.top + window.pageYOffset + rect.height / 2 - 25 / 2;
+        const left =
+          firstDOMPoint.getBoundingClientRect().left + window.pageXOffset - 30;
+        setCoords([top, left]);
+      }
     }
-  }, [editor, selection]);
+  }, [editor, activenode]);
 
-  // if (
-  //   (selection && Range.isExpanded(selection)) ||
-  //   !ReactEditor.isFocused(editor)
-  // ) {
-  //   return null;
-  // }
+  if (
+    !selection ||
+    Range.isExpanded(selection) ||
+    Range.start(selection).offset !== 0 ||
+    !isBlockEmpty(editor) ||
+    !ReactEditor.isFocused(editor)
+  ) {
+    if (!showMenu) {
+      return null;
+    }
+  }
 
   return (
     <Manager>
       <Reference>
         {({ ref }) => (
-          <div style={{ position: "absolute", top: coords[0], left: 0 }}>
-            <BlockInsertBtn ref={ref} onClick={handleBlockInsert}>
-              <span>🖊</span>
+          <div
+            ref={ref}
+            style={{ position: "absolute", top: coords[0], left: coords[1] }}
+          >
+            <BlockInsertBtn onClick={handleBlockInsert}>
+              <span>+</span>
             </BlockInsertBtn>
           </div>
         )}
       </Reference>
       {showMenu && (
-        <Popper placement="right">
+        <Popper
+          placement="bottom-end"
+          modifiers={[
+            {
+              name: "offset",
+              options: {
+                offset: [25, 10]
+              }
+            }
+          ]}
+        >
           {({ ref, style, placement, arrowProps }) => (
             <div ref={ref} style={style} data-placement={placement}>
               {
-                <ToolBox>
-                  <ToolbarBtn
-                    onClick={() => {
-                      RichEditor.insertHeader(editor, "heading-1");
-                      ReactEditor.focus(editor);
-                    }}
-                  >
-                    H1
-                  </ToolbarBtn>
-                  <ToolbarBtn
-                    onClick={() => {
-                      RichEditor.insertHeader(editor, "heading-2");
-                      ReactEditor.focus(editor);
-                    }}
-                  >
-                    H2
-                  </ToolbarBtn>
-                  <ToolbarBtn
-                    onClick={() => {
-                      RichEditor.insertHeader(editor, "heading-3");
-                      ReactEditor.focus(editor);
-                    }}
-                  >
-                    H3
-                  </ToolbarBtn>
+                <ToolBox ref={toolboxRef}>
+                  <TextFormatToolsWrapper>
+                    <ToolbarBtn
+                      isActive={isNodeActive(editor, "heading-1")}
+                      onClick={() => {
+                        RichEditor.insertBlock(editor, "heading-1");
+                        ReactEditor.focus(editor);
+                      }}
+                    >
+                      H1
+                    </ToolbarBtn>
+                    <ToolbarBtn
+                      isActive={isNodeActive(editor, "heading-2")}
+                      onClick={() => {
+                        RichEditor.insertBlock(editor, "heading-2");
+                        ReactEditor.focus(editor);
+                      }}
+                    >
+                      H2
+                    </ToolbarBtn>
+                    <ToolbarBtn
+                      isActive={isNodeActive(editor, "heading-3")}
+                      onClick={() => {
+                        RichEditor.insertBlock(editor, "heading-3");
+                        ReactEditor.focus(editor);
+                      }}
+                    >
+                      H3
+                    </ToolbarBtn>
+                    <ToolDivider></ToolDivider>
+                    <ToolbarBtn
+                      isActive={isNodeActive(editor, "paragraph")}
+                      onClick={() => {
+                        RichEditor.insertBlock(editor, "paragraph");
+                        ReactEditor.focus(editor);
+                      }}
+                    >
+                      Text
+                    </ToolbarBtn>
+                    <ToolDivider></ToolDivider>
+                    <ToolbarBtn
+                      isActive={isNodeActive(editor, "link")}
+                      onClick={() => {
+                        RichEditor.insertBlock(editor, "link");
+                        ReactEditor.focus(editor);
+                      }}
+                    >
+                      Link
+                    </ToolbarBtn>
+                  </TextFormatToolsWrapper>
                 </ToolBox>
               }
               <div ref={arrowProps.ref} style={arrowProps.style} />
@@ -270,14 +422,36 @@ function BlockInsert() {
   );
 }
 
-export function Aeditor(props: {
-  value: Node[];
-  onChange: (value: Node[]) => void;
-  theme?: AeditorTheme & { [key: string]: any };
-}) {
-  const { value, onChange } = props;
+function withAeditor<T extends Editor>(editor: T): T {
+  const { deleteBackward } = editor;
+
+  editor.deleteBackward = (unit: "character" | "word" | "line" | "block") => {
+    const [isParagraph] = Editor.nodes(editor, {
+      match: n => n.type === "paragraph"
+    });
+    if (
+      !isParagraph &&
+      editor.selection &&
+      editor.selection.focus.offset === 0
+    ) {
+      return Transforms.setNodes(editor, { type: "paragraph" });
+    }
+    return deleteBackward(unit);
+  };
+
+  return editor;
+}
+
+export function Aeditor(
+  props: {
+    value: Node[];
+    onChange: (value: Node[]) => void;
+    theme?: AeditorTheme & { [key: string]: any };
+  } & React.ComponentProps<typeof Editable>
+) {
+  const { value, onChange, theme, ...otherProps } = props;
   const editor = useMemo(
-    () => withLinks(withHistory(withReact(createEditor()))),
+    () => withAeditor(withLinks(withHistory(withReact(createEditor())))),
     []
   );
 
@@ -288,11 +462,19 @@ export function Aeditor(props: {
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     return <Leafs {...props} />;
   }, []);
+  const handleDecorate = useCallback((entry: NodeEntry) => {
+    return [];
+  }, []);
   const handleKeyDown = useCallback(
-    (event: any) => {
-      if (event.key === "Enter") {
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.keyCode === 13) {
+        // Enter key
+        if (event.shiftKey) {
+          editor.insertText("\n");
+          event.preventDefault();
+        }
         const { selection } = editor;
-        if (selection) {
+        if (selection && selection.focus.offset !== 0) {
           const [match] = Editor.nodes(editor, {
             match: n => n.type?.match(/(heading)/)
           });
@@ -319,21 +501,23 @@ export function Aeditor(props: {
 
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
-      <ThemeProvider theme={{ ...defaultTheme, ...props.theme }}>
+      <ThemeProvider theme={{ ...defaultTheme, ...theme }}>
         <HoveringTool>
           <HoveringToolbars />
         </HoveringTool>
-        <BlockInsert />
         <div
           style={{
             marginLeft: 20
           }}
         >
+          <BlockInsert />
           <EditorThemeWrapper>
             <Editable
               renderLeaf={renderLeaf}
               renderElement={renderElement}
+              decorate={handleDecorate}
               onKeyDown={handleKeyDown}
+              {...otherProps}
             />
           </EditorThemeWrapper>
         </div>

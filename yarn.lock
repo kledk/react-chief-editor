@@ -9151,10 +9151,10 @@ react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-popper@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.0.0.tgz#f8e2ad150589b9a6b90cb3f2c112919988b53f22"
-  integrity sha512-2XmX13B2V906yJa6g1EHlhqJMOa4nXc5Zpx+dCCdYGtvn4k/HML+tu9f0v7mGvFhQfi+R8zEgCqwM7YUWYn/ZQ==
+react-popper@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.1.0.tgz#63f94c5c26d247961ab7604c7c68acf810d9bae4"
+  integrity sha512-SCDXYyd0pA8yAzEck6IMEznYo3X2gGuPn9DvTC5cjcH5hfyrZHv0q6y39ittdU5Bk+akggepnAg61Fb6jGtIeg==
   dependencies:
     "@babel/runtime" "^7.9.2"
     deep-equal "^2.0.1"

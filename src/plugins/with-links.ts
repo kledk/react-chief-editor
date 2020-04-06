@@ -2,9 +2,7 @@ import { Editor, Range, Transforms } from "slate";
 import isUrl from "is-url";
 import { isLinkELement } from "../elements/link";
 
-export function withLinks<T extends Editor>(
-  editor: T
-): T & { insertData: Function } {
+export function withLinks<T extends Editor>(editor: T): T {
   const { insertData, insertText, isInline } = editor;
 
   editor.isInline = element => {
