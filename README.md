@@ -2,8 +2,6 @@
 
 > Redia WYSIWYG
 
-[![NPM](https://img.shields.io/npm/v/redia-aeditor.svg)](https://www.npmjs.com/package/redia-aeditor) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
 ## Install
 
 ```bash
@@ -26,3 +24,6 @@ class Example extends Component {
 ```
 
 © [Redia](https://redia.dk)
+
+# Tips
+https://github.com/objectlegal/slate-snippets

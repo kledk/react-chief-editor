@@ -18,7 +18,11 @@ function App() {
       children: [{ text: "" }],
       url:
         "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_waiting_in_Namibia.jpg/1200px-Lion_waiting_in_Namibia.jpg"
-    }
+    },
+    {
+      type: "paragraph",
+      children: [{ text: "en to tre fire fem seks syv" }]
+    },
   ]);
 
   // useEffect(() => console.log(value), [value]);
@@ -32,7 +36,7 @@ function App() {
           fontSize: 14
         }}
         spellCheck={false}
-        style={{ height: 400, margin: 10, overflow: "auto" }}
+        style={{ margin: 10, overflow: "auto" }}
       ></Aeditor>
     </div>
   );

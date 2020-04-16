@@ -10,19 +10,22 @@ export const Image = (props: RenderElementProps) => {
   const focused = useFocused();
   const selected = useSelected();
   return (
-    <div contentEditable={false}>
-      <img
-        style={{
-          objectFit: "cover",
-          width: "100%",
-          display: "block",
-          height: 400,
-          outline: focused && selected ? "1px solid blue" : "none"
-        }}
-        alt={props.element.caption}
-        {...props.attributes}
-        src={props.element.url}
-      ></img>
+    <div {...props.attributes}>
+      <div contentEditable={false}>
+        <img
+          style={{
+            objectFit: "cover",
+            width: "100%",
+            display: "block",
+            height: 400,
+            outline:
+              focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
+          }}
+          alt={props.element.caption}
+          src={props.element.url}
+        ></img>
+        {props.children}
+      </div>
     </div>
   );
 };

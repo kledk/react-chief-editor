@@ -4,7 +4,7 @@ import {
   getActiveNode,
   useOnClickOutside
 } from "./utils";
-import {} from "./HoveringTool";
+import { HoverToolProvider, useHoverTool } from "./HoveringTool";
 import React, {
   useMemo,
   useState,
@@ -30,7 +30,9 @@ import {
   Transforms,
   Range,
   Point,
-  NodeEntry
+  NodeEntry,
+  Element,
+  Path
 } from "slate";
 import { Elements } from "./Elements";
 import { Leafs } from "./Leafs";
@@ -40,7 +42,8 @@ import { withLinks, isLinkActive } from "./plugins/with-links";
 import { Manager, Reference, Popper } from "react-popper";
 
 export const defaultTheme = {
-  editor: { fontSize: 14 }
+  editor: { fontSize: 14 },
+  colors: {}
 };
 
 export type AeditorTheme = typeof defaultTheme;
@@ -56,10 +59,16 @@ type Heading =
 
 type Link = "link";
 
-type BlockType = Heading | Link | "paragraph";
+type Image = "image";
+
+type Paragraph = "paragraph";
+
+type BlockType = Heading | Link | Image | Paragraph;
 
 const isTextFormat = (editor: Editor, formatType: TextFormat) => {
-  const [match] = Editor.nodes(editor, { match: n => n[formatType] });
+  const [match] = Editor.nodes(editor, {
+    match: n => n[formatType]
+  });
   return Boolean(match);
 };
 
@@ -142,7 +151,10 @@ const BlockInsertBtn = styled(Button)`
     padding: 0;
     margin: 0;
     &:hover {
-      color: #808080;
+      color: #ddd;
+    }
+    &:active {
+      color: #eee;
     }
   }
 `;
@@ -190,6 +202,7 @@ function FormatBtn(props: {
   formatType: TextFormat;
   children: React.ReactNode;
 }) {
+  const { selection } = useHoverTool();
   const editor = useSlate();
   const isActive = isTextFormat(editor, props.formatType);
   return (
@@ -207,6 +220,7 @@ function HeadingBtn(props: {
   children: React.ReactNode;
 }) {
   const editor = useSlate();
+  const { selection } = useHoverTool();
   const isActive = isHeadingType(editor, props.headingType);
   return (
     <ToolbarBtn
@@ -217,6 +231,37 @@ function HeadingBtn(props: {
     </ToolbarBtn>
   );
 }
+
+const InputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-size: 14px;
+  line-height: 20px;
+  padding: 4px 10px;
+  position: relative;
+  border-radius: 3px;
+  box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px inset,
+    rgba(15, 15, 15, 0.1) 0px 1px 1px inset;
+  background: rgba(242, 241, 238, 0.6);
+  cursor: text;
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin-right: 8px;
+  input {
+    &:focus {
+      outline: 0;
+    }
+    font-size: inherit;
+    line-height: inherit;
+    border: none;
+    background: none;
+    width: 100%;
+    display: block;
+    resize: none;
+    padding: 0px;
+  }
+`;
 
 function TextFormatTools() {
   return (
@@ -234,29 +279,61 @@ function TextFormatTools() {
   );
 }
 
+function LinkPopup(props: { onClose: () => void }) {
+  const hoverTool = useHoverTool();
+  useEffect(() => {
+    return hoverTool.saveSelection();
+  }, []);
+  const linkWrapperRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(linkWrapperRef, () => props.onClose());
+  return (
+    <div
+      ref={linkWrapperRef}
+      style={{ padding: 9, display: "flex", minWidth: 300 }}
+    >
+      <InputWrapper>
+        <input placeholder="Insert link" autoFocus data-slate-editor />
+      </InputWrapper>
+      <ToolbarBtn onClick={props.onClose}>Link</ToolbarBtn>
+      <ToolbarBtn>Unlink</ToolbarBtn>
+    </div>
+  );
+}
+
 function LinkBtn(props: { children: React.ReactNode }) {
   const editor = useSlate();
   const isActive = isLinkActive(editor);
   const [showLinkConfig, setShowLinkConfig] = useState(false);
+
   return (
     <Manager>
       <Reference>
         {({ ref }) => (
           <ToolbarBtn
             ref={ref}
-            isActive={isActive}
+            isActive={isActive || showLinkConfig}
             onClick={() => setShowLinkConfig(!showLinkConfig)}
           >
             {props.children}
           </ToolbarBtn>
         )}
       </Reference>
-      <Popper placement="bottom">
+      <Popper
+        placement="bottom"
+        modifiers={[
+          {
+            name: "offset",
+            options: {
+              offset: [-100, 10]
+            }
+          }
+        ]}
+      >
         {({ ref, style, placement, arrowProps }) => (
           <div ref={ref} style={style} data-placement={placement}>
             {showLinkConfig && (
               <ToolBox>
-                <input autoFocus data-slate-editor></input>
+                <LinkPopup onClose={() => setShowLinkConfig(false)}></LinkPopup>
               </ToolBox>
             )}
             <div ref={arrowProps.ref} style={arrowProps.style} />
@@ -293,8 +370,8 @@ function BlockInsert() {
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event.preventDefault();
       event.stopPropagation();
-      ReactEditor.focus(editor);
       setShowMenu(!showMenu);
+      ReactEditor.focus(editor);
     },
     [showMenu]
   );
@@ -318,13 +395,14 @@ function BlockInsert() {
         setCoords([top, left]);
       }
     }
-  }, [editor, activenode]);
+  }, [selection, activenode, editor]);
 
   if (
     !selection ||
     Range.isExpanded(selection) ||
     Range.start(selection).offset !== 0 ||
     !isBlockEmpty(editor) ||
+    Editor.isVoid(editor, activenode) ||
     !ReactEditor.isFocused(editor)
   ) {
     if (!showMenu) {
@@ -402,13 +480,13 @@ function BlockInsert() {
                     </ToolbarBtn>
                     <ToolDivider></ToolDivider>
                     <ToolbarBtn
-                      isActive={isNodeActive(editor, "link")}
+                      isActive={isNodeActive(editor, "image")}
                       onClick={() => {
-                        RichEditor.insertBlock(editor, "link");
+                        RichEditor.insertBlock(editor, "image");
                         ReactEditor.focus(editor);
                       }}
                     >
-                      Link
+                      Image
                     </ToolbarBtn>
                   </TextFormatToolsWrapper>
                 </ToolBox>
@@ -442,6 +520,61 @@ function withAeditor<T extends Editor>(editor: T): T {
   return editor;
 }
 
+function withImages<T extends Editor>(editor: T): T {
+  const { isVoid, normalizeNode } = editor;
+
+  editor.isVoid = (element: Element) => {
+    return element.type === "image" ? true : isVoid(element);
+  };
+
+  editor.normalizeNode = (entry: NodeEntry) => {
+    const [node, path] = entry;
+    if (Element.isElement(node) && node.type === "image") {
+      let previous = Editor.previous(editor, { at: path });
+      if (previous) {
+        const [previousNode, previousPath] = previous;
+        if (Element.isElement(previousNode) && editor.isVoid(previousNode)) {
+          Transforms.insertNodes(
+            editor,
+            {
+              type: "paragraph",
+              children: [{ text: "1" }]
+            },
+            { at: Path.next(previousPath) }
+          );
+        }
+      }
+      let next = Editor.next(editor, { at: path });
+      if (next) {
+        const [nextNode, nextPath] = next;
+        if (Element.isElement(nextNode) && editor.isVoid(nextNode)) {
+          Transforms.insertNodes(
+            editor,
+            {
+              type: "paragraph",
+              children: [{ text: "2" }]
+            },
+            { at: Path.next(nextPath) }
+          );
+        }
+      } else {
+        Transforms.insertNodes(
+          editor,
+          {
+            type: "paragraph",
+            children: [{ text: "3" }]
+          },
+          { at: Path.next(path) }
+        );
+      }
+    } else {
+      normalizeNode(entry);
+    }
+  };
+
+  return editor;
+}
+
 export function Aeditor(
   props: {
     value: Node[];
@@ -451,7 +584,10 @@ export function Aeditor(
 ) {
   const { value, onChange, theme, ...otherProps } = props;
   const editor = useMemo(
-    () => withAeditor(withLinks(withHistory(withReact(createEditor())))),
+    () =>
+      withAeditor(
+        withImages(withLinks(withHistory(withReact(createEditor()))))
+      ),
     []
   );
 
@@ -462,8 +598,9 @@ export function Aeditor(
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     return <Leafs {...props} />;
   }, []);
-  const handleDecorate = useCallback((entry: NodeEntry) => {
-    return [];
+  const handleDecorate = useCallback(([node, path]: NodeEntry) => {
+    const ranges: any[] = [];
+    return ranges;
   }, []);
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -502,25 +639,24 @@ export function Aeditor(
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
       <ThemeProvider theme={{ ...defaultTheme, ...theme }}>
-        <HoveringTool>
-          <HoveringToolbars />
-        </HoveringTool>
-        <div
-          style={{
-            marginLeft: 20
-          }}
-        >
-          <BlockInsert />
-          <EditorThemeWrapper>
-            <Editable
-              renderLeaf={renderLeaf}
-              renderElement={renderElement}
-              decorate={handleDecorate}
-              onKeyDown={handleKeyDown}
-              {...otherProps}
-            />
-          </EditorThemeWrapper>
-        </div>
+        <HoverToolProvider hoverTool={<HoveringToolbars />}>
+          <div
+            style={{
+              marginLeft: 20
+            }}
+          >
+            <BlockInsert />
+            <EditorThemeWrapper>
+              <Editable
+                renderLeaf={renderLeaf}
+                renderElement={renderElement}
+                decorate={handleDecorate}
+                onKeyDown={handleKeyDown}
+                {...otherProps}
+              />
+            </EditorThemeWrapper>
+          </div>
+        </HoverToolProvider>
       </ThemeProvider>
     </Slate>
   );
