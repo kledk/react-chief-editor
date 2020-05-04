@@ -38,7 +38,7 @@ import { Elements } from "./Elements";
 import { Leafs } from "./Leafs";
 import { HoveringTool } from "./HoveringTool";
 import styled, { ThemeProvider } from "styled-components";
-import { withLinks, isLinkActive } from "./plugins/with-links";
+import { withLinks, isLinkActive, insertLink } from "./plugins/with-links";
 import { Manager, Reference, Popper } from "react-popper";
 
 export const defaultTheme = {
@@ -119,7 +119,8 @@ const RichEditor = {
         children: [{ text: "" }]
       });
     }
-  }
+  },
+  insertLink: insertLink
 };
 
 const Button = styled.button`
@@ -279,23 +280,64 @@ function TextFormatTools() {
   );
 }
 
+function ImageTools() {
+  return (
+    <TextFormatToolsWrapper>
+      <LinkBtn>Delete</LinkBtn>
+    </TextFormatToolsWrapper>
+  );
+}
+
 function LinkPopup(props: { onClose: () => void }) {
-  const hoverTool = useHoverTool();
+  const editor = useSlate();
+  const { saveSelection, perform, selection } = useHoverTool();
   useEffect(() => {
-    return hoverTool.saveSelection();
+    return saveSelection();
   }, []);
   const linkWrapperRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(linkWrapperRef, () => props.onClose());
+  useOnClickOutside(linkWrapperRef, e => {
+    e.preventDefault();
+    props.onClose();
+  });
+  let linkNode: Node | null = null;
+  if (selection?.current) {
+    const [_linkNode] = Editor.nodes(editor, {
+      at: selection.current,
+      match: n => n.type === "link"
+    });
+    linkNode = _linkNode && _linkNode[0];
+  }
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    if (linkNode) {
+      setUrl(linkNode.url);
+    }
+  }, [linkNode]);
+  const handleInsertLink = useCallback(() => {
+    perform(() => {
+      RichEditor.insertLink(editor, url);
+      props.onClose();
+    });
+  }, [url]);
+
   return (
     <div
       ref={linkWrapperRef}
       style={{ padding: 9, display: "flex", minWidth: 300 }}
     >
       <InputWrapper>
-        <input placeholder="Insert link" autoFocus data-slate-editor />
+        <input
+          value={url}
+          onChange={(e: React.FormEvent<HTMLInputElement>) =>
+            setUrl(e.currentTarget.value)
+          }
+          placeholder="Insert link"
+          autoFocus
+          data-slate-editor
+        />
       </InputWrapper>
-      <ToolbarBtn onClick={props.onClose}>Link</ToolbarBtn>
-      <ToolbarBtn>Unlink</ToolbarBtn>
+      <ToolbarBtn onClick={handleInsertLink}>Link</ToolbarBtn>
+      <ToolbarBtn onClick={props.onClose}>Unlink</ToolbarBtn>
     </div>
   );
 }
@@ -303,53 +345,56 @@ function LinkPopup(props: { onClose: () => void }) {
 function LinkBtn(props: { children: React.ReactNode }) {
   const editor = useSlate();
   const isActive = isLinkActive(editor);
-  const [showLinkConfig, setShowLinkConfig] = useState(false);
-
+  const { useToolWindow } = useHoverTool();
+  const Toolwindow = useToolWindow();
   return (
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <ToolbarBtn
-            ref={ref}
-            isActive={isActive || showLinkConfig}
-            onClick={() => setShowLinkConfig(!showLinkConfig)}
-          >
-            {props.children}
-          </ToolbarBtn>
-        )}
-      </Reference>
-      <Popper
-        placement="bottom"
-        modifiers={[
-          {
-            name: "offset",
-            options: {
-              offset: [-100, 10]
-            }
-          }
-        ]}
-      >
-        {({ ref, style, placement, arrowProps }) => (
-          <div ref={ref} style={style} data-placement={placement}>
-            {showLinkConfig && (
-              <ToolBox>
-                <LinkPopup onClose={() => setShowLinkConfig(false)}></LinkPopup>
-              </ToolBox>
-            )}
-            <div ref={arrowProps.ref} style={arrowProps.style} />
-          </div>
-        )}
-      </Popper>
-    </Manager>
+    <Toolwindow
+      renderContent={setShow => (
+        <ToolBox>
+          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
+        </ToolBox>
+      )}
+      renderToolBtn={(tprops, show) => (
+        <ToolbarBtn {...tprops} isActive={isActive || show}>
+          {props.children}
+        </ToolbarBtn>
+      )}
+    />
   );
 }
 
+function getNodeFromSelection(editor: Editor, selection: Range | null) {
+  if (selection) {
+    const [, path] = Editor.node(editor, selection);
+    if (path.length) {
+      const [parent] = Editor.parent(editor, path);
+      return parent;
+    }
+  }
+  return null;
+}
+
 function HoveringToolbars() {
-  return (
-    <ToolBox>
-      <TextFormatTools />
-    </ToolBox>
-  );
+  const editor = useSlate();
+  const { selection } = useHoverTool();
+  if (selection && selection.current) {
+    const node = getNodeFromSelection(editor, selection.current);
+    switch (node?.type) {
+      case "image":
+        return (
+          <ToolBox>
+            <ImageTools />
+          </ToolBox>
+        );
+      default:
+        return (
+          <ToolBox>
+            <TextFormatTools />
+          </ToolBox>
+        );
+    }
+  }
+  return null;
 }
 
 function BlockInsert() {
@@ -527,6 +572,7 @@ function withImages<T extends Editor>(editor: T): T {
     return element.type === "image" ? true : isVoid(element);
   };
 
+  // TODO
   editor.normalizeNode = (entry: NodeEntry) => {
     const [node, path] = entry;
     if (Element.isElement(node) && node.type === "image") {

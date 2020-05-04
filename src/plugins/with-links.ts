@@ -30,7 +30,7 @@ export function withLinks<T extends Editor>(editor: T): T {
   return editor;
 }
 
-const insertLink = (editor: Editor, url: string) => {
+export const insertLink = (editor: Editor, url: string) => {
   if (editor.selection) {
     wrapLink(editor, url);
   }

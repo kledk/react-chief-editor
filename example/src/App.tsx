@@ -25,7 +25,7 @@ function App() {
     },
   ]);
 
-  // useEffect(() => console.log(value), [value]);
+  useEffect(() => console.log(value), [value]);
 
   return (
     <div style={{ padding: "1em" }}>

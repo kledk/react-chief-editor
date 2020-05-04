@@ -5,35 +5,124 @@ import React, {
   useContext,
   useCallback
 } from "react";
-import { ReactEditor, useSlate } from "slate-react";
-import { Editor, Range, Node, Transforms } from "slate";
-import { Popper } from "react-popper";
+import { ReactEditor, useSlate, useFocused, useSelected } from "slate-react";
+import { Editor, Range, Node, Transforms, RangeRef } from "slate";
+import { Popper, Manager, Reference } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
-import { useOnClickOutside } from "./utils";
+import { useOnClickOutside, getActiveNode } from "./utils";
 
 type HoverToolContext = {
   activeNode?: Node;
-  selection: Range | null;
   enabled: boolean;
+  selection: RangeRef | null;
   saveSelection: () => () => void;
+  perform: (fn: (selection: Range) => void) => void;
+  useToolWindow: () => typeof ToolWindow;
 };
 
 const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
 );
 
+function ToolWindow(props: {
+  renderContent: (setShow: (show: boolean) => void) => React.ReactNode;
+  renderToolBtn: (
+    props: {
+      ref: React.Ref<any>;
+      onClick: () => void;
+    },
+    show: boolean
+  ) => React.ReactNode;
+}) {
+  const [show, setShow] = useState(false);
+  const toolWindow = useRef(null);
+  useOnClickOutside(toolWindow, e => {
+    e.preventDefault();
+    setShow(false);
+  });
+  return (
+    <Manager>
+      <Reference>
+        {({ ref }) =>
+          props.renderToolBtn({ ref, onClick: () => setShow(!show) }, show)
+        }
+      </Reference>
+      <Popper
+        placement="bottom"
+        modifiers={[
+          {
+            name: "offset",
+            options: {
+              offset: [-100, 10]
+            }
+          }
+        ]}
+      >
+        {({ ref, style, placement, arrowProps }) => (
+          <div ref={ref} style={style} data-placement={placement}>
+            {show && <div ref={toolWindow}>{props.renderContent(setShow)}</div>}
+            <div ref={arrowProps.ref} style={arrowProps.style} />
+          </div>
+        )}
+      </Popper>
+    </Manager>
+  );
+}
+
+function getUseToolWindow() {
+  return function useToolWindow() {
+    return ToolWindow;
+  };
+}
+
+function getNodeFromSelection(editor: Editor, selection: Range | null) {
+  if (selection) {
+    const [, path] = Editor.node(editor, selection);
+    if (path.length) {
+      const [parent] = Editor.parent(editor, path);
+      return parent;
+    }
+  }
+  return null;
+}
+
 function useProvideContext() {
+  const editor = useSlate();
+  const { selection } = editor;
   const [ctx, setCtx] = useState<HoverToolContext>({
     enabled: false,
     saveSelection: () => () => null,
-    selection: null
+    perform: () => () => null,
+    selection: null,
+    useToolWindow: getUseToolWindow()
   });
-  const [savedSelection, setSaveSelection] = useState<Range | null>();
-  const editor = useSlate();
-  const { selection } = editor;
+  const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
   const isCollapsed = selection && Range.isCollapsed(selection);
   const isEmpty = selection && Editor.string(editor, selection) === "";
+  const currentNode = getNodeFromSelection(editor, selection);
+  const isVoid = Editor.isVoid(editor, currentNode);
+
+  // console.log({
+  //   isEditorFocused,
+  //   selection,
+  //   isCollapsed,
+  //   isEmpty,
+  //   isVoid,
+  //   ...ctx
+  // });
+
+  // When selection changes. We proxy the editor selection with or own saved selection.
+  useEffect(() => {
+    if (savedSelection?.current) {
+      setCtx({ ...ctx, selection: savedSelection });
+    } else if (selection) {
+      const sRef = Editor.rangeRef(editor, selection);
+      setCtx({ ...ctx, selection: sRef });
+    } else {
+      setCtx({ ...ctx, selection: null });
+    }
+  }, [selection, savedSelection]);
 
   const setEnabled = useCallback((enabled: boolean) => {
     setCtx(ctx => ({
@@ -44,34 +133,52 @@ function useProvideContext() {
 
   useEffect(() => {
     if (ctx.enabled) {
-      if (!savedSelection && isCollapsed) {
+      if (!savedSelection?.current && isCollapsed && !isVoid) {
         setEnabled(false);
       }
     } else {
-      if (isEditorFocused && !isCollapsed && !isEmpty) {
-        setEnabled(true);
+      if (isEditorFocused) {
+        if (isCollapsed && isVoid) {
+          setEnabled(true);
+        } else if (!isCollapsed && !isEmpty) {
+          setEnabled(true);
+        }
       }
     }
-  }, [isEditorFocused, isCollapsed, isEmpty]);
+  }, [isEditorFocused, isCollapsed, isEmpty, isVoid]);
 
   const editorRef = useRef(editor);
-
   editorRef.current = editor;
 
   const saveSelection = useCallback(() => {
     if (selection) {
-      const _selection: typeof selection = { ...selection };
-      setSaveSelection(_selection);
+      const sRef = Editor.rangeRef(editor, selection);
+      setSaveSelection(sRef);
+      setCtx(ctx => ({ ...ctx, selection: sRef }));
       return () => {
-        Transforms.select(editorRef.current, _selection);
-        ReactEditor.focus(editorRef.current);
-        setSaveSelection(null);
+        if (sRef.current) {
+          Transforms.select(editorRef.current, sRef.current);
+          ReactEditor.focus(editorRef.current);
+          setSaveSelection(null);
+          sRef.current = null;
+        }
       };
     }
     return () => null;
   }, [selection]);
 
   useEffect(() => setCtx(ctx => ({ ...ctx, saveSelection })), [saveSelection]);
+
+  const perform = useCallback(
+    (fn: (selection: Range) => void) => {
+      if (savedSelection && savedSelection.current) {
+        Transforms.select(editorRef.current, savedSelection.current);
+        fn(savedSelection.current);
+      }
+    },
+    [savedSelection]
+  );
+  useEffect(() => setCtx(ctx => ({ ...ctx, perform })), [perform]);
 
   return { ctx, setEnabled };
 }
@@ -85,13 +192,14 @@ export function useHoverTool() {
 }
 
 export function HoverToolProvider(props: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   hoverTool: React.ReactNode;
 }) {
   const { ctx, setEnabled } = useProvideContext();
   return (
     <hoverToolContext.Provider value={ctx}>
       <HoveringTool
+        selection={ctx.selection?.current || null}
         onChangeEnabled={enabled => setEnabled(enabled)}
         enabled={ctx.enabled}
       >
@@ -104,16 +212,25 @@ export function HoverToolProvider(props: {
 
 export const HoveringTool = (
   props: {
-    children: React.ReactNode;
+    selection: Range | null;
+    children?: React.ReactNode;
     enabled: boolean;
     onChangeEnabled: (enabled: boolean) => void;
   } & React.HTMLProps<HTMLDivElement>
 ) => {
-  const { children, enabled, onChangeEnabled, ...otherProps } = props;
+  const {
+    children,
+    enabled,
+    onChangeEnabled,
+    selection,
+    ...otherProps
+  } = props;
   const editor = useSlate();
-  const { selection } = editor;
+  const currentNode = getNodeFromSelection(editor, selection);
+  const isVoid = Editor.isVoid(editor, currentNode);
 
   const [deltaOffset, setDeltaOffset] = useState(-1);
+
   useEffect(() => {
     const deltaoffset = selection
       ? selection.focus.offset - selection.anchor.offset
@@ -132,14 +249,20 @@ export const HoveringTool = (
       height: 1
     })
   });
-  useOnClickOutside(toolRef, () => {
+
+  useOnClickOutside(toolRef, e => {
+    if (currentNode) {
+      const domNode = ReactEditor.toDOMNode(editor, currentNode);
+      if (e.target && domNode.contains(e.target as globalThis.Node)) {
+        return;
+      }
+    }
     onChangeEnabled(false);
   });
 
   useEffect(() => {
     if (enabled) {
       const domSelection = window.getSelection();
-      // TODO: handle bugs here
       const domRange = domSelection?.getRangeAt(0);
       if (domRange && deltaOffset !== -1) {
         _setV({
@@ -147,9 +270,22 @@ export const HoveringTool = (
         });
       }
     }
-  }, [enabled, deltaOffset]);
+  }, [enabled, deltaOffset, selection]);
 
-  if (!enabled) {
+  const [offsetW, setOffsetW] = useState(0);
+
+  useEffect(() => {
+    if (currentNode && isVoid) {
+      const domNode = ReactEditor.toDOMNode(editor, currentNode);
+      const rect = domNode.getBoundingClientRect();
+      setOffsetW(rect.width / 2);
+    }
+    if (!isVoid) {
+      setOffsetW(0);
+    }
+  }, [currentNode, isVoid]);
+
+  if (!enabled || !children) {
     return null;
   }
 
@@ -159,7 +295,7 @@ export const HoveringTool = (
         {
           name: "offset",
           options: {
-            offset: [0, 10]
+            offset: [offsetW, 10]
           }
         }
       ]}
