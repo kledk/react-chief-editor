@@ -226,8 +226,6 @@ export const HoveringTool = (
     ...otherProps
   } = props;
   const editor = useSlate();
-  const currentNode = getNodeFromSelection(editor, selection);
-  const isVoid = Editor.isVoid(editor, currentNode);
 
   const [deltaOffset, setDeltaOffset] = useState(-1);
 
@@ -251,6 +249,7 @@ export const HoveringTool = (
   });
 
   useOnClickOutside(toolRef, e => {
+    const currentNode = getNodeFromSelection(editor, selection);
     if (currentNode) {
       const domNode = ReactEditor.toDOMNode(editor, currentNode);
       if (e.target && domNode.contains(e.target as globalThis.Node)) {
@@ -262,28 +261,24 @@ export const HoveringTool = (
 
   useEffect(() => {
     if (enabled) {
-      const domSelection = window.getSelection();
-      const domRange = domSelection?.getRangeAt(0);
-      if (domRange && deltaOffset !== -1) {
+      const currentNode = getNodeFromSelection(editor, selection);
+      const isVoid = Editor.isVoid(editor, currentNode);
+      if (isVoid && currentNode) {
+        const domNode = ReactEditor.toDOMNode(editor, currentNode);
         _setV({
-          getBoundingClientRect: () => domRange.getBoundingClientRect()
+          getBoundingClientRect: () => domNode.getBoundingClientRect()
         });
+      } else {
+        const domSelection = window.getSelection();
+        const domRange = domSelection?.getRangeAt(0);
+        if (domRange && deltaOffset !== -1) {
+          _setV({
+            getBoundingClientRect: () => domRange.getBoundingClientRect()
+          });
+        }
       }
     }
   }, [enabled, deltaOffset, selection]);
-
-  const [offsetW, setOffsetW] = useState(0);
-
-  useEffect(() => {
-    if (currentNode && isVoid) {
-      const domNode = ReactEditor.toDOMNode(editor, currentNode);
-      const rect = domNode.getBoundingClientRect();
-      setOffsetW(rect.width / 2);
-    }
-    if (!isVoid) {
-      setOffsetW(0);
-    }
-  }, [currentNode, isVoid]);
 
   if (!enabled || !children) {
     return null;
@@ -295,11 +290,11 @@ export const HoveringTool = (
         {
           name: "offset",
           options: {
-            offset: [offsetW, 10]
+            offset: [0, 10]
           }
         }
       ]}
-      placement="top"
+      placement="top-end"
       referenceElement={_v}
     >
       {({ ref, style, placement, arrowProps }) => (
