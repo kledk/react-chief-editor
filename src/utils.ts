@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from "react";
 import { Editor, Point, Node, Transforms } from "slate";
 import { ReactEditor } from "slate-react";
+import { Range } from "slate";
 
 export const isInside = (rect: ClientRect, x: number, y: number) => {
   return (
@@ -149,4 +150,15 @@ export function useOnClickOutside(
     // ... passing it into this hook.
     [ref, handler]
   );
+}
+
+export function getNodeFromSelection(editor: Editor, selection: Range | null) {
+  if (selection) {
+    const [, path] = Editor.node(editor, selection);
+    if (path.length) {
+      const [parent] = Editor.parent(editor, path);
+      return parent;
+    }
+  }
+  return null;
 }

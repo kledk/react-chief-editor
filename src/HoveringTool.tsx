@@ -9,7 +9,8 @@ import { ReactEditor, useSlate, useFocused, useSelected } from "slate-react";
 import { Editor, Range, Node, Transforms, RangeRef } from "slate";
 import { Popper, Manager, Reference } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
-import { useOnClickOutside, getActiveNode } from "./utils";
+import { useOnClickOutside, getActiveNode, getNodeFromSelection } from "./utils";
+import { EditableProps } from "slate-react/dist/components/editable";
 
 type HoverToolContext = {
   activeNode?: Node;
@@ -18,6 +19,7 @@ type HoverToolContext = {
   saveSelection: () => () => void;
   perform: (fn: (selection: Range) => void) => void;
   useToolWindow: () => typeof ToolWindow;
+  editableProps: EditableProps;
 };
 
 const hoverToolContext = React.createContext<HoverToolContext | undefined>(
@@ -75,17 +77,6 @@ function getUseToolWindow() {
   };
 }
 
-function getNodeFromSelection(editor: Editor, selection: Range | null) {
-  if (selection) {
-    const [, path] = Editor.node(editor, selection);
-    if (path.length) {
-      const [parent] = Editor.parent(editor, path);
-      return parent;
-    }
-  }
-  return null;
-}
-
 function useProvideContext() {
   const editor = useSlate();
   const { selection } = editor;
@@ -94,7 +85,8 @@ function useProvideContext() {
     saveSelection: () => () => null,
     perform: () => () => null,
     selection: null,
-    useToolWindow: getUseToolWindow()
+    useToolWindow: getUseToolWindow(),
+    editableProps: {}
   });
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
@@ -192,7 +184,7 @@ export function useHoverTool() {
 }
 
 export function HoverToolProvider(props: {
-  children?: React.ReactNode;
+  children?: React.ReactNode | ((props: EditableProps) => React.ReactNode);
   hoverTool: React.ReactNode;
 }) {
   const { ctx, setEnabled } = useProvideContext();
@@ -205,7 +197,9 @@ export function HoverToolProvider(props: {
       >
         {props.hoverTool}
       </HoveringTool>
-      {props.children}
+      {typeof props.children === "function"
+        ? props.children(ctx.editableProps)
+        : props.children}
     </hoverToolContext.Provider>
   );
 }
@@ -270,11 +264,13 @@ export const HoveringTool = (
         });
       } else {
         const domSelection = window.getSelection();
-        const domRange = domSelection?.getRangeAt(0);
-        if (domRange && deltaOffset !== -1) {
-          _setV({
-            getBoundingClientRect: () => domRange.getBoundingClientRect()
-          });
+        if (domSelection && domSelection.rangeCount > 0) {
+          const domRange = domSelection.getRangeAt(0);
+          if (domRange && deltaOffset !== -1) {
+            _setV({
+              getBoundingClientRect: () => domRange.getBoundingClientRect()
+            });
+          }
         }
       }
     }

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect } from "react";
-import { Aeditor } from "redia-aeditor";
+import { Aeditor, CoreAddons } from "redia-aeditor";
 import { Node } from "slate";
 
 function App() {
@@ -22,22 +22,43 @@ function App() {
     {
       type: "paragraph",
       children: [{ text: "en to tre fire fem seks syv" }]
-    },
+    }
   ]);
 
   useEffect(() => console.log(value), [value]);
 
+  const [preferDark, setPreferDark] = useState(false);
+
   return (
     <div style={{ padding: "1em" }}>
+      <div>
+        <span>
+          <input
+            type="checkbox"
+            onChange={e => setPreferDark(Boolean(e.target.checked))}
+          ></input>{" "}
+          Prefer dark (use browser preference for dark mode)
+        </span>
+      </div>
       <Aeditor
+        addons={[...CoreAddons]}
         value={value}
         onChange={value => setValue(value)}
         theme={{
-          fontSize: 14
+          preferDarkOption: preferDark,
+          darkTheme: {
+            background: "black",
+            foreground: "white"
+          },
+          editor: { fontSize: 14 }
         }}
         spellCheck={false}
         style={{ margin: 10, overflow: "auto" }}
       ></Aeditor>
+      <textarea
+        style={{ width: "100%", height: 400 }}
+        value={JSON.stringify(value, null, 2)}
+      ></textarea>
     </div>
   );
 }

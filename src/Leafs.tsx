@@ -1,5 +1,6 @@
 import React from "react";
 import { RenderLeafProps } from "slate-react";
+
 export function Leafs({ attributes, children, leaf }: RenderLeafProps) {
   if (leaf.bold) {
     children = <strong>{children}</strong>;
