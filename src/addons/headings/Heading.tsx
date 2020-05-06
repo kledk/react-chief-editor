@@ -1,5 +1,6 @@
 import React from "react";
 import { RenderElementProps } from "slate-react";
+import styled from "styled-components";
 
 export const Heading = (props: RenderElementProps) => {
   switch (props.element.type) {

@@ -9,7 +9,11 @@ import { ReactEditor, useSlate, useFocused, useSelected } from "slate-react";
 import { Editor, Range, Node, Transforms, RangeRef } from "slate";
 import { Popper, Manager, Reference } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
-import { useOnClickOutside, getActiveNode, getNodeFromSelection } from "./utils";
+import {
+  useOnClickOutside,
+  getActiveNode,
+  getNodeFromSelection
+} from "./utils";
 import { EditableProps } from "slate-react/dist/components/editable";
 
 type HoverToolContext = {

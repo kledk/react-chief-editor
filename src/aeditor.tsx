@@ -293,6 +293,25 @@ function BlockInsertTools() {
   );
 }
 
+const Placeholder = styled.span`
+  :before {
+    content: attr(placeholder);
+    display: block;
+    position: absolute;
+    color: rgba(55, 53, 47, 0.2);
+    ${props =>
+      props.theme.preferDarkOption &&
+      `
+@media (prefers-color-scheme: dark) {
+    color: rgba(255, 255, 255, 0.36);
+  }`}
+  }
+`;
+
+const TextSpan = styled.span`
+  position: relative;
+`;
+
 const handleRenderElement = (
   props: RenderElementProps,
   editor: ReactEditor,
@@ -310,7 +329,17 @@ const handleRenderElement = (
     }
   }
   element = element || (
-    <p {...props.attributes}>{React.Children.map(props.children, it => it)}</p>
+    <p {...props.attributes}>
+      <Placeholder
+        placeholder={
+          Editor.isEmpty(editor, props.element)
+            ? "Enter some text or leave blank"
+            : undefined
+        }
+      >
+        <TextSpan>{React.Children.map(props.children, it => it)}</TextSpan>
+      </Placeholder>
+    </p>
   );
   return element;
 };
