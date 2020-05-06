@@ -16,7 +16,7 @@ export const BoldAddon: Addon = {
     }
     return false;
   },
-  contextMenu: {
+  hoverMenu: {
     order: 1,
     category: "marks",
     renderButton: () => {

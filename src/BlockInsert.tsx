@@ -3,7 +3,34 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
 import { Node, Editor, Range } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
-import { BlockInsertBtn } from "./index";
+import styled from "styled-components";
+import { Button } from "./Button";
+
+export const BlockInsertBtn = styled(Button)`
+  user-select: none;
+  border: none;
+  background: transparent;
+  display: block;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #ccc;
+  border-radius: ${25 / 2}px;
+  span {
+    font-size: 28px;
+    color: #ccc;
+    position: absolute;
+    top: -6px;
+    left: 4px;
+    padding: 0;
+    margin: 0;
+    &:hover {
+      color: #ddd;
+    }
+    &:active {
+      color: #eee;
+    }
+  }
+`;
 
 export function BlockInsert(props: { children?: React.ReactNode }) {
   const editor = useSlate();

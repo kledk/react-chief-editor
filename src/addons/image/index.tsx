@@ -1,12 +1,7 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { Element, Editor, Transforms, Path, NodeEntry } from "slate";
-import {
-  useFocused,
-  useSelected,
-  RenderElementProps,
-  ReactEditor
-} from "slate-react";
+import { useFocused, useSelected, RenderElementProps } from "slate-react";
 
 export const isImageELement = (element: Element) => {
   return element.type === "image" && typeof element.url === "string";
@@ -27,8 +22,8 @@ export const Image = (props: RenderElementProps) => {
             outline:
               focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
           }}
-          alt={props.element.caption}
-          src={props.element.url}
+          alt={props.element.caption as string}
+          src={props.element.url as string}
         ></img>
         {props.children}
       </div>
@@ -99,7 +94,7 @@ export const ImageAddon: Addon = {
 
     return editor;
   },
-  contextMenu: {
+  hoverMenu: {
     order: 1,
     category: "image",
     typeMatch: /image/,

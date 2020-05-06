@@ -15,7 +15,7 @@ export const ItalicAddon: Addon = {
     }
     return false;
   },
-  contextMenu: {
+  hoverMenu: {
     order: 2,
     category: "marks",
     renderButton: () => {

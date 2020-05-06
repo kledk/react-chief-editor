@@ -7,7 +7,7 @@ export const StrikethroughAddon: Addon = {
   renderLeaf(props) {
     return renderLeaf(props, "strikethrough", "s");
   },
-  contextMenu: {
+  hoverMenu: {
     order: 4,
     category: "marks",
     renderButton: () => {

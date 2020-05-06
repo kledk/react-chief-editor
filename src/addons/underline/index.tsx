@@ -7,7 +7,7 @@ export const UnderlineAddon: Addon = {
   renderLeaf(props) {
     return renderLeaf(props, "underline", "u");
   },
-  contextMenu: {
+  hoverMenu: {
     order: 3,
     category: "marks",
     renderButton: () => {

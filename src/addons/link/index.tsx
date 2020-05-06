@@ -1,9 +1,14 @@
-import React from "react";
-import { RenderElementProps } from "slate-react";
-import { Element, Editor, Transforms, Range } from "slate";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { RenderElementProps, ReactEditor, useSlate } from "slate-react";
+import { Element, Editor, Transforms, Range, Node } from "slate";
 import { Addon } from "../../addon";
 import isUrl from "is-url";
-import { LinkBtn } from "../../aeditor";
+import { RichEditor } from "../../aeditor";
+import { useHoverTool } from "../../HoveringTool";
+import { useOnClickOutside } from "../../utils";
+import { StyledToolbarBtn } from "../../StyledToolbarBtn";
+import { StyledToolBox } from "../../StyledToolBox";
+import { InputWrapper } from "../../InputWrapper";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -11,7 +16,7 @@ export const isLinkELement = (element: Element) => {
 
 export const Link = (props: RenderElementProps) => {
   return (
-    <a {...props.attributes} href={props.element.url}>
+    <a {...props.attributes} href={props.element.url as string}>
       {props.children}
     </a>
   );
@@ -25,7 +30,7 @@ export const LinkAddon: Addon = {
       return <Link {...props} />;
     }
   },
-  withPlugin: <T extends Editor>(editor: T): T => {
+  withPlugin: <T extends ReactEditor>(editor: T): T => {
     const { insertData, insertText, isInline } = editor;
 
     editor.isInline = element => {
@@ -39,7 +44,6 @@ export const LinkAddon: Addon = {
         insertText(text);
       }
     };
-    //@ts-ignore
     editor.insertData = data => {
       const text = data.getData("text/plain");
 
@@ -49,10 +53,9 @@ export const LinkAddon: Addon = {
         insertData(data);
       }
     };
-    //@ts-ignore
     return editor;
   },
-  contextMenu: {
+  hoverMenu: {
     order: 5,
     category: "link",
     renderButton: () => {
@@ -96,3 +99,78 @@ const wrapLink = (editor: Editor, url: string) => {
     Transforms.collapse(editor, { edge: "end" });
   }
 };
+
+function LinkPopup(props: { onClose: () => void }) {
+  const editor = useSlate();
+  const { saveSelection, perform, selection } = useHoverTool();
+  useEffect(() => {
+    return saveSelection();
+  }, []);
+  const linkWrapperRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(linkWrapperRef, e => {
+    e.preventDefault();
+    props.onClose();
+  });
+  let linkNode: Node | null = null;
+  if (selection?.current) {
+    const [_linkNode] = Editor.nodes(editor, {
+      at: selection.current,
+      match: n => n.type === "link"
+    });
+    linkNode = _linkNode && _linkNode[0];
+  }
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    if (linkNode && typeof linkNode.url === "string") {
+      setUrl(linkNode.url);
+    }
+  }, [linkNode]);
+  const handleInsertLink = useCallback(() => {
+    perform(() => {
+      RichEditor.insertLink(editor, url);
+      props.onClose();
+    });
+  }, [url]);
+
+  return (
+    <div
+      ref={linkWrapperRef}
+      style={{ padding: 9, display: "flex", minWidth: 300 }}
+    >
+      <InputWrapper>
+        <input
+          value={url}
+          onChange={(e: React.FormEvent<HTMLInputElement>) =>
+            setUrl(e.currentTarget.value)
+          }
+          placeholder="Insert link"
+          autoFocus
+          data-slate-editor
+        />
+      </InputWrapper>
+      <StyledToolbarBtn onClick={handleInsertLink}>Link</StyledToolbarBtn>
+      <StyledToolbarBtn onClick={props.onClose}>Unlink</StyledToolbarBtn>
+    </div>
+  );
+}
+
+export function LinkBtn(props: { children: React.ReactNode }) {
+  const editor = useSlate();
+  const isActive = isLinkActive(editor);
+  const { useToolWindow } = useHoverTool();
+  const Toolwindow = useToolWindow();
+  return (
+    <Toolwindow
+      renderContent={setShow => (
+        <StyledToolBox>
+          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
+        </StyledToolBox>
+      )}
+      renderToolBtn={(tprops, show) => (
+        <StyledToolbarBtn {...tprops} isActive={isActive || show}>
+          {props.children}
+        </StyledToolbarBtn>
+      )}
+    />
+  );
+}

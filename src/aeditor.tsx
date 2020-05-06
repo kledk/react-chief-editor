@@ -37,6 +37,10 @@ import { Addon } from "./addon";
 import { insertLink, isLinkActive } from "./addons/link";
 import orderBy from "lodash/orderBy";
 import groupBy from "lodash/groupBy";
+import { StyledToolbarBtn } from "./StyledToolbarBtn";
+import { StyledToolBox } from "./StyledToolBox";
+import { ToolDivider } from "./ToolDivider";
+import { ToolsWrapper } from "./ToolsWrapper";
 
 export const defaultTheme = {
   preferDarkOption: false,
@@ -69,7 +73,7 @@ type BlockType = Heading | Link | Image | Paragraph;
 
 const isTextFormat = (editor: Editor, formatType: TextFormat) => {
   const [match] = Editor.nodes(editor, {
-    match: n => n[formatType]
+    match: n => Boolean(n[formatType])
   });
   return Boolean(match);
 };
@@ -125,89 +129,6 @@ export const RichEditor = {
   insertLink: insertLink
 };
 
-const Button = styled.button`
-  font-family: inherit;
-  font-size: 100%;
-  line-height: 1.15;
-  margin: 0;
-  cursor: pointer;
-  &:focus {
-    outline: none;
-  }
-`;
-
-export const BlockInsertBtn = styled(Button)`
-  user-select: none;
-  border: none;
-  background: transparent;
-  display: block;
-  width: 25px;
-  height: 25px;
-  border: 1px solid #ccc;
-  border-radius: ${25 / 2}px;
-  span {
-    font-size: 28px;
-    color: #ccc;
-    position: absolute;
-    top: -6px;
-    left: 4px;
-    padding: 0;
-    margin: 0;
-    &:hover {
-      color: #ddd;
-    }
-    &:active {
-      color: #eee;
-    }
-  }
-`;
-
-const StyledToolbarBtn = styled(Button)<{ isActive?: boolean }>`
-  background-color: white;
-  &:hover {
-    background-color: #ddd;
-  }
-  &:active {
-    background-color: #eee;
-  }
-  &:first-child {
-    padding-left: 10px;
-  }
-  &:last-child {
-    padding-right: 10px;
-  }
-  padding: 8px;
-  color: ${props => (props.isActive ? "rgb(46, 170, 220)" : undefined)};
-  border: none;
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-  background-color: grey;
-  color: ${props.isActive ? "white" : undefined};
-  &:hover {
-    background-color: dimgrey;
-  }
-  &:active {
-    background-color: darkgrey;
-  }
-  }`}
-`;
-
-const StyledToolBox = styled.div`
-  background-color: white;
-  overflow: hidden;
-  border-radius: 3px;
-  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
-    rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-    background-color: ${props.theme.darkTheme.background};
-  }`}
-`;
-
 const EditorThemeWrapper = styled.div`
   font-size: ${props => props.theme.editor.fontSize}px;
   ${props =>
@@ -221,21 +142,6 @@ const EditorThemeWrapper = styled.div`
       background: #cbcbcb
     }
   }`}
-`;
-
-const ToolDivider = styled.div`
-  width: 1px;
-  background-color: #f5f5f5;
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-  background-color: #737373;
-  }`}
-`;
-
-const ToolsWrapper = styled.div`
-  display: flex;
 `;
 
 export function FormatBtn(props: {
@@ -270,152 +176,22 @@ export function HeadingBtn(props: {
   );
 }
 
-const InputWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  font-size: 14px;
-  line-height: 20px;
-  padding: 4px 10px;
-  position: relative;
-  border-radius: 3px;
-  box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px inset,
-    rgba(15, 15, 15, 0.1) 0px 1px 1px inset;
-  background: rgba(242, 241, 238, 0.6);
-  cursor: text;
-  flex-grow: 1;
-  flex-shrink: 1;
-  margin-right: 8px;
-  input {
-    &:focus {
-      outline: 0;
-    }
-    font-size: inherit;
-    line-height: inherit;
-    border: none;
-    background: none;
-    width: 100%;
-    display: block;
-    resize: none;
-    padding: 0px;
-  }
-`;
-
-function TextFormatTools() {
-  return (
-    <ToolsWrapper>
-      <FormatBtn formatType="bold">B</FormatBtn>
-      <FormatBtn formatType="italic">I</FormatBtn>
-      <FormatBtn formatType="underline">U</FormatBtn>
-      <FormatBtn formatType="strikethrough">S</FormatBtn>
-      <ToolDivider></ToolDivider>
-      <HeadingBtn headingType="heading-1">H1</HeadingBtn>
-      <HeadingBtn headingType="heading-2">H2</HeadingBtn>
-      <ToolDivider></ToolDivider>
-      <LinkBtn>Link</LinkBtn>
-    </ToolsWrapper>
-  );
-}
-
-function ImageTools() {
-  return (
-    <ToolsWrapper>
-      <LinkBtn>Delete</LinkBtn>
-    </ToolsWrapper>
-  );
-}
-
-function LinkPopup(props: { onClose: () => void }) {
-  const editor = useSlate();
-  const { saveSelection, perform, selection } = useHoverTool();
-  useEffect(() => {
-    return saveSelection();
-  }, []);
-  const linkWrapperRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(linkWrapperRef, e => {
-    e.preventDefault();
-    props.onClose();
-  });
-  let linkNode: Node | null = null;
-  if (selection?.current) {
-    const [_linkNode] = Editor.nodes(editor, {
-      at: selection.current,
-      match: n => n.type === "link"
-    });
-    linkNode = _linkNode && _linkNode[0];
-  }
-  const [url, setUrl] = useState("");
-  useEffect(() => {
-    if (linkNode) {
-      setUrl(linkNode.url);
-    }
-  }, [linkNode]);
-  const handleInsertLink = useCallback(() => {
-    perform(() => {
-      RichEditor.insertLink(editor, url);
-      props.onClose();
-    });
-  }, [url]);
-
-  return (
-    <div
-      ref={linkWrapperRef}
-      style={{ padding: 9, display: "flex", minWidth: 300 }}
-    >
-      <InputWrapper>
-        <input
-          value={url}
-          onChange={(e: React.FormEvent<HTMLInputElement>) =>
-            setUrl(e.currentTarget.value)
-          }
-          placeholder="Insert link"
-          autoFocus
-          data-slate-editor
-        />
-      </InputWrapper>
-      <StyledToolbarBtn onClick={handleInsertLink}>Link</StyledToolbarBtn>
-      <StyledToolbarBtn onClick={props.onClose}>Unlink</StyledToolbarBtn>
-    </div>
-  );
-}
-
-export function LinkBtn(props: { children: React.ReactNode }) {
-  const editor = useSlate();
-  const isActive = isLinkActive(editor);
-  const { useToolWindow } = useHoverTool();
-  const Toolwindow = useToolWindow();
-  return (
-    <Toolwindow
-      renderContent={setShow => (
-        <StyledToolBox>
-          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
-        </StyledToolBox>
-      )}
-      renderToolBtn={(tprops, show) => (
-        <StyledToolbarBtn {...tprops} isActive={isActive || show}>
-          {props.children}
-        </StyledToolbarBtn>
-      )}
-    />
-  );
-}
-
 function HoveringToolbars(props: { addons: Addon[] }) {
   const { addons } = props;
   const editor = useSlate();
   const { selection } = useHoverTool();
   if (selection && selection.current) {
     const addonsForContext = addons.filter(addon => {
-      if (addon.contextMenu) {
+      if (addon.hoverMenu) {
         if (selection.current) {
           const [match] = Editor.nodes(editor, {
             match: n => {
-              if (addon.contextMenu?.typeMatch && typeof n.type === "string") {
-                if (n.type.match(addon.contextMenu.typeMatch)) {
+              if (addon.hoverMenu?.typeMatch && typeof n.type === "string") {
+                if (n.type.match(addon.hoverMenu.typeMatch)) {
                   return true;
                 }
               } else if (
-                !addon.contextMenu?.typeMatch &&
+                !addon.hoverMenu?.typeMatch &&
                 !Editor.isVoid(editor, n) &&
                 typeof n.type === "string"
               ) {
@@ -440,7 +216,15 @@ function HoveringToolbars(props: { addons: Addon[] }) {
           <ToolsWrapper>
             {Object.entries(groupedAddons).map(([, orderedAddons]) => (
               <React.Fragment>
-                {orderedAddons.map((it, i) => it.contextMenu?.renderButton())}
+                {orderedAddons.map((it, i) => {
+                  if (it.hoverMenu) {
+                    const renderButton = it.hoverMenu.renderButton;
+                    return typeof renderButton === "function"
+                      ? renderButton()
+                      : renderButton;
+                  }
+                  return null;
+                })}
                 <ToolDivider />
               </React.Fragment>
             ))}

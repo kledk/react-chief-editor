@@ -1,7 +1,7 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { Heading } from "./Heading";
-import { Transforms, Editor } from "slate";
+import { Transforms, Editor, Node } from "slate";
 import { ReactEditor } from "slate-react";
 import { HeadingBtn } from "../../aeditor";
 
@@ -26,7 +26,8 @@ export const HeadingsAddon: Addon = {
       const { selection } = editor;
       if (selection && selection.focus.offset !== 0) {
         const [match] = Editor.nodes(editor, {
-          match: n => n.type?.match(/(heading)/)
+          match: n =>
+            typeof n.type === "string" && Boolean(n.type?.match(/(heading)/))
         });
         if (match) {
           event.preventDefault();
@@ -40,7 +41,7 @@ export const HeadingsAddon: Addon = {
     }
     return false;
   },
-  contextMenu: {
+  hoverMenu: {
     order: 4,
     category: "heading",
     renderButton: () => {

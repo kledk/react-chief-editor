@@ -22,10 +22,10 @@ export interface Addon {
     editor: ReactEditor
   ): boolean | undefined;
   onClick?(event: React.MouseEvent<HTMLElement>, editor: ReactEditor): void;
-  contextMenu?: {
+  hoverMenu?: {
     order: number;
     typeMatch?: RegExp;
     category?: string;
-    renderButton: () => React.ReactNode;
+    renderButton: () => React.ReactNode | React.ReactNode;
   };
 }
