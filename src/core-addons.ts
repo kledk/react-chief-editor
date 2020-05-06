@@ -5,6 +5,8 @@ import { StrikethroughAddon } from "./addons/strikethrough";
 import { HeadingsAddon } from "./addons/headings";
 import { ImageAddon } from "./addons/image";
 import { LinkAddon } from "./addons/link";
+import { PreventNewlineAddon } from "./addons/prevent-newline";
+import { ResetToParagraphAddon } from "./addons/reset-to-paragraph";
 
 export const CoreAddons = [
   BoldAddon,
@@ -13,5 +15,7 @@ export const CoreAddons = [
   StrikethroughAddon,
   HeadingsAddon,
   ImageAddon,
-  LinkAddon
+  LinkAddon,
+  PreventNewlineAddon,
+  ResetToParagraphAddon
 ];

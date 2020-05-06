@@ -26,6 +26,7 @@
   "dependencies": {
     "@popperjs/core": "^2.2.1",
     "is-url": "^1.2.4",
+    "lodash": "^4.17.15",
     "react-dom": "^16.13.1",
     "react-popper": "^2.2.3",
     "slate": "^0.57.3",

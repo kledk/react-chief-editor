@@ -3,6 +3,7 @@ import { RenderElementProps } from "slate-react";
 import { Element, Editor, Transforms, Range } from "slate";
 import { Addon } from "../../addon";
 import isUrl from "is-url";
+import { LinkBtn } from "../../aeditor";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -17,12 +18,12 @@ export const Link = (props: RenderElementProps) => {
 };
 
 export const LinkAddon: Addon = {
-  renderElement: props => {
-    console.log(props.element.type);
-    if (props.element.type === "link") {
+  name: "link",
+  element: {
+    typeMatch: /link/,
+    renderElement: props => {
       return <Link {...props} />;
     }
-    return undefined;
   },
   withPlugin: <T extends Editor>(editor: T): T => {
     const { insertData, insertText, isInline } = editor;
@@ -50,6 +51,13 @@ export const LinkAddon: Addon = {
     };
     //@ts-ignore
     return editor;
+  },
+  contextMenu: {
+    order: 5,
+    category: "link",
+    renderButton: () => {
+      return <LinkBtn>Link</LinkBtn>;
+    }
   }
 };
 

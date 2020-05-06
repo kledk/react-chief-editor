@@ -28,12 +28,15 @@ import {
   Point,
   NodeEntry,
   Element,
-  Path
+  Path,
+  Location
 } from "slate";
 import styled, { ThemeProvider } from "styled-components";
 import { BlockInsert } from "./BlockInsert";
 import { Addon } from "./addon";
 import { insertLink, isLinkActive } from "./addons/link";
+import orderBy from "lodash/orderBy";
+import groupBy from "lodash/groupBy";
 
 export const defaultTheme = {
   preferDarkOption: false,
@@ -78,7 +81,7 @@ const isHeadingType = (editor: Editor, header: Heading) => {
   return Boolean(match);
 };
 
-const RichEditor = {
+export const RichEditor = {
   ...Editor,
   toggleFormat(editor: Editor, format: TextFormat) {
     let isFormatted = isTextFormat(editor, format);
@@ -231,15 +234,14 @@ const ToolDivider = styled.div`
   }`}
 `;
 
-const TextFormatToolsWrapper = styled.div`
+const ToolsWrapper = styled.div`
   display: flex;
 `;
 
-function FormatBtn(props: {
+export function FormatBtn(props: {
   formatType: TextFormat;
   children: React.ReactNode;
 }) {
-  const { selection } = useHoverTool();
   const editor = useSlate();
   const isActive = isTextFormat(editor, props.formatType);
   return (
@@ -252,7 +254,7 @@ function FormatBtn(props: {
   );
 }
 
-function HeadingBtn(props: {
+export function HeadingBtn(props: {
   headingType: Heading;
   children: React.ReactNode;
 }) {
@@ -301,7 +303,7 @@ const InputWrapper = styled.div`
 
 function TextFormatTools() {
   return (
-    <TextFormatToolsWrapper>
+    <ToolsWrapper>
       <FormatBtn formatType="bold">B</FormatBtn>
       <FormatBtn formatType="italic">I</FormatBtn>
       <FormatBtn formatType="underline">U</FormatBtn>
@@ -311,15 +313,15 @@ function TextFormatTools() {
       <HeadingBtn headingType="heading-2">H2</HeadingBtn>
       <ToolDivider></ToolDivider>
       <LinkBtn>Link</LinkBtn>
-    </TextFormatToolsWrapper>
+    </ToolsWrapper>
   );
 }
 
 function ImageTools() {
   return (
-    <TextFormatToolsWrapper>
+    <ToolsWrapper>
       <LinkBtn>Delete</LinkBtn>
-    </TextFormatToolsWrapper>
+    </ToolsWrapper>
   );
 }
 
@@ -377,7 +379,7 @@ function LinkPopup(props: { onClose: () => void }) {
   );
 }
 
-function LinkBtn(props: { children: React.ReactNode }) {
+export function LinkBtn(props: { children: React.ReactNode }) {
   const editor = useSlate();
   const isActive = isLinkActive(editor);
   const { useToolWindow } = useHoverTool();
@@ -398,24 +400,53 @@ function LinkBtn(props: { children: React.ReactNode }) {
   );
 }
 
-function HoveringToolbars() {
+function HoveringToolbars(props: { addons: Addon[] }) {
+  const { addons } = props;
   const editor = useSlate();
   const { selection } = useHoverTool();
   if (selection && selection.current) {
-    const node = getNodeFromSelection(editor, selection.current);
-    switch (node?.type) {
-      case "image":
-        return (
-          <StyledToolBox>
-            <ImageTools />
-          </StyledToolBox>
-        );
-      default:
-        return (
-          <StyledToolBox>
-            <TextFormatTools />
-          </StyledToolBox>
-        );
+    const addonsForContext = addons.filter(addon => {
+      if (addon.contextMenu) {
+        if (selection.current) {
+          const [match] = Editor.nodes(editor, {
+            match: n => {
+              if (addon.contextMenu?.typeMatch && typeof n.type === "string") {
+                if (n.type.match(addon.contextMenu.typeMatch)) {
+                  return true;
+                }
+              } else if (
+                !addon.contextMenu?.typeMatch &&
+                !Editor.isVoid(editor, n) &&
+                typeof n.type === "string"
+              ) {
+                return true;
+              }
+              return false;
+            },
+            at: selection.current
+          });
+          return Boolean(match);
+        } else {
+          return false;
+        }
+      }
+      return false;
+    });
+    if (addonsForContext.length > 0) {
+      const orderedAddons = orderBy(addonsForContext, "contextMenu.order");
+      const groupedAddons = groupBy(orderedAddons, "contextMenu.category");
+      return (
+        <StyledToolBox>
+          <ToolsWrapper>
+            {Object.entries(groupedAddons).map(([, orderedAddons]) => (
+              <React.Fragment>
+                {orderedAddons.map((it, i) => it.contextMenu?.renderButton())}
+                <ToolDivider />
+              </React.Fragment>
+            ))}
+          </ToolsWrapper>
+        </StyledToolBox>
+      );
     }
   }
   return null;
@@ -425,7 +456,7 @@ function BlockInsertTools() {
   const editor = useSlate();
   return (
     <StyledToolBox>
-      <TextFormatToolsWrapper>
+      <ToolsWrapper>
         <StyledToolbarBtn
           isActive={isNodeActive(editor, "heading-1")}
           onClick={() => {
@@ -473,29 +504,9 @@ function BlockInsertTools() {
         >
           Image
         </StyledToolbarBtn>
-      </TextFormatToolsWrapper>
+      </ToolsWrapper>
     </StyledToolBox>
   );
-}
-
-function withAeditor<T extends Editor>(editor: T): T {
-  const { deleteBackward } = editor;
-
-  editor.deleteBackward = (unit: "character" | "word" | "line" | "block") => {
-    const [isParagraph] = Editor.nodes(editor, {
-      match: n => n.type === "paragraph"
-    });
-    if (
-      !isParagraph &&
-      editor.selection &&
-      editor.selection.focus.offset === 0
-    ) {
-      return Transforms.setNodes(editor, { type: "paragraph" });
-    }
-    return deleteBackward(unit);
-  };
-
-  return editor;
 }
 
 const handleRenderElement = (
@@ -504,14 +515,19 @@ const handleRenderElement = (
   addons: Addon[]
 ) => {
   let element: JSX.Element | undefined;
-
   for (let addon of addons) {
-    if (addon.renderElement) {
-      element = addon.renderElement(props, editor) || element;
+    if (
+      addon.element &&
+      addon.element.renderElement &&
+      addon.element.typeMatch &&
+      (props.element?.type as string).match(addon.element.typeMatch)
+    ) {
+      element = addon.element.renderElement(props, editor) || element;
     }
   }
-  element = element || <p {...props.attributes}>{[props.children]}</p>;
-
+  element = element || (
+    <p {...props.attributes}>{React.Children.map(props.children, it => it)}</p>
+  );
   return element;
 };
 
@@ -532,11 +548,83 @@ function handleRenderLeaf(
   return <span {...copy.attributes}>{copy.children}</span>;
 }
 
+const handleKeyDown = (
+  event: React.KeyboardEvent<HTMLDivElement>,
+  editor: ReactEditor,
+  addons: Addon[]
+) => {
+  for (let addon of addons) {
+    if (addon.onKeyDown) {
+      if (addon.onKeyDown(event, editor)) {
+        // On true, we break out of the onKeyDown loop
+        return;
+      }
+    }
+  }
+};
+
+const handleKeyUp = (
+  event: React.KeyboardEvent<HTMLDivElement>,
+  editor: ReactEditor,
+  addons: Addon[]
+) => {
+  const { selection } = editor;
+  if (!selection) {
+    return;
+  }
+  const [node, path] = Editor.node(editor, selection as Location);
+  if (!path.length) {
+    return;
+  }
+  const [parent] = Editor.parent(editor, path);
+  if (parent) {
+    // TODO: implement some kind of trigger
+    // for (let addon of addons) {
+    //   if (addon.triggers) {
+    //     for (let trigger of plugin.triggers) {
+    //       const matches = findMatches(trigger.pattern, trigger.range, editor);
+    //       if (matches.length) {
+    //         plugin.onTrigger && plugin.onTrigger(editor, matches, trigger);
+    //         return;
+    //       }
+    //     }
+    //   }
+    // }
+  }
+};
+
+const handleClick = (
+  event: React.MouseEvent<HTMLElement>,
+  editor: ReactEditor,
+  addons: Addon[]
+) => {
+  addons.forEach(addon => {
+    if (addon.onClick) {
+      addon.onClick(event, editor);
+    }
+  });
+};
+
+const handleDecorate = (
+  entry: NodeEntry,
+  editor: ReactEditor,
+  addons: Addon[]
+) => {
+  let ranges: Range[] = [];
+  for (let addon of addons) {
+    if (addon.decorate) {
+      const result = addon.decorate(entry, editor);
+      if (result) {
+        return (ranges = ranges.concat(result));
+      }
+    }
+  }
+  return ranges;
+};
+
 const createEditor = (addons: Addon[]): ReactEditor => {
   return useMemo(() => {
-    let editor: ReactEditor = withAeditor(
-      withHistory(withReact(createSlateEditor()))
-    );
+    let editor: ReactEditor = withHistory(withReact(createSlateEditor()));
     addons.forEach(addon => {
       if (addon.withPlugin) {
         editor = addon.withPlugin(editor);
@@ -564,57 +652,52 @@ export function Aeditor(
   const { value, onChange, theme, addons, ...otherProps } = props;
   const editor = createEditor(addons);
 
-  const renderElement = useCallback((props: RenderElementProps) => {
-    return handleRenderElement(props, editor, addons);
-  }, []);
-
-  const renderLeaf = useCallback((props: RenderLeafProps) => {
-    return handleRenderLeaf(props, editor, addons);
-  }, []);
-
-  const handleDecorate = useCallback(([node, path]: NodeEntry) => {
-    const ranges: any[] = [];
-    return ranges;
-  }, []);
-
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.keyCode === 13) {
-        // Enter key
-        if (event.shiftKey) {
-          editor.insertText("\n");
-          event.preventDefault();
-        }
-        const { selection } = editor;
-        if (selection && selection.focus.offset !== 0) {
-          const [match] = Editor.nodes(editor, {
-            match: n => n.type?.match(/(heading)/)
-          });
-          if (match) {
-            event.preventDefault();
-            Transforms.insertNodes(editor, {
-              type: "paragraph",
-              children: [{ text: "" }]
-            });
-          }
-        }
-      }
-      if (event.key === "b" && event.ctrlKey) {
-        event.preventDefault();
-        RichEditor.toggleFormat(editor, "bold");
-      }
-      if (event.key === "i" && event.ctrlKey) {
-        event.preventDefault();
-        RichEditor.toggleFormat(editor, "italic");
-      }
+  const renderElement = useCallback(
+    (props: RenderElementProps) => {
+      return handleRenderElement(props, editor, addons);
     },
-    [editor]
+    [addons]
   );
+
+  const renderLeaf = useCallback(
+    (props: RenderLeafProps) => {
+      return handleRenderLeaf(props, editor, addons);
+    },
+    [addons]
+  );
+
+  const decorate = useCallback(
+    (entry: NodeEntry) => handleDecorate(entry, editor, addons),
+    []
+  );
+
+  const keyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    return handleKeyDown(event, editor, addons);
+  }, []);
+
+  const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    handleKeyUp(event, editor, addons);
+  }, []);
+
+  const click = useCallback(
+    (event: React.MouseEvent<HTMLElement>) =>
+      handleClick(event, editor, addons),
+    []
+  );
+
+  const paste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
+    const clipboardData = event.clipboardData;
+    const pastedData = clipboardData.getData("Text");
+    if (!pastedData) {
+      return;
+    }
+    editor.insertText(pastedData);
+  }, []);
 
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
       <ThemeProvider theme={{ ...defaultTheme, ...theme }}>
-        <HoverToolProvider hoverTool={<HoveringToolbars />}>
+        <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
           {editableProps => (
             <div
               style={{
@@ -629,8 +712,11 @@ export function Aeditor(
                   {...editableProps}
                   renderLeaf={renderLeaf}
                   renderElement={renderElement}
-                  decorate={handleDecorate}
-                  onKeyDown={handleKeyDown}
+                  decorate={decorate}
+                  onKeyDown={keyDown}
+                  onKeyUp={keyUp}
+                  onClick={click}
+                  onPaste={paste}
                   {...otherProps}
                 />
               </EditorThemeWrapper>

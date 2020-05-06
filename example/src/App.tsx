@@ -58,6 +58,7 @@ function App() {
       <textarea
         style={{ width: "100%", height: 400 }}
         value={JSON.stringify(value, null, 2)}
+        readOnly
       ></textarea>
     </div>
   );

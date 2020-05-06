@@ -37,11 +37,12 @@ export const Image = (props: RenderElementProps) => {
 };
 
 export const ImageAddon: Addon = {
-  renderElement: props => {
-    if (props.element.type === "image") {
+  name: "image",
+  element: {
+    typeMatch: /image/,
+    renderElement: props => {
       return <Image {...props} />;
     }
-    return undefined;
   },
   withPlugin: <T extends Editor>(editor: T): T => {
     const { isVoid, normalizeNode } = editor;
@@ -97,5 +98,13 @@ export const ImageAddon: Addon = {
     };
 
     return editor;
+  },
+  contextMenu: {
+    order: 1,
+    category: "image",
+    typeMatch: /image/,
+    renderButton: () => {
+      return <span>Delete</span>;
+    }
   }
 };
