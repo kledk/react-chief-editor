@@ -46,7 +46,6 @@ export const LinkAddon: Addon = {
     };
     editor.insertData = data => {
       const text = data.getData("text/plain");
-
       if (text && isUrl(text)) {
         wrapLink(editor, text);
       } else {
@@ -102,9 +101,10 @@ const wrapLink = (editor: Editor, url: string) => {
 
 function LinkPopup(props: { onClose: () => void }) {
   const editor = useSlate();
-  const { saveSelection, perform, selection } = useHoverTool();
+  const { selection } = editor;
+  const { saveSelection, perform } = useHoverTool();
   useEffect(() => {
-    return saveSelection();
+    return saveSelection(selection);
   }, []);
   const linkWrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(linkWrapperRef, e => {
@@ -112,9 +112,9 @@ function LinkPopup(props: { onClose: () => void }) {
     props.onClose();
   });
   let linkNode: Node | null = null;
-  if (selection?.current) {
+  if (selection) {
     const [_linkNode] = Editor.nodes(editor, {
-      at: selection.current,
+      at: selection,
       match: n => n.type === "link"
     });
     linkNode = _linkNode && _linkNode[0];
@@ -126,10 +126,8 @@ function LinkPopup(props: { onClose: () => void }) {
     }
   }, [linkNode]);
   const handleInsertLink = useCallback(() => {
-    perform(() => {
-      RichEditor.insertLink(editor, url);
-      props.onClose();
-    });
+    RichEditor.insertLink(editor, url);
+    props.onClose();
   }, [url]);
 
   return (

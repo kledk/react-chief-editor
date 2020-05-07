@@ -45,13 +45,17 @@ import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
 import { PlaceholderHint } from "./PlaceholderHint";
 
+Transforms.deselect = () => {
+  console.log("inside deselect method ");
+};
+
 export const defaultTheme = {
   preferDarkOption: false,
   darkTheme: {
     background: "#000",
     foreground: "#fff"
   },
-  editor: { fontSize: 14 },
+  editor: { fontSize: 14, color: "rgb(55, 53, 47)" },
   colors: {}
 };
 
@@ -182,11 +186,12 @@ export function HeadingBtn(props: {
 function HoveringToolbars(props: { addons: Addon[] }) {
   const { addons } = props;
   const editor = useSlate();
-  const { selection } = useHoverTool();
-  if (selection && selection.current) {
+  // const { selection } = useHoverTool();
+  const {selection} = editor;
+  if (selection) {
     const addonsForContext = addons.filter(addon => {
       if (addon.hoverMenu) {
-        if (selection.current) {
+        if (selection) {
           const [match] = Editor.nodes(editor, {
             match: n => {
               if (addon.hoverMenu?.typeMatch && typeof n.type === "string") {
@@ -202,7 +207,7 @@ function HoveringToolbars(props: { addons: Addon[] }) {
               }
               return false;
             },
-            at: selection.current
+            at: selection
           });
           return Boolean(match);
         } else {

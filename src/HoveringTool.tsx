@@ -20,7 +20,7 @@ type HoverToolContext = {
   activeNode?: Node;
   enabled: boolean;
   selection: RangeRef | null;
-  saveSelection: () => () => void;
+  saveSelection: (selection: Range | null) => () => void;
   perform: (fn: (selection: Range) => void) => void;
   useToolWindow: () => typeof ToolWindow;
   editableProps: EditableProps;
@@ -108,18 +108,6 @@ function useProvideContext() {
   //   ...ctx
   // });
 
-  // When selection changes. We proxy the editor selection with or own saved selection.
-  useEffect(() => {
-    if (savedSelection?.current) {
-      setCtx({ ...ctx, selection: savedSelection });
-    } else if (selection) {
-      const sRef = Editor.rangeRef(editor, selection);
-      setCtx({ ...ctx, selection: sRef });
-    } else {
-      setCtx({ ...ctx, selection: null });
-    }
-  }, [selection, savedSelection]);
-
   const setEnabled = useCallback((enabled: boolean) => {
     setCtx(ctx => ({
       ...ctx,
@@ -146,7 +134,7 @@ function useProvideContext() {
   const editorRef = useRef(editor);
   editorRef.current = editor;
 
-  const saveSelection = useCallback(() => {
+  const saveSelection = useCallback((selection: Range | null) => {
     if (selection) {
       const sRef = Editor.rangeRef(editor, selection);
       setSaveSelection(sRef);
@@ -161,9 +149,9 @@ function useProvideContext() {
       };
     }
     return () => null;
-  }, [selection]);
+  }, []);
 
-  useEffect(() => setCtx(ctx => ({ ...ctx, saveSelection })), [saveSelection]);
+  useEffect(() => setCtx(ctx => ({ ...ctx, saveSelection })), []);
 
   const perform = useCallback(
     (fn: (selection: Range) => void) => {
@@ -195,7 +183,6 @@ export function HoverToolProvider(props: {
   return (
     <hoverToolContext.Provider value={ctx}>
       <HoveringTool
-        selection={ctx.selection?.current || null}
         onChangeEnabled={enabled => setEnabled(enabled)}
         enabled={ctx.enabled}
       >
@@ -210,20 +197,14 @@ export function HoverToolProvider(props: {
 
 export const HoveringTool = (
   props: {
-    selection: Range | null;
     children?: React.ReactNode;
     enabled: boolean;
     onChangeEnabled: (enabled: boolean) => void;
   } & React.HTMLProps<HTMLDivElement>
 ) => {
-  const {
-    children,
-    enabled,
-    onChangeEnabled,
-    selection,
-    ...otherProps
-  } = props;
+  const { children, enabled, onChangeEnabled, ...otherProps } = props;
   const editor = useSlate();
+  const { selection } = editor;
 
   const [deltaOffset, setDeltaOffset] = useState(-1);
 
