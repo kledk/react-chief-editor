@@ -1,4 +1,4 @@
-import { getNodeFromSelection } from "./utils";
+import { getNodeFromSelection, getActiveNodeType } from "./utils";
 import { isNodeActive, useOnClickOutside } from "./utils";
 import { HoverToolProvider, useHoverTool } from "./HoveringTool";
 import React, {
@@ -15,7 +15,9 @@ import {
   Slate,
   Editable,
   useSlate,
-  ReactEditor
+  ReactEditor,
+  useFocused,
+  useSelected
 } from "slate-react";
 import { withHistory } from "slate-history";
 import {
@@ -41,6 +43,7 @@ import { StyledToolbarBtn } from "./StyledToolbarBtn";
 import { StyledToolBox } from "./StyledToolBox";
 import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
+import { PlaceholderHint } from "./PlaceholderHint";
 
 export const defaultTheme = {
   preferDarkOption: false,
@@ -293,24 +296,22 @@ function BlockInsertTools() {
   );
 }
 
-const Placeholder = styled.span`
-  :before {
-    content: attr(placeholder);
-    display: block;
-    position: absolute;
-    color: rgba(55, 53, 47, 0.2);
-    ${props =>
-      props.theme.preferDarkOption &&
-      `
-@media (prefers-color-scheme: dark) {
-    color: rgba(255, 255, 255, 0.36);
-  }`}
-  }
-`;
-
-const TextSpan = styled.span`
-  position: relative;
-`;
+function Paragraph(props: RenderElementProps) {
+  const editor = useSlate();
+  const isFocused = useFocused();
+  const isSelected = useSelected();
+  return (
+    <p {...props.attributes}>
+      <PlaceholderHint
+        isEmpty={Editor.isEmpty(editor, props.element)}
+        hoverHint={"Click to start typing"}
+        placeholder={isFocused && isSelected ? "Text" : undefined}
+      >
+        {React.Children.map(props.children, it => it)}
+      </PlaceholderHint>
+    </p>
+  );
+}
 
 const handleRenderElement = (
   props: RenderElementProps,
@@ -328,20 +329,8 @@ const handleRenderElement = (
       element = addon.element.renderElement(props, editor) || element;
     }
   }
-  element = element || (
-    <p {...props.attributes}>
-      <Placeholder
-        placeholder={
-          Editor.isEmpty(editor, props.element)
-            ? "Enter some text or leave blank"
-            : undefined
-        }
-      >
-        <TextSpan>{React.Children.map(props.children, it => it)}</TextSpan>
-      </Placeholder>
-    </p>
-  );
-  return element;
+
+  return (element = element || <Paragraph {...props} />);
 };
 
 function handleRenderLeaf(
