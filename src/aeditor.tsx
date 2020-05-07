@@ -45,8 +45,9 @@ import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
 import { PlaceholderHint } from "./PlaceholderHint";
 
+export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
-  console.log("inside deselect method ");
+  // We disable the default deselect.
 };
 
 export const defaultTheme = {
@@ -187,7 +188,7 @@ function HoveringToolbars(props: { addons: Addon[] }) {
   const { addons } = props;
   const editor = useSlate();
   // const { selection } = useHoverTool();
-  const {selection} = editor;
+  const { selection } = editor;
   if (selection) {
     const addonsForContext = addons.filter(addon => {
       if (addon.hoverMenu) {
