@@ -28,4 +28,9 @@ export interface Addon {
     category?: string;
     renderButton: () => React.ReactNode | React.ReactNode;
   };
+  blockInsertMenu?: {
+    order: number;
+    category?: string;
+    renderButton: (editor: ReactEditor) => React.ReactNode | React.ReactNode;
+  };
 }

@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { Button } from "./Button";
-export const StyledToolbarBtn = styled(Button) <{
-    isActive?: boolean;
-}> `
+export const StyledToolbarBtn = styled(Button)<{
+  isActive?: boolean;
+}>`
   background-color: white;
+  font-size: 0.9em;
   &:hover {
     background-color: #ddd;
   }
@@ -19,8 +20,9 @@ export const StyledToolbarBtn = styled(Button) <{
   padding: 8px;
   color: ${props => (props.isActive ? "rgb(46, 170, 220)" : undefined)};
   border: none;
-  ${props => props.theme.preferDarkOption &&
-        `
+  ${props =>
+    props.theme.preferDarkOption &&
+    `
 @media (prefers-color-scheme: dark) {
   background-color: grey;
   color: ${props.isActive ? "white" : undefined};

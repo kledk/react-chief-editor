@@ -1,7 +1,15 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { Element, Editor, Transforms, Path, NodeEntry } from "slate";
-import { useFocused, useSelected, RenderElementProps } from "slate-react";
+import {
+  useFocused,
+  useSelected,
+  RenderElementProps,
+  ReactEditor
+} from "slate-react";
+import { StyledToolbarBtn } from "../../StyledToolbarBtn";
+import { isNodeActive } from "../../utils";
+import { RichEditor } from "../../aeditor";
 
 export const isImageELement = (element: Element) => {
   return element.type === "image" && typeof element.url === "string";
@@ -99,7 +107,24 @@ export const ImageAddon: Addon = {
     category: "image",
     typeMatch: /image/,
     renderButton: () => {
-      return <span>Delete</span>;
+      return <StyledToolbarBtn>Delete</StyledToolbarBtn>;
+    }
+  },
+  blockInsertMenu: {
+    order: 1,
+    category: "image",
+    renderButton: editor => {
+      return (
+        <StyledToolbarBtn
+          isActive={isNodeActive(editor, "image")}
+          onClick={() => {
+            RichEditor.insertBlock(editor, "image");
+            ReactEditor.focus(editor);
+          }}
+        >
+          Image
+        </StyledToolbarBtn>
+      );
     }
   }
 };

@@ -126,7 +126,7 @@ function LinkPopup(props: { onClose: () => void }) {
     }
   }, [linkNode]);
   const handleInsertLink = useCallback(() => {
-    RichEditor.insertLink(editor, url);
+    insertLink(editor, url);
     props.onClose();
   }, [url]);
 

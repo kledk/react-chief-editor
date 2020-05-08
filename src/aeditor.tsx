@@ -1,101 +1,76 @@
-import { getNodeFromSelection, getActiveNodeType } from "./utils";
-import { isNodeActive, useOnClickOutside } from "./utils";
-import { HoverToolProvider, useHoverTool } from "./HoveringTool";
-import React, {
-  useMemo,
-  useState,
-  useCallback,
-  useEffect,
-  useRef
-} from "react";
+import groupBy from "lodash/groupBy";
+import merge from "lodash/merge";
+import orderBy from "lodash/orderBy";
+import React, { useCallback, useMemo } from "react";
 import {
-  withReact,
+  createEditor as createSlateEditor,
+  Editor,
+  Location,
+  Node,
+  NodeEntry,
+  Range,
+  Text,
+  Transforms
+} from "slate";
+import { withHistory } from "slate-history";
+import {
+  Editable,
+  ReactEditor,
   RenderElementProps,
   RenderLeafProps,
   Slate,
-  Editable,
-  useSlate,
-  ReactEditor,
   useFocused,
-  useSelected
+  useSelected,
+  useSlate,
+  withReact
 } from "slate-react";
-import { withHistory } from "slate-history";
-import {
-  createEditor as createSlateEditor,
-  Node,
-  Editor,
-  Text,
-  Transforms,
-  Range,
-  Point,
-  NodeEntry,
-  Element,
-  Path,
-  Location
-} from "slate";
 import styled, { ThemeProvider } from "styled-components";
-import { BlockInsert } from "./BlockInsert";
+import { isDefined } from "ts-is-present";
 import { Addon } from "./addon";
-import { insertLink, isLinkActive } from "./addons/link";
-import orderBy from "lodash/orderBy";
-import groupBy from "lodash/groupBy";
+import { BlockInsert } from "./BlockInsert";
+import { HoverToolProvider } from "./HoveringTool";
+import { PlaceholderHint } from "./PlaceholderHint";
 import { StyledToolbarBtn } from "./StyledToolbarBtn";
 import { StyledToolBox } from "./StyledToolBox";
 import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
-import { PlaceholderHint } from "./PlaceholderHint";
+import { isNodeActive } from "./utils";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
   // We disable the default deselect.
 };
 
-export const defaultTheme = {
+export type AeditorTheme = {
+  preferDarkOption: boolean;
+  darkTheme: {
+    background: string;
+    foreground: string;
+  };
+  editor: React.CSSProperties;
+  colors: {};
+};
+
+export const defaultTheme: AeditorTheme = {
   preferDarkOption: false,
   darkTheme: {
     background: "#000",
     foreground: "#fff"
   },
-  editor: { fontSize: 14, color: "rgb(55, 53, 47)" },
+  editor: { fontSize: 14 },
   colors: {}
 };
 
-export type AeditorTheme = typeof defaultTheme;
-
-type TextFormat = "bold" | "italic" | "underline" | "strikethrough";
-type Heading =
-  | "heading-1"
-  | "heading-2"
-  | "heading-3"
-  | "heading-4"
-  | "heading-5"
-  | "heading-6";
-
-type Link = "link";
-
-type Image = "image";
-
-type Paragraph = "paragraph";
-
-type BlockType = Heading | Link | Image | Paragraph;
-
-const isTextFormat = (editor: Editor, formatType: TextFormat) => {
+const isTextFormat = (editor: Editor, formatType: string) => {
   const [match] = Editor.nodes(editor, {
     match: n => Boolean(n[formatType])
   });
   return Boolean(match);
 };
 
-const isHeadingType = (editor: Editor, header: Heading) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => n.type === header
-  });
-  return Boolean(match);
-};
-
 export const RichEditor = {
-  ...Editor,
-  toggleFormat(editor: Editor, format: TextFormat) {
+  ...ReactEditor,
+  toggleFormat(editor: Editor, format: string) {
     let isFormatted = isTextFormat(editor, format);
     Transforms.setNodes(
       editor,
@@ -103,25 +78,13 @@ export const RichEditor = {
       { match: n => Text.isText(n), split: true }
     );
   },
-  toggleHeading(editor: Editor, heading: Heading) {
-    const isHeaderOfType = isHeadingType(editor, heading);
-    if (isHeaderOfType) {
-      Transforms.setNodes(editor, {
-        type: "paragraph"
-      });
-    } else {
-      Transforms.setNodes(editor, {
-        type: heading
-      });
-    }
-  },
-  insertHeader(editor: Editor, heading: Heading) {
+  insertHeader(editor: Editor, heading: string) {
     Transforms.insertNodes(editor, {
       type: heading,
       children: [{ text: "" }]
     });
   },
-  insertBlock(editor: Editor, blockType: BlockType) {
+  insertBlock(editor: Editor, blockType: string) {
     if (!isNodeActive(editor, blockType)) {
       Transforms.setNodes(editor, {
         type: blockType,
@@ -133,12 +96,11 @@ export const RichEditor = {
         children: [{ text: "" }]
       });
     }
-  },
-  insertLink: insertLink
+  }
 };
 
 const EditorThemeWrapper = styled.div`
-  font-size: ${props => props.theme.editor.fontSize}px;
+  ${props => ({ ...props.theme.editor })}
   ${props =>
     props.theme.preferDarkOption &&
     `
@@ -153,7 +115,7 @@ const EditorThemeWrapper = styled.div`
 `;
 
 export function FormatBtn(props: {
-  formatType: TextFormat;
+  formatType: string;
   children: React.ReactNode;
 }) {
   const editor = useSlate();
@@ -168,66 +130,45 @@ export function FormatBtn(props: {
   );
 }
 
-export function HeadingBtn(props: {
-  headingType: Heading;
-  children: React.ReactNode;
-}) {
-  const editor = useSlate();
-  const isActive = isHeadingType(editor, props.headingType);
-  return (
-    <StyledToolbarBtn
-      isActive={isActive}
-      onClick={() => RichEditor.toggleHeading(editor, props.headingType)}
-    >
-      {props.children}
-    </StyledToolbarBtn>
-  );
-}
-
 function HoveringToolbars(props: { addons: Addon[] }) {
   const { addons } = props;
   const editor = useSlate();
   // const { selection } = useHoverTool();
   const { selection } = editor;
   if (selection) {
-    const addonsForContext = addons.filter(addon => {
-      if (addon.hoverMenu) {
-        if (selection) {
-          const [match] = Editor.nodes(editor, {
-            match: n => {
-              if (addon.hoverMenu?.typeMatch && typeof n.type === "string") {
-                if (n.type.match(addon.hoverMenu.typeMatch)) {
-                  return true;
-                }
-              } else if (
-                !addon.hoverMenu?.typeMatch &&
-                !Editor.isVoid(editor, n) &&
-                typeof n.type === "string"
-              ) {
+    const buttons = addons
+      .map(it => it.hoverMenu)
+      .filter(isDefined)
+      .filter(hoverMenu => {
+        const [match] = Editor.nodes(editor, {
+          match: n => {
+            if (hoverMenu?.typeMatch && typeof n.type === "string") {
+              if (n.type.match(hoverMenu.typeMatch)) {
                 return true;
               }
-              return false;
-            },
-            at: selection
-          });
-          return Boolean(match);
-        } else {
-          return false;
-        }
-      }
-      return false;
-    });
-    if (addonsForContext.length > 0) {
-      const orderedAddons = orderBy(addonsForContext, "contextMenu.order");
-      const groupedAddons = groupBy(orderedAddons, "contextMenu.category");
+            } else if (
+              !hoverMenu?.typeMatch &&
+              !Editor.isVoid(editor, n) &&
+              typeof n.type === "string"
+            ) {
+              return true;
+            }
+            return false;
+          }
+        });
+        return Boolean(match);
+      });
+    if (buttons.length > 0) {
+      const ordered = orderBy(buttons, "order");
+      const grouped = groupBy(ordered, "category");
       return (
         <StyledToolBox>
           <ToolsWrapper>
-            {Object.entries(groupedAddons).map(([, orderedAddons]) => (
+            {Object.entries(grouped).map(([, orderedAddons]) => (
               <React.Fragment>
                 {orderedAddons.map((it, i) => {
-                  if (it.hoverMenu) {
-                    const renderButton = it.hoverMenu.renderButton;
+                  if (it) {
+                    const renderButton = it.renderButton;
                     return typeof renderButton === "function"
                       ? renderButton()
                       : renderButton;
@@ -245,61 +186,43 @@ function HoveringToolbars(props: { addons: Addon[] }) {
   return null;
 }
 
-function BlockInsertTools() {
+function BlockInsertTools(props: { addons: Addon[] }) {
   const editor = useSlate();
-  return (
-    <StyledToolBox>
-      <ToolsWrapper>
-        <StyledToolbarBtn
-          isActive={isNodeActive(editor, "heading-1")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "heading-1");
-            ReactEditor.focus(editor);
-          }}
-        >
-          H1
-        </StyledToolbarBtn>
-        <StyledToolbarBtn
-          isActive={isNodeActive(editor, "heading-2")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "heading-2");
-            ReactEditor.focus(editor);
-          }}
-        >
-          H2
-        </StyledToolbarBtn>
-        <StyledToolbarBtn
-          isActive={isNodeActive(editor, "heading-3")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "heading-3");
-            ReactEditor.focus(editor);
-          }}
-        >
-          H3
-        </StyledToolbarBtn>
-        <ToolDivider></ToolDivider>
-        <StyledToolbarBtn
-          isActive={isNodeActive(editor, "paragraph")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "paragraph");
-            ReactEditor.focus(editor);
-          }}
-        >
-          Text
-        </StyledToolbarBtn>
-        <ToolDivider></ToolDivider>
-        <StyledToolbarBtn
-          isActive={isNodeActive(editor, "image")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "image");
-            ReactEditor.focus(editor);
-          }}
-        >
-          Image
-        </StyledToolbarBtn>
-      </ToolsWrapper>
-    </StyledToolBox>
-  );
+  const buttons = props.addons.map(it => it.blockInsertMenu).filter(isDefined);
+  if (buttons.length > 0) {
+    const ordered = orderBy(buttons, "order");
+    const grouped = groupBy(ordered, "category");
+    return (
+      <StyledToolBox>
+        <ToolsWrapper>
+          {Object.entries(grouped).map(([, buttons]) => (
+            <React.Fragment>
+              {buttons.map((it, i) => {
+                if (it) {
+                  const renderButton = it.renderButton;
+                  return typeof renderButton === "function"
+                    ? renderButton(editor)
+                    : renderButton;
+                }
+                return null;
+              })}
+              <ToolDivider />
+            </React.Fragment>
+          ))}
+          <StyledToolbarBtn
+            isActive={isNodeActive(editor, "paragraph")}
+            onClick={() => {
+              RichEditor.insertBlock(editor, "paragraph");
+              ReactEditor.focus(editor);
+            }}
+          >
+            Text
+          </StyledToolbarBtn>
+        </ToolsWrapper>
+      </StyledToolBox>
+    );
+  }
+  return null;
 }
 
 function Paragraph(props: RenderElementProps) {
@@ -502,9 +425,11 @@ export function Aeditor(
     editor.insertText(pastedData);
   }, []);
 
+  const _theme = merge({}, defaultTheme, theme);
+
   return (
     <Slate editor={editor} value={value} onChange={onChange}>
-      <ThemeProvider theme={{ ...defaultTheme, ...theme }}>
+      <ThemeProvider theme={_theme}>
         <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
           {editableProps => (
             <div
@@ -513,7 +438,7 @@ export function Aeditor(
               }}
             >
               <BlockInsert>
-                <BlockInsertTools />
+                <BlockInsertTools addons={addons} />
               </BlockInsert>
               <EditorThemeWrapper>
                 <Editable
