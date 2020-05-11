@@ -1,7 +1,8 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { RichEditor, FormatBtn } from "../../aeditor";
+import { RichEditor } from "../../aeditor";
+import { MarkBtn } from "../../mark-button";
 
 export const BoldAddon: Addon = {
   name: "bold",
@@ -20,7 +21,11 @@ export const BoldAddon: Addon = {
     order: 1,
     category: "marks",
     renderButton: () => {
-      return <FormatBtn formatType="bold">B</FormatBtn>;
+      return (
+        <MarkBtn tooltip={{ label: "Bold", shortcut: "⌘+B" }} formatType="bold">
+          B
+        </MarkBtn>
+      );
     }
   }
 };

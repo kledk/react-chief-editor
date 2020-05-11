@@ -24,17 +24,22 @@ import {
   useSlate,
   withReact
 } from "slate-react";
-import styled, { ThemeProvider } from "styled-components";
+import styled, {
+  css,
+  ThemeProvider,
+  createGlobalStyle
+} from "styled-components";
 import { isDefined } from "ts-is-present";
 import { Addon } from "./addon";
 import { BlockInsert } from "./BlockInsert";
 import { HoverToolProvider } from "./HoveringTool";
-import { PlaceholderHint } from "./PlaceholderHint";
+import { PlaceholderHint } from "./placeholder-hint";
 import { StyledToolbarBtn } from "./StyledToolbarBtn";
 import { StyledToolBox } from "./StyledToolBox";
 import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
 import { isNodeActive } from "./utils";
+import { OverrideTheme } from "./override-theme";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
@@ -47,8 +52,24 @@ export type AeditorTheme = {
     background: string;
     foreground: string;
   };
-  editor: React.CSSProperties;
-  colors: {};
+  colors?: {
+    primary: string;
+    seconday: string;
+    gray: {
+      100: string;
+      200: string;
+      300: string;
+      400: string;
+      500: string;
+      600: string;
+      700: string;
+      800: string;
+      900: string;
+    };
+  };
+  overrides?: {
+    [key: string]: ReturnType<typeof css>;
+  };
 };
 
 export const defaultTheme: AeditorTheme = {
@@ -57,11 +78,24 @@ export const defaultTheme: AeditorTheme = {
     background: "#000",
     foreground: "#fff"
   },
-  editor: { fontSize: 14 },
-  colors: {}
+  colors: {
+    primary: "#4299E1",
+    seconday: "#38B2AC",
+    gray: {
+      100: "#F7FAFC",
+      200: "#EDF2F7",
+      300: "#E2E8F0",
+      400: "#CBD5E0",
+      500: "#A0AEC0",
+      600: "#718096",
+      700: "#4A5568",
+      800: "#2D3748",
+      900: "#1A202C"
+    }
+  }
 };
 
-const isTextFormat = (editor: Editor, formatType: string) => {
+export const isTextFormat = (editor: Editor, formatType: string) => {
   const [match] = Editor.nodes(editor, {
     match: n => Boolean(n[formatType])
   });
@@ -100,7 +134,9 @@ export const RichEditor = {
 };
 
 const EditorThemeWrapper = styled.div`
-  ${props => ({ ...props.theme.editor })}
+  font-size: 14px;
+  ${props => props.theme.overrides.editor}
+  ${props => OverrideTheme("Editor", props)}
   ${props =>
     props.theme.preferDarkOption &&
     `
@@ -113,22 +149,6 @@ const EditorThemeWrapper = styled.div`
     }
   }`}
 `;
-
-export function FormatBtn(props: {
-  formatType: string;
-  children: React.ReactNode;
-}) {
-  const editor = useSlate();
-  const isActive = isTextFormat(editor, props.formatType);
-  return (
-    <StyledToolbarBtn
-      isActive={isActive}
-      onClick={() => RichEditor.toggleFormat(editor, props.formatType)}
-    >
-      {props.children}
-    </StyledToolbarBtn>
-  );
-}
 
 function HoveringToolbars(props: { addons: Addon[] }) {
   const { addons } = props;
@@ -372,6 +392,8 @@ const createEditor = (addons: Addon[]): ReactEditor => {
   }, []);
 };
 
+type a = Parameters<typeof createGlobalStyle>;
+
 export function Aeditor(
   props: {
     value: Node[];
@@ -426,6 +448,7 @@ export function Aeditor(
   }, []);
 
   const _theme = merge({}, defaultTheme, theme);
+  console.log(_theme);
 
   return (
     <Slate editor={editor} value={value} onChange={onChange}>

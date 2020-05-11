@@ -8,7 +8,8 @@ import { useHoverTool } from "../../HoveringTool";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { StyledToolBox } from "../../StyledToolBox";
-import { InputWrapper } from "../../InputWrapper";
+import { InputWrapper, Input } from "../../InputWrapper";
+import { ToolbarBtn } from "../../ToolbarBtn";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -102,7 +103,7 @@ const wrapLink = (editor: Editor, url: string) => {
 function LinkPopup(props: { onClose: () => void }) {
   const editor = useSlate();
   const { selection } = editor;
-  const { saveSelection, perform } = useHoverTool();
+  const { saveSelection } = useHoverTool();
   useEffect(() => {
     return saveSelection(selection);
   }, []);
@@ -126,29 +127,54 @@ function LinkPopup(props: { onClose: () => void }) {
     }
   }, [linkNode]);
   const handleInsertLink = useCallback(() => {
-    insertLink(editor, url);
+    if (url.length > 0) {
+      insertLink(editor, url);
+      props.onClose();
+    }
+  }, [url]);
+
+  const handleUnlink = useCallback(() => {
+    unwrapLink(editor);
     props.onClose();
   }, [url]);
 
   return (
-    <div
-      ref={linkWrapperRef}
-      style={{ padding: 9, display: "flex", minWidth: 300 }}
-    >
-      <InputWrapper>
-        <input
-          value={url}
-          onChange={(e: React.FormEvent<HTMLInputElement>) =>
-            setUrl(e.currentTarget.value)
-          }
-          placeholder="Insert link"
-          autoFocus
-          data-slate-editor
-        />
-      </InputWrapper>
-      <StyledToolbarBtn onClick={handleInsertLink}>Link</StyledToolbarBtn>
-      <StyledToolbarBtn onClick={props.onClose}>Unlink</StyledToolbarBtn>
-    </div>
+    <form onSubmit={handleInsertLink}>
+      <div
+        ref={linkWrapperRef}
+        style={{
+          padding: 9,
+          display: "flex",
+          minWidth: 400,
+          flexDirection: "row"
+        }}
+      >
+        <InputWrapper>
+          <Input
+            value={url}
+            onChange={(e: React.FormEvent<HTMLInputElement>) =>
+              setUrl(e.currentTarget.value)
+            }
+            placeholder="Paste or type your link here"
+            autoFocus
+          />
+        </InputWrapper>
+        <ToolbarBtn
+          rounded
+          disabled={url.length === 0}
+          onClick={handleInsertLink}
+        >
+          Link
+        </ToolbarBtn>
+        <ToolbarBtn
+          rounded
+          disabled={!isLinkActive(editor)}
+          onClick={handleUnlink}
+        >
+          Unlink
+        </ToolbarBtn>
+      </div>
+    </form>
   );
 }
 
@@ -165,9 +191,13 @@ export function LinkBtn(props: { children: React.ReactNode }) {
         </StyledToolBox>
       )}
       renderToolBtn={(tprops, show) => (
-        <StyledToolbarBtn {...tprops} isActive={isActive || show}>
+        <ToolbarBtn
+          tooltip={{ label: "Add link", shortcut: "⌘+K" }}
+          {...tprops}
+          isActive={isActive || show}
+        >
           {props.children}
-        </StyledToolbarBtn>
+        </ToolbarBtn>
       )}
     />
   );

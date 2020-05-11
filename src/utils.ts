@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { Editor, Point, Node, Transforms } from "slate";
 import { ReactEditor } from "slate-react";
 import { Range } from "slate";
@@ -12,7 +12,7 @@ export const isInside = (rect: ClientRect, x: number, y: number) => {
   );
 };
 
-export const useHover = (element: HTMLElement | null) => {
+export const useGlobalHover = (element: HTMLElement | null) => {
   const [over, setOver] = useState(false);
 
   const handleMove = useCallback(
@@ -33,6 +33,37 @@ export const useHover = (element: HTMLElement | null) => {
   }, [element]);
   return over;
 };
+
+export function useHover<T extends HTMLElement>(): [
+  React.RefObject<T>,
+  boolean
+] {
+  const [value, setValue] = useState(false);
+
+  const ref = useRef<T>(null);
+
+  const handleMouseOver = () => setValue(true);
+  const handleMouseOut = () => setValue(false);
+
+  useEffect(
+    () => {
+      const node = ref.current;
+      if (node) {
+        node.addEventListener("mouseover", handleMouseOver);
+        node.addEventListener("mouseout", handleMouseOut);
+
+        return () => {
+          node.removeEventListener("mouseover", handleMouseOver);
+          node.removeEventListener("mouseout", handleMouseOut);
+        };
+      }
+      return undefined;
+    },
+    [ref.current] // Recall only if ref changes
+  );
+
+  return [ref, value];
+}
 
 export const getActiveNode = (editor: ReactEditor) => {
   if (editor.selection) {

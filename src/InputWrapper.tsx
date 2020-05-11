@@ -1,6 +1,22 @@
 import styled from "styled-components";
 
-export const InputWrapper = styled.div`
+export const Input = styled.input.attrs(props => ({}))`
+  &:focus {
+    outline: 0;
+  }
+  font-size: inherit;
+  line-height: inherit;
+  border: none;
+  background: none;
+  width: 100%;
+  display: block;
+  resize: none;
+  padding: 0px;
+`;
+
+export const InputWrapper = styled.div.attrs(props => ({
+  "data-slate-editor": true
+}))`
   display: flex;
   align-items: center;
   width: 100%;
@@ -16,17 +32,6 @@ export const InputWrapper = styled.div`
   flex-grow: 1;
   flex-shrink: 1;
   margin-right: 8px;
-  input {
-    &:focus {
-      outline: 0;
-    }
-    font-size: inherit;
-    line-height: inherit;
-    border: none;
-    background: none;
-    width: 100%;
-    display: block;
-    resize: none;
-    padding: 0px;
+  ${Input} {
   }
 `;

@@ -5,7 +5,7 @@ import {
   useFocused,
   useSelected
 } from "slate-react";
-import { PlaceholderHint } from "../../PlaceholderHint";
+import { PlaceholderHint } from "../../placeholder-hint";
 import { Editor } from "slate";
 
 export const Heading = (props: RenderElementProps) => {

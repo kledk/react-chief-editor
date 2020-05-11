@@ -10,14 +10,33 @@ import {
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { RichEditor } from "../../aeditor";
+import { ToolbarBtn } from "../../ToolbarBtn";
 
-export const isImageELement = (element: Element) => {
-  return element.type === "image" && typeof element.url === "string";
-};
+export interface AElement extends Element {
+  type: string;
+}
+
+export function isAElement(element: unknown): element is AElement {
+  return typeof (element as AElement).type !== "undefined";
+}
+
+export interface ImageElement extends AElement {
+  type: "image";
+  url: string;
+  caption: string;
+}
+
+export function isImageElement(element: unknown): element is ImageElement {
+  return isAElement(element) && element.type === "image";
+}
 
 export const Image = (props: RenderElementProps) => {
   const focused = useFocused();
   const selected = useSelected();
+  const { element } = props;
+  if (!isImageElement(element)) {
+    return null;
+  }
   return (
     <div {...props.attributes}>
       <div contentEditable={false}>
@@ -30,8 +49,8 @@ export const Image = (props: RenderElementProps) => {
             outline:
               focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
           }}
-          alt={props.element.caption as string}
-          src={props.element.url as string}
+          alt={element.caption}
+          src={element.url}
         ></img>
         {props.children}
       </div>
@@ -51,50 +70,23 @@ export const ImageAddon: Addon = {
     const { isVoid, normalizeNode } = editor;
 
     editor.isVoid = (element: Element) => {
-      return element.type === "image" ? true : isVoid(element);
+      return isAElement(element) && element.type === "image"
+        ? true
+        : isVoid(element);
     };
 
     // TODO
     editor.normalizeNode = (entry: NodeEntry) => {
       const [node, path] = entry;
-      if (Element.isElement(node) && node.type === "image") {
-        let previous = Editor.previous(editor, { at: path });
-        if (previous) {
-          const [previousNode, previousPath] = previous;
-          if (Element.isElement(previousNode) && editor.isVoid(previousNode)) {
-            Transforms.insertNodes(
-              editor,
-              {
-                type: "paragraph",
-                children: [{ text: "1" }]
-              },
-              { at: Path.next(previousPath) }
-            );
-          }
-        }
-        let next = Editor.next(editor, { at: path });
-        if (next) {
-          const [nextNode, nextPath] = next;
-          if (Element.isElement(nextNode) && editor.isVoid(nextNode)) {
-            Transforms.insertNodes(
-              editor,
-              {
-                type: "paragraph",
-                children: [{ text: "2" }]
-              },
-              { at: Path.next(nextPath) }
-            );
-          }
-        } else {
-          Transforms.insertNodes(
-            editor,
-            {
-              type: "paragraph",
-              children: [{ text: "3" }]
-            },
-            { at: Path.next(path) }
-          );
-        }
+      if (isImageElement(node)) {
+        Transforms.insertNodes(
+          editor,
+          {
+            type: "paragraph",
+            children: [{ text: "" }]
+          },
+          { at: Path.next(path) }
+        );
       } else {
         normalizeNode(entry);
       }
@@ -107,7 +99,7 @@ export const ImageAddon: Addon = {
     category: "image",
     typeMatch: /image/,
     renderButton: () => {
-      return <StyledToolbarBtn>Delete</StyledToolbarBtn>;
+      return <ToolbarBtn>Delete</ToolbarBtn>;
     }
   },
   blockInsertMenu: {
@@ -115,7 +107,7 @@ export const ImageAddon: Addon = {
     category: "image",
     renderButton: editor => {
       return (
-        <StyledToolbarBtn
+        <ToolbarBtn
           isActive={isNodeActive(editor, "image")}
           onClick={() => {
             RichEditor.insertBlock(editor, "image");
@@ -123,7 +115,7 @@ export const ImageAddon: Addon = {
           }}
         >
           Image
-        </StyledToolbarBtn>
+        </ToolbarBtn>
       );
     }
   }

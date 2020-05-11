@@ -1,7 +1,7 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { FormatBtn } from "../../aeditor";
+import { MarkBtn } from "../../mark-button";
 
 export const StrikethroughAddon: Addon = {
   renderLeaf(props) {
@@ -11,7 +11,7 @@ export const StrikethroughAddon: Addon = {
     order: 4,
     category: "marks",
     renderButton: () => {
-      return <FormatBtn formatType="strikethrough">S</FormatBtn>;
+      return <MarkBtn tooltip={{ label: "Strike-through", shortcut: "⌘+S" }} formatType="strikethrough">S</MarkBtn>;
     }
   }
 };

@@ -1,7 +1,8 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { RichEditor, FormatBtn } from "../../aeditor";
+import { RichEditor } from "../../aeditor";
+import { MarkBtn } from "../../mark-button";
 
 export const ItalicAddon: Addon = {
   renderLeaf(props) {
@@ -19,7 +20,7 @@ export const ItalicAddon: Addon = {
     order: 2,
     category: "marks",
     renderButton: () => {
-      return <FormatBtn formatType="italic">I</FormatBtn>;
+      return <MarkBtn tooltip={{ label: "Italic", shortcut: "⌘+I" }} formatType="italic">I</MarkBtn>;
     }
   }
 };

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Aeditor, CoreAddons } from "redia-aeditor";
 import { Node } from "slate";
+import { css } from "styled-components";
 
 function App() {
   const [value, setValue] = useState<Node[]>([
@@ -18,10 +19,6 @@ function App() {
       children: [{ text: "" }],
       url:
         "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Lion_waiting_in_Namibia.jpg/1200px-Lion_waiting_in_Namibia.jpg"
-    },
-    {
-      type: "paragraph",
-      children: [{ text: "en to tre fire fem seks syv" }]
     }
   ]);
 
@@ -50,7 +47,12 @@ function App() {
             background: "black",
             foreground: "white"
           },
-          editor: { fontSize: 14 }
+          overrides: {
+            Editor: css`
+              font-size: 14px;
+              backdrop-filter: ${props => console.log(props)};
+            `
+          }
         }}
         spellCheck={false}
         style={{ margin: 10, overflow: "auto" }}

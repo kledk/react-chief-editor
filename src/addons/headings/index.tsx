@@ -1,11 +1,12 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { Heading } from "./Heading";
-import { Transforms, Editor } from "slate";
+import { Transforms, Editor, Range, Element } from "slate";
 import { useSlate, ReactEditor } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { RichEditor } from "../../aeditor";
+import { ToolbarBtn } from "../../ToolbarBtn";
 
 export const headingTypes = [
   "heading-1",
@@ -26,17 +27,23 @@ export const HeadingsAddon: Addon = {
   onKeyDown: (event, editor) => {
     if (event.keyCode === 13) {
       const { selection } = editor;
-      if (selection && selection.focus.offset !== 0) {
+      if (selection && Range.isCollapsed(selection)) {
         const [match] = Editor.nodes(editor, {
           match: n =>
-            typeof n.type === "string" && Boolean(n.type?.match(/(heading)/))
+            typeof n.type === "string" &&
+            Boolean(n.type?.match(/(heading-[1-6])/))
         });
         if (match) {
           event.preventDefault();
-          Transforms.insertNodes(editor, {
-            type: "paragraph",
-            children: [{ text: "" }]
-          });
+          const [node] = match;
+          if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
+            Transforms.setNodes(editor, { type: "paragraph" });
+          } else {
+            Transforms.insertNodes(editor, {
+              type: "paragraph",
+              children: [{ text: "" }]
+            });
+          }
           return true;
         }
       }
@@ -64,7 +71,7 @@ export const HeadingsAddon: Addon = {
     renderButton: editor => {
       return (
         <React.Fragment>
-          <StyledToolbarBtn
+          <ToolbarBtn
             isActive={isNodeActive(editor, "heading-1")}
             onClick={() => {
               RichEditor.insertBlock(editor, "heading-1");
@@ -72,8 +79,8 @@ export const HeadingsAddon: Addon = {
             }}
           >
             H1
-          </StyledToolbarBtn>
-          <StyledToolbarBtn
+          </ToolbarBtn>
+          <ToolbarBtn
             isActive={isNodeActive(editor, "heading-2")}
             onClick={() => {
               RichEditor.insertBlock(editor, "heading-2");
@@ -81,8 +88,8 @@ export const HeadingsAddon: Addon = {
             }}
           >
             H2
-          </StyledToolbarBtn>
-          <StyledToolbarBtn
+          </ToolbarBtn>
+          <ToolbarBtn
             isActive={isNodeActive(editor, "heading-3")}
             onClick={() => {
               RichEditor.insertBlock(editor, "heading-3");
@@ -90,7 +97,7 @@ export const HeadingsAddon: Addon = {
             }}
           >
             H3
-          </StyledToolbarBtn>
+          </ToolbarBtn>
         </React.Fragment>
       );
     }
@@ -121,11 +128,11 @@ function HeadingBtn(props: { headingType: string; children: React.ReactNode }) {
   const editor = useSlate();
   const isActive = isHeadingType(editor, props.headingType);
   return (
-    <StyledToolbarBtn
+    <ToolbarBtn
       isActive={isActive}
       onClick={() => toggleHeading(editor, props.headingType)}
     >
       {props.children}
-    </StyledToolbarBtn>
+    </ToolbarBtn>
   );
 }

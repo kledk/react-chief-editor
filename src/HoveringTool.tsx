@@ -46,6 +46,11 @@ function ToolWindow(props: {
     e.preventDefault();
     setShow(false);
   });
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.keyCode === 27) {
+      setShow(false);
+    }
+  };
   return (
     <Manager>
       <Reference>
@@ -54,7 +59,7 @@ function ToolWindow(props: {
         }
       </Reference>
       <Popper
-        placement="bottom"
+        placement="bottom-start"
         modifiers={[
           {
             name: "offset",
@@ -66,7 +71,11 @@ function ToolWindow(props: {
       >
         {({ ref, style, placement, arrowProps }) => (
           <div ref={ref} style={style} data-placement={placement}>
-            {show && <div ref={toolWindow}>{props.renderContent(setShow)}</div>}
+            {show && (
+              <div onKeyDown={handleKeyDown} ref={toolWindow}>
+                {props.renderContent(setShow)}
+              </div>
+            )}
             <div ref={arrowProps.ref} style={arrowProps.style} />
           </div>
         )}
@@ -280,13 +289,7 @@ export const HoveringTool = (
     >
       {({ ref, style, placement, arrowProps }) => (
         <div ref={ref} style={style} data-placement={placement}>
-          <div
-            ref={toolRef}
-            onMouseDown={e => {
-              e.preventDefault();
-            }}
-            {...otherProps}
-          >
+          <div ref={toolRef} {...otherProps}>
             {children}
           </div>
           <div ref={arrowProps.ref} style={arrowProps.style} />

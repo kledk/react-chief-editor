@@ -1,4 +1,5 @@
 export * from "./aeditor";
+export * from "./placeholder-hint";
 export * from "./addon";
 export * from "./core-addons";
 export * from "./addons/bold";

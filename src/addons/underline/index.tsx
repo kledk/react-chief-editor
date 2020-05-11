@@ -1,7 +1,7 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { FormatBtn } from "../../aeditor";
+import { MarkBtn } from "../../mark-button";
 
 export const UnderlineAddon: Addon = {
   renderLeaf(props) {
@@ -11,7 +11,7 @@ export const UnderlineAddon: Addon = {
     order: 3,
     category: "marks",
     renderButton: () => {
-      return <FormatBtn formatType="underline">U</FormatBtn>;
+      return <MarkBtn tooltip={{ label: "Underline", shortcut: "⌘+U" }} formatType="underline">U</MarkBtn>;
     }
   }
 };
