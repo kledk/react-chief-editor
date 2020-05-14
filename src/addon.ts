@@ -2,7 +2,10 @@ import React from "react";
 import { RenderLeafProps, ReactEditor, RenderElementProps } from "slate-react";
 import { NodeEntry, Range } from "slate";
 
-export interface Addon {
+export interface Addon<
+  TLabels extends Object = { [key: string]: string },
+  TData extends Object = {}
+> {
   name?: string;
   renderLeaf?: (
     props: RenderLeafProps,
@@ -12,7 +15,8 @@ export interface Addon {
     typeMatch: RegExp;
     renderElement: (
       props: RenderElementProps,
-      editor: ReactEditor
+      editor: ReactEditor,
+      addon: Addon
     ) => JSX.Element | undefined;
   };
   withPlugin?(editor: ReactEditor): ReactEditor;
@@ -26,11 +30,18 @@ export interface Addon {
     order: number;
     typeMatch?: RegExp;
     category?: string;
-    renderButton: () => React.ReactNode | React.ReactNode;
+    renderButton: (
+      editor: ReactEditor,
+      addon: Addon
+    ) => React.ReactNode | React.ReactNode;
   };
   blockInsertMenu?: {
     order: number;
     category?: string;
     renderButton: (editor: ReactEditor) => React.ReactNode | React.ReactNode;
+  };
+  data?: TData;
+  labels?: TLabels & {
+    [key: string]: string;
   };
 }

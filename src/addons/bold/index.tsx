@@ -1,10 +1,10 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { RichEditor } from "../../aeditor";
-import { MarkBtn } from "../../mark-button";
+import { RichEditor, useCreateAddon } from "../../editor";
+import { MarkBtn, toggleFormat } from "../../mark-button";
 
-export const BoldAddon: Addon = {
+export const BoldImpl: Addon<{ name: string }> = {
   name: "bold",
   renderLeaf(props) {
     return renderLeaf(props, "bold", "strong");
@@ -12,7 +12,7 @@ export const BoldAddon: Addon = {
   onKeyDown: (event, editor) => {
     if (event.key === "b" && event.ctrlKey) {
       event.preventDefault();
-      RichEditor.toggleFormat(editor, "bold");
+      toggleFormat(editor, "bold");
       return true;
     }
     return false;
@@ -20,12 +20,27 @@ export const BoldAddon: Addon = {
   hoverMenu: {
     order: 1,
     category: "marks",
-    renderButton: () => {
+    renderButton: (editor, addon) => {
       return (
-        <MarkBtn tooltip={{ label: "Bold", shortcut: "⌘+B" }} formatType="bold">
+        <MarkBtn
+          // @ts-ignore
+          tooltip={{
+            label: addon.labels?.name,
+            shortcut: "⌘+B"
+          }}
+          formatType="bold"
+        >
           B
         </MarkBtn>
       );
     }
+  },
+  labels: {
+    name: "Bold"
   }
 };
+
+export function BoldAddon(props: Addon<{ name: string }>) {
+  const Bold = useCreateAddon(BoldImpl, props);
+  return <Bold />;
+}

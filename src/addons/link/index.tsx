@@ -3,7 +3,7 @@ import { RenderElementProps, ReactEditor, useSlate } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { Addon } from "../../addon";
 import isUrl from "is-url";
-import { RichEditor } from "../../aeditor";
+import { RichEditor } from "../../editor";
 import { useHoverTool } from "../../HoveringTool";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";

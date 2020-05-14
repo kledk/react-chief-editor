@@ -9,7 +9,6 @@ import { PreventNewlineAddon } from "./addons/prevent-newline";
 import { ResetToParagraphAddon } from "./addons/reset-to-paragraph";
 
 export const CoreAddons = [
-  BoldAddon,
   ItalicAddon,
   UnderlineAddon,
   StrikethroughAddon,

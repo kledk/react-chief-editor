@@ -9,7 +9,7 @@ import {
 } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
-import { RichEditor } from "../../aeditor";
+import { RichEditor } from "../../editor";
 import { ToolbarBtn } from "../../ToolbarBtn";
 
 export interface AElement extends Element {

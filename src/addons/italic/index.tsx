@@ -1,8 +1,7 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { RichEditor } from "../../aeditor";
-import { MarkBtn } from "../../mark-button";
+import { MarkBtn, toggleFormat } from "../../mark-button";
 
 export const ItalicAddon: Addon = {
   renderLeaf(props) {
@@ -11,7 +10,7 @@ export const ItalicAddon: Addon = {
   onKeyDown: (event, editor) => {
     if (event.key === "i" && event.ctrlKey) {
       event.preventDefault();
-      RichEditor.toggleFormat(editor, "italic");
+      toggleFormat(editor, "italic");
       return true;
     }
     return false;

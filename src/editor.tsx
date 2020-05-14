@@ -1,10 +1,17 @@
 import groupBy from "lodash/groupBy";
 import merge from "lodash/merge";
 import orderBy from "lodash/orderBy";
-import React, { useCallback, useMemo } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useContext,
+  useEffect,
+  useRef
+} from "react";
 import {
   createEditor as createSlateEditor,
-  Editor,
+  Editor as SlateEditor,
   Location,
   Node,
   NodeEntry,
@@ -24,11 +31,7 @@ import {
   useSlate,
   withReact
 } from "slate-react";
-import styled, {
-  css,
-  ThemeProvider,
-  createGlobalStyle
-} from "styled-components";
+import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
 import { isDefined } from "ts-is-present";
 import { Addon } from "./addon";
 import { BlockInsert } from "./BlockInsert";
@@ -40,85 +43,18 @@ import { ToolDivider } from "./ToolDivider";
 import { ToolsWrapper } from "./ToolsWrapper";
 import { isNodeActive } from "./utils";
 import { OverrideTheme } from "./override-theme";
+import { AeditorTheme } from "./AeditorTheme";
+import { defaultTheme } from "./defaultTheme";
+import { BoldAddon } from "./addons/bold";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
   // We disable the default deselect.
 };
 
-export type AeditorTheme = {
-  preferDarkOption: boolean;
-  darkTheme: {
-    background: string;
-    foreground: string;
-  };
-  colors?: {
-    primary: string;
-    seconday: string;
-    gray: {
-      100: string;
-      200: string;
-      300: string;
-      400: string;
-      500: string;
-      600: string;
-      700: string;
-      800: string;
-      900: string;
-    };
-  };
-  overrides?: {
-    [key: string]: ReturnType<typeof css>;
-  };
-};
-
-export const defaultTheme: AeditorTheme = {
-  preferDarkOption: false,
-  darkTheme: {
-    background: "#000",
-    foreground: "#fff"
-  },
-  colors: {
-    primary: "#4299E1",
-    seconday: "#38B2AC",
-    gray: {
-      100: "#F7FAFC",
-      200: "#EDF2F7",
-      300: "#E2E8F0",
-      400: "#CBD5E0",
-      500: "#A0AEC0",
-      600: "#718096",
-      700: "#4A5568",
-      800: "#2D3748",
-      900: "#1A202C"
-    }
-  }
-};
-
-export const isTextFormat = (editor: Editor, formatType: string) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => Boolean(n[formatType])
-  });
-  return Boolean(match);
-};
-
 export const RichEditor = {
   ...ReactEditor,
-  toggleFormat(editor: Editor, format: string) {
-    let isFormatted = isTextFormat(editor, format);
-    Transforms.setNodes(
-      editor,
-      { [format]: !isFormatted },
-      { match: n => Text.isText(n), split: true }
-    );
-  },
-  insertHeader(editor: Editor, heading: string) {
-    Transforms.insertNodes(editor, {
-      type: heading,
-      children: [{ text: "" }]
-    });
-  },
-  insertBlock(editor: Editor, blockType: string) {
+  insertBlock(editor: SlateEditor, blockType: string) {
     if (!isNodeActive(editor, blockType)) {
       Transforms.setNodes(editor, {
         type: blockType,
@@ -156,19 +92,19 @@ function HoveringToolbars(props: { addons: Addon[] }) {
   // const { selection } = useHoverTool();
   const { selection } = editor;
   if (selection) {
-    const buttons = addons
-      .map(it => it.hoverMenu)
-      .filter(isDefined)
-      .filter(hoverMenu => {
-        const [match] = Editor.nodes(editor, {
+    const addonsWithBtns = addons
+      // .map(it => it.hoverMenu)
+      .filter(addon => isDefined(addon.hoverMenu))
+      .filter(addon => {
+        const [match] = SlateEditor.nodes(editor, {
           match: n => {
-            if (hoverMenu?.typeMatch && typeof n.type === "string") {
-              if (n.type.match(hoverMenu.typeMatch)) {
+            if (addon.hoverMenu?.typeMatch && typeof n.type === "string") {
+              if (n.type.match(addon.hoverMenu.typeMatch)) {
                 return true;
               }
             } else if (
-              !hoverMenu?.typeMatch &&
-              !Editor.isVoid(editor, n) &&
+              !addon.hoverMenu?.typeMatch &&
+              !SlateEditor.isVoid(editor, n) &&
               typeof n.type === "string"
             ) {
               return true;
@@ -178,19 +114,19 @@ function HoveringToolbars(props: { addons: Addon[] }) {
         });
         return Boolean(match);
       });
-    if (buttons.length > 0) {
-      const ordered = orderBy(buttons, "order");
-      const grouped = groupBy(ordered, "category");
+    if (addonsWithBtns.length > 0) {
+      const ordered = orderBy(addonsWithBtns, "hoverMenu.order");
+      const grouped = groupBy(ordered, "hoverMenu.category");
       return (
         <StyledToolBox>
           <ToolsWrapper>
             {Object.entries(grouped).map(([, orderedAddons]) => (
               <React.Fragment>
-                {orderedAddons.map((it, i) => {
-                  if (it) {
-                    const renderButton = it.renderButton;
+                {orderedAddons.map((addon, i) => {
+                  if (addon.hoverMenu) {
+                    const renderButton = addon.hoverMenu.renderButton;
                     return typeof renderButton === "function"
-                      ? renderButton()
+                      ? renderButton(editor, addon)
                       : renderButton;
                   }
                   return null;
@@ -252,7 +188,7 @@ function Paragraph(props: RenderElementProps) {
   return (
     <p {...props.attributes}>
       <PlaceholderHint
-        isEmpty={Editor.isEmpty(editor, props.element)}
+        isEmpty={SlateEditor.isEmpty(editor, props.element)}
         hoverHint={"Click to start typing"}
         placeholder={isFocused && isSelected ? "Text" : undefined}
       >
@@ -275,7 +211,7 @@ const handleRenderElement = (
       addon.element.typeMatch &&
       (props.element?.type as string).match(addon.element.typeMatch)
     ) {
-      element = addon.element.renderElement(props, editor) || element;
+      element = addon.element.renderElement(props, editor, addon) || element;
     }
   }
 
@@ -323,11 +259,11 @@ const handleKeyUp = (
   if (!selection) {
     return;
   }
-  const [node, path] = Editor.node(editor, selection as Location);
+  const [node, path] = SlateEditor.node(editor, selection as Location);
   if (!path.length) {
     return;
   }
-  const [parent] = Editor.parent(editor, path);
+  const [parent] = SlateEditor.parent(editor, path);
   if (parent) {
     // TODO: implement some kind of trigger
     // for (let addon of addons) {
@@ -374,112 +310,183 @@ const handleDecorate = (
 };
 
 const createEditor = (addons: Addon[]): ReactEditor => {
+  const editor = useMemo(() => createSlateEditor(), []);
   return useMemo(() => {
-    let editor: ReactEditor = withHistory(withReact(createSlateEditor()));
+    let _editor: ReactEditor = withHistory(withReact(editor));
     addons.forEach(addon => {
       if (addon.withPlugin) {
-        editor = addon.withPlugin(editor);
+        _editor = addon.withPlugin(_editor);
       }
     });
-    editor.replaceNode = (element: Node, replacement: Node) => {
-      const at = ReactEditor.findPath(editor, element);
-      Transforms.select(editor, at);
-      Transforms.unwrapNodes(editor, { at });
-      Transforms.delete(editor);
-      Editor.insertNode(editor, replacement);
-    };
-    return editor;
-  }, []);
+    return _editor;
+  }, [addons]);
 };
 
-type a = Parameters<typeof createGlobalStyle>;
-
-export function Aeditor(
-  props: {
-    value: Node[];
-    onChange: (value: Node[]) => void;
-    theme?: AeditorTheme & { [key: string]: any };
-    addons: Addon[];
-  } & React.ComponentProps<typeof Editable>
-) {
-  const { value, onChange, theme, addons, ...otherProps } = props;
-  const editor = createEditor(addons);
-
-  const renderElement = useCallback(
-    (props: RenderElementProps) => {
-      return handleRenderElement(props, editor, addons);
-    },
-    [addons]
-  );
-
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => {
-      return handleRenderLeaf(props, editor, addons);
-    },
-    [addons]
-  );
-
-  const decorate = useCallback(
-    (entry: NodeEntry) => handleDecorate(entry, editor, addons),
-    []
-  );
-
-  const keyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-    return handleKeyDown(event, editor, addons);
-  }, []);
-
-  const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-    handleKeyUp(event, editor, addons);
-  }, []);
-
-  const click = useCallback(
-    (event: React.MouseEvent<HTMLElement>) =>
-      handleClick(event, editor, addons),
-    []
-  );
-
-  const paste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
-    const clipboardData = event.clipboardData;
-    const pastedData = clipboardData.getData("Text");
-    if (!pastedData) {
-      return;
-    }
-    editor.insertText(pastedData);
-  }, []);
-
-  const _theme = merge({}, defaultTheme, theme);
-  console.log(_theme);
-
-  return (
-    <Slate editor={editor} value={value} onChange={onChange}>
-      <ThemeProvider theme={_theme}>
-        <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
-          {editableProps => (
-            <div
-              style={{
-                marginLeft: 20
-              }}
-            >
-              <BlockInsert>
-                <BlockInsertTools addons={addons} />
-              </BlockInsert>
-              <EditorThemeWrapper>
-                <Editable
-                  {...editableProps}
-                  renderLeaf={renderLeaf}
-                  renderElement={renderElement}
-                  decorate={decorate}
-                  onKeyDown={keyDown}
-                  onKeyUp={keyUp}
-                  onClick={click}
-                  onPaste={paste}
-                  {...otherProps}
-                />
-              </EditorThemeWrapper>
-            </div>
-          )}
-        </HoverToolProvider>
-      </ThemeProvider>
-    </Slate>
-  );
+interface ChiefContextValue {
+  addons: Addon[];
+  editor: ReactEditor;
+  readOnly: boolean;
+  setReadOnly: (readOnly: boolean) => void;
+  id: string;
+  injectAddon: (addon: Addon) => void;
 }
+
+const ChiefContext = React.createContext<ChiefContextValue | null>(null);
+
+let count = 1;
+function useProvideChiefContext(props: React.ComponentProps<typeof Chief>) {
+  const [addons, setAddons] = useState<Addon[]>(props.addons);
+  const editor = createEditor(addons);
+  console.log(editor);
+  const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
+  const { current: id } = useRef(props.id || `chiefeditor${count++}`);
+  function injectAddon(addon: Addon) {
+    setAddons(addons => [...addons, addon]);
+  }
+  const value: ChiefContextValue = {
+    addons: addons,
+    editor,
+    readOnly,
+    setReadOnly,
+    id,
+    injectAddon
+  };
+
+  return {
+    value
+  };
+}
+
+function useChief() {
+  const ctx = useContext(ChiefContext);
+  if (!ctx) {
+    throw new Error(
+      "Chief not found. Wrap your <Chief.Editor/> in a <Chief/>."
+    );
+  }
+  return ctx;
+}
+
+function useAddon(name: string) {
+  const chief = useChief();
+  return chief.addons.find(it => it.name === name);
+}
+
+export const Chief = React.memo(function(props: {
+  children: React.ReactNode;
+  addons: Addon[];
+  readOnly?: boolean;
+  id: string;
+}) {
+  const { children } = props;
+  const { value } = useProvideChiefContext(props);
+  return (
+    <ChiefContext.Provider value={value}>
+      <React.Fragment>{children}</React.Fragment>
+    </ChiefContext.Provider>
+  );
+});
+
+export function useCreateAddon(addon: Addon, overrides?: Addon) {
+  const { injectAddon } = useChief();
+  function AddonComponent() {
+    return null;
+  }
+  useEffect(() => injectAddon({ ...addon, ...overrides }), []);
+
+  return AddonComponent;
+}
+
+export const Editor = React.memo(
+  (
+    props: {
+      value: Node[];
+      onChange: (value: Node[]) => void;
+      theme?: AeditorTheme & { [key: string]: any };
+    } & React.ComponentProps<typeof Editable>
+  ) => {
+    const { addons, editor, readOnly, id } = useChief();
+    const { value, onChange, theme, ...otherProps } = props;
+
+    const renderElement = useCallback(
+      (props: RenderElementProps) => {
+        return handleRenderElement(props, editor, addons);
+      },
+      [addons]
+    );
+
+    const renderLeaf = useCallback(
+      (props: RenderLeafProps) => {
+        return handleRenderLeaf(props, editor, addons);
+      },
+      [addons]
+    );
+
+    const decorate = useCallback(
+      (entry: NodeEntry) => handleDecorate(entry, editor, addons),
+      []
+    );
+
+    const keyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        return handleKeyDown(event, editor, addons);
+      },
+      []
+    );
+
+    const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+      handleKeyUp(event, editor, addons);
+    }, []);
+
+    const click = useCallback(
+      (event: React.MouseEvent<HTMLElement>) =>
+        handleClick(event, editor, addons),
+      []
+    );
+
+    const paste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
+      const clipboardData = event.clipboardData;
+      const pastedData = clipboardData.getData("Text");
+      if (!pastedData) {
+        return;
+      }
+      editor.insertText(pastedData);
+    }, []);
+
+    const _theme = merge({}, defaultTheme, theme);
+    return (
+      <Slate editor={editor} value={value} onChange={onChange}>
+        <ThemeProvider theme={_theme}>
+          <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
+            {editableProps => (
+              <div
+                style={{
+                  marginLeft: 20
+                }}
+              >
+                <BlockInsert>
+                  <BlockInsertTools addons={addons} />
+                </BlockInsert>
+                <EditorThemeWrapper>
+                  <Editable
+                    {...editableProps}
+                    renderLeaf={renderLeaf}
+                    renderElement={renderElement}
+                    decorate={decorate}
+                    onKeyDown={keyDown}
+                    onKeyUp={keyUp}
+                    onClick={click}
+                    onPaste={paste}
+                    readOnly={readOnly}
+                    id={`${id}`}
+                    {...otherProps}
+                  />
+                </EditorThemeWrapper>
+              </div>
+            )}
+          </HoverToolProvider>
+        </ThemeProvider>
+      </Slate>
+    );
+  }
+);

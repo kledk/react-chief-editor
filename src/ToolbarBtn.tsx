@@ -36,7 +36,6 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
       </div>
       <Overlay
         show={tooltip && show}
-        rootClose
         placement={"top"}
         container={containerRef}
         target={triggerRef}

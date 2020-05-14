@@ -5,7 +5,7 @@ import { Transforms, Editor, Range, Element } from "slate";
 import { useSlate, ReactEditor } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
-import { RichEditor } from "../../aeditor";
+import { RichEditor } from "../../editor";
 import { ToolbarBtn } from "../../ToolbarBtn";
 
 export const headingTypes = [
@@ -123,6 +123,13 @@ export const isHeadingType = (editor: Editor, header: string) => {
   });
   return Boolean(match);
 };
+
+function insertHeader(editor: Editor, heading: string) {
+  Transforms.insertNodes(editor, {
+    type: heading,
+    children: [{ text: "" }]
+  });
+}
 
 function HeadingBtn(props: { headingType: string; children: React.ReactNode }) {
   const editor = useSlate();

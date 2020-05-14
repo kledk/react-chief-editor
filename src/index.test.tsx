@@ -1,7 +1,7 @@
-import { Aeditor } from ".";
+import { Editor } from ".";
 
 describe("Aeditor", () => {
   it("is truthy", () => {
-    expect(Aeditor).toBeTruthy();
+    expect(Editor).toBeTruthy();
   });
 });

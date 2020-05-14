@@ -1,8 +1,23 @@
 import React from "react";
 import { useSlate } from "slate-react";
-import { StyledToolbarBtn } from "./StyledToolbarBtn";
-import { isTextFormat, RichEditor } from "./aeditor";
 import { ToolbarBtn } from "./ToolbarBtn";
+import { Editor, Transforms, Text } from "slate";
+
+export function toggleFormat(editor: Editor, format: string) {
+  let isFormatted = isTextFormat(editor, format);
+  Transforms.setNodes(
+    editor,
+    { [format]: !isFormatted },
+    { match: n => Text.isText(n), split: true }
+  );
+}
+
+const isTextFormat = (editor: Editor, formatType: string) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => Boolean(n[formatType])
+  });
+  return Boolean(match);
+};
 
 export function MarkBtn(
   props: {
@@ -15,7 +30,7 @@ export function MarkBtn(
   return (
     <ToolbarBtn
       isActive={isActive}
-      onClick={() => RichEditor.toggleFormat(editor, props.formatType)}
+      onClick={() => toggleFormat(editor, props.formatType)}
       {...otherProps}
     />
   );
