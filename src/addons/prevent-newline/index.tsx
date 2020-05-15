@@ -1,20 +1,17 @@
 import { Addon } from "../../addon";
-import { useCreateAddon } from "../../chief/chief";
-
-export const PreventNewlineAddonImpl: Addon = {
-  onKeyDown: (event, editor) => {
-    if (event.keyCode === 13) {
-      if (event.shiftKey) {
-        editor.insertText("\n");
-        event.preventDefault();
-        return true;
-      }
-    }
-    return false;
-  }
-};
+import { useOnKey } from "../../chief/chief";
 
 export function PreventNewlineAddon(props: Addon) {
-  useCreateAddon(PreventNewlineAddonImpl, props);
+  useOnKey(
+    {
+      pattern: "Enter+Shift",
+      handler: (event, editor) => {
+        event.preventDefault();
+        editor.insertText("\n");
+        return true;
+      }
+    },
+    props
+  );
   return null;
 }

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { Addon } from "../../addon";
 import { Element, Editor, Transforms, Path, NodeEntry } from "slate";
 import {
@@ -13,7 +13,12 @@ import { RichEditor } from "../../editor";
 import { FileUpload } from "../../FileUpload";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import styled from "styled-components";
-import { useCreateAddon, useRenderElement } from "../../chief/chief";
+import { useCreateAddon, useRenderElement, useOnKey } from "../../chief/chief";
+import { ElementWrapper } from "../../element-wrapper";
+import { StyledToolBox, StyledToolBase } from "../../StyledToolBox";
+import { StyledToolbarBtn } from "../../StyledToolbarBtn";
+import { ToolsWrapper } from "../../ToolsWrapper";
+import { Button } from "../../Button";
 
 export interface AElement extends Element {
   type: string;
@@ -27,6 +32,7 @@ export interface ImageElement extends AElement {
   type: "image";
   url: string | null;
   caption: string;
+  previewId?: number;
 }
 
 export function isImageElement(element: unknown): element is ImageElement {
@@ -49,35 +55,90 @@ const StyledImageEmptyContainer = styled.div`
   }
 `;
 
+const StyledFocusToolbar = styled(StyledToolBase)`
+  background-color: transparent;
+  ${Button} {
+    background-color: rgba(47, 47, 47, 0.77);
+    &:hover {
+      background-color: rgba(67, 67, 67, 0.77);
+    }
+    font-size: 0.8em;
+    color: white;
+    border: none;
+    &:first-child {
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+    }
+    &:last-child {
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+    padding: 4px 8px;
+    margin: 0 1px;
+  }
+`;
+
 export const Image = (
-  props: RenderElementProps & { onOpenFileRequest: () => void }
+  props: RenderElementProps & {
+    onOpenFileRequest: () => void;
+    previewData: string[];
+  }
 ) => {
   const focused = useFocused();
   const selected = useSelected();
-  const { element } = props;
+  const editor = useSlate();
+  const { onOpenFileRequest, previewData, ...renderElementProps } = props;
+  const { element, children, attributes } = renderElementProps;
   if (!isImageElement(element)) {
     return null;
   }
 
-  if (element.url) {
+  const handleDelete = useCallback(() => {
+    Transforms.delete(editor, { at: ReactEditor.findPath(editor, element) });
+  }, [element]);
+
+  const handleReplace = useCallback(() => {
+    onOpenFileRequest();
+  }, []);
+
+  if (element.url || typeof element.previewId === "number") {
+    const src = element.url
+      ? element.url
+      : typeof element.previewId === "number"
+      ? props.previewData[element.previewId]
+      : "";
     return (
-      <div {...props.attributes}>
-        <div contentEditable={false}>
-          <img
-            style={{
-              objectFit: "cover",
-              width: "100%",
-              display: "block",
-              height: 400,
-              outline:
-                focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
-            }}
-            alt={element.caption}
-            src={element.url}
-          ></img>
-          {props.children}
+      <ElementWrapper
+        {...renderElementProps}
+        attentionChildren={
+          <StyledFocusToolbar>
+            <ToolsWrapper>
+              <Button onClick={handleDelete}>Delete</Button>
+              <Button onClick={handleReplace}>Replace</Button>
+            </ToolsWrapper>
+          </StyledFocusToolbar>
+        }
+        style={{ right: 0, marginTop: 5, marginRight: 5 }}
+      >
+        <div>
+          <div contentEditable={false}>
+            <img
+              {...attributes}
+              style={{
+                objectFit: "cover",
+                width: "100%",
+                display: "block",
+                height: 400,
+                outline:
+                  focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
+              }}
+              alt={element.caption}
+              src={src}
+            ></img>
+            {children}
+          </div>
         </div>
-      </div>
+      </ElementWrapper>
     );
   } else {
     return (
@@ -121,14 +182,6 @@ export const ImageAddonImpl: Addon<{ name: string }, {}> = {
 
     return editor;
   },
-  hoverMenu: {
-    order: 1,
-    category: "image",
-    typeMatch: /image/,
-    renderButton: (editor, addon) => {
-      return <ToolbarBtn>Delete</ToolbarBtn>;
-    }
-  },
   blockInsertMenu: {
     order: 1,
     category: "image",
@@ -149,12 +202,74 @@ export const ImageAddonImpl: Addon<{ name: string }, {}> = {
 };
 
 export function ImageAddon(
-  props: Addon & { onUpload?: (files: globalThis.FileList | null) => void }
+  props: Addon & {
+    onUploadRequest?: (files: globalThis.FileList | null) => Promise<string>;
+  }
 ) {
+  const editor = useSlate();
+  const [previewData, setPreviewData] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPreview = (dataUrl: FileReader["result"]) => {
+    if (typeof dataUrl === "string") {
+      setPreviewData(d => {
+        const _d = [...d];
+        const currentPreviewId = _d.push(dataUrl) - 1;
+        Transforms.setNodes(editor, {
+          url: null,
+          previewId: currentPreviewId
+        });
+        return _d;
+      });
+    }
+  };
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editor.selection) {
+      return;
+    }
+    const imageRef = Editor.rangeRef(editor, editor.selection);
+    const onUploadedSuccess = (url: string) => {
+      if (!imageRef.current) return;
+      Transforms.setNodes(
+        editor,
+        {
+          url: url,
+          previewId: undefined
+        },
+        { at: imageRef.current }
+      );
+      imageRef.unref();
+    };
+    const onUploadedFailed = () => {
+      if (!imageRef.current) return;
+      Transforms.setNodes(
+        editor,
+        {
+          url: null,
+          previewId: undefined
+        },
+        { at: imageRef.current }
+      );
+      imageRef.unref();
+    };
     const files = e.target.files;
-    props.onUpload && props.onUpload(files);
+    if (!files) {
+      return;
+    }
+    if (files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.addEventListener("load", () => onPreview(reader.result));
+      reader.readAsDataURL(file);
+      if (props.onUploadRequest) {
+        try {
+          const url = await props.onUploadRequest(files);
+          onUploadedSuccess(url);
+        } catch (err) {
+          onUploadedFailed();
+        }
+      }
+    }
   };
 
   const { addon } = useCreateAddon(ImageAddonImpl, props);
@@ -164,12 +279,14 @@ export function ImageAddon(
       typeMatch: /image/,
       renderElement: props => (
         <Image
+          previewData={previewData}
           onOpenFileRequest={() => fileRef.current && fileRef.current.click()}
           {...props}
         />
       )
     },
-    props
+    props,
+    [previewData]
   );
 
   return <FileUpload ref={fileRef} onChange={handleFile} multiple={false} />;

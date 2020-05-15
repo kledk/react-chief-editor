@@ -20,16 +20,16 @@ export type InjectedRenderLeaf = {
 
 export type InjectedRenderElement = {
   typeMatch: RegExp;
-  renderElement: (
-    props: RenderElementProps,
-    editor: ReactEditor
-  ) => JSX.Element | undefined;
+  renderElement:
+    | JSX.Element
+    | ((
+        props: RenderElementProps,
+        editor: ReactEditor
+      ) => JSX.Element | undefined);
 };
 
 interface ChiefContextValue {
   addons: Addon[];
-  value: Node[];
-  onChange: (value: Node[]) => void;
   editor: ReactEditor;
   readOnly: boolean;
   setReadOnly: (readOnly: boolean) => void;
@@ -42,20 +42,29 @@ interface ChiefContextValue {
   injectRenderElement: (irl: InjectedRenderElement) => void;
   removeRenderElement: (irl: InjectedRenderElement) => void;
   renderElements: InjectedRenderElement[];
+  injectOnKeyHandler: (keyHandler: KeyHandler) => void;
+  removeOnKeyHandler: (keyHandler: KeyHandler) => void;
+  onKeyHandlers: KeyHandler[];
 }
 
 const ChiefContext = React.createContext<ChiefContextValue | null>(null);
 
 let count = 1;
-function useProvideChiefContext(props: React.ComponentProps<typeof Chief>) {
+function useProvideChiefContext(props: {
+  addons?: Addon[];
+  readOnly?: boolean;
+  id?: string;
+}) {
   const [addons, setAddons] = useState<Addon[]>(props.addons || []);
   const [renderLeafs, setRenderLeafs] = useState<InjectedRenderLeaf[]>([]);
   const [renderElements, setRenderElements] = useState<InjectedRenderElement[]>(
     []
   );
+  const [onKeyHandlers, setOnKeyHandlers] = useState<KeyHandler[]>([]);
   const editor = createEditor(addons);
   const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
   const { current: id } = useRef(props.id || `chiefeditor${count++}`);
+
   function injectAddon(addon: Addon) {
     setAddons(addons => [...addons, addon]);
   }
@@ -92,11 +101,21 @@ function useProvideChiefContext(props: React.ComponentProps<typeof Chief>) {
     });
   }
 
+  function injectOnKeyHandler(keyHandler: KeyHandler) {
+    setOnKeyHandlers(it => [...it, keyHandler]);
+  }
+
+  function removeOnKeyHandler(keyHandler: KeyHandler) {
+    setOnKeyHandlers(it => {
+      const toSlicer = [...it];
+      toSlicer.splice(it.indexOf(keyHandler), 1);
+      return toSlicer;
+    });
+  }
+
   const value: ChiefContextValue = {
     addons: addons,
     editor,
-    value: props.value,
-    onChange: props.onChange,
     readOnly,
     setReadOnly,
     id,
@@ -107,7 +126,10 @@ function useProvideChiefContext(props: React.ComponentProps<typeof Chief>) {
     removeRenderLeaf,
     renderElements,
     injectRenderElement,
-    removeRenderElement
+    removeRenderElement,
+    injectOnKeyHandler,
+    removeOnKeyHandler,
+    onKeyHandlers
   };
 
   return {
@@ -143,22 +165,61 @@ export function useCreateAddon<TAddon extends Addon>(
   return { addon: injectedAddon };
 }
 
-export function useRenderLeaf(irl: InjectedRenderLeaf, overrides: Addon) {
+export function useRenderLeaf(
+  irl: InjectedRenderLeaf,
+  overrides: Addon,
+  deps: any[] = []
+) {
   const chief = useChief();
   useEffect(() => {
     const _irl = merge({}, irl, overrides?.renderLeaf);
     chief.injectRenderLeaf(_irl);
     return () => chief.removeRenderLeaf(_irl);
-  }, []);
+  }, deps);
 }
 
-export function useRenderElement(ire: InjectedRenderElement, overrides: Addon) {
+export function useRenderElement(
+  ire: InjectedRenderElement,
+  overrides: Addon,
+  deps: any[] = []
+) {
   const chief = useChief();
   useEffect(() => {
     const _ire = merge({}, ire, overrides?.renderElement);
     chief.injectRenderElement(_ire);
     return () => chief.removeRenderElement(_ire);
-  }, []);
+  }, deps);
+}
+
+export type KeyHandler = {
+  /** Key pattern used to trigger, eg. "mod+b"*/
+  pattern?: string;
+  /** Handler function for key trigger.*/
+  handler: (
+    e: KeyboardEvent,
+    editor: ReactEditor
+  ) => boolean | undefined | void;
+};
+
+/**
+ * Respond to onKeyDown events in the editor.
+ * If you want to receive all onKeyDown events, you can leave out the pattern.
+ * For responding to certain key down combos, you can specify a key pattern, eg. "mod+b".
+ * @param handler Function to call when a key or combo is pressed
+ * @param overrides
+ * @param deps
+ */
+export function useOnKey(
+  handler: KeyHandler,
+  overrides: Addon,
+  deps: any[] = []
+) {
+  const chief = useChief();
+  useEffect(() => {
+    const _handler = merge({}, handler, overrides?.onKey);
+    chief.injectOnKeyHandler(_handler);
+    return () => chief.removeOnKeyHandler(_handler);
+  }, deps);
 }
 
 export const Chief = React.memo(function(props: {
@@ -169,14 +230,10 @@ export const Chief = React.memo(function(props: {
   readOnly?: boolean;
   id?: string;
 }) {
-  const { children } = props;
-  const chief = useProvideChiefContext(props);
+  const { children, onChange, value, readOnly, id, addons } = props;
+  const chief = useProvideChiefContext({ readOnly, addons, id });
   return (
-    <Slate
-      editor={chief.value.editor}
-      value={chief.value.value}
-      onChange={chief.value.onChange}
-    >
+    <Slate editor={chief.value.editor} value={value} onChange={onChange}>
       <ChiefContext.Provider value={chief.value}>
         <React.Fragment>{children}</React.Fragment>
       </ChiefContext.Provider>

@@ -35,8 +35,10 @@ import { defaultTheme } from "./defaultTheme";
 import {
   InjectedRenderElement,
   InjectedRenderLeaf,
-  useChief
+  useChief,
+  KeyHandler
 } from "./chief/chief";
+import isHotkey from "is-hotkey";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
@@ -197,7 +199,10 @@ const handleRenderElement = (
   let element: JSX.Element | undefined;
   for (let renderElement of renderElements) {
     if ((props.element?.type as string).match(renderElement.typeMatch)) {
-      element = renderElement.renderElement(props, editor) || element;
+      element =
+        typeof renderElement.renderElement === "function"
+          ? renderElement.renderElement(props, editor)
+          : React.cloneElement(renderElement.renderElement, props) || element;
     }
   }
 
@@ -222,12 +227,18 @@ function handleRenderLeaf(
 const handleKeyDown = (
   event: React.KeyboardEvent<HTMLDivElement>,
   editor: ReactEditor,
-  addons: Addon[]
+  onKeyHandlers: KeyHandler[]
 ) => {
-  for (let addon of addons) {
-    if (addon.onKeyDown) {
-      if (addon.onKeyDown(event, editor)) {
-        // On true, we break out of the onKeyDown loop
+  for (let handler of onKeyHandlers) {
+    if (handler.pattern) {
+      if (
+        isHotkey(handler.pattern, event.nativeEvent) &&
+        handler.handler(event.nativeEvent, editor)
+      ) {
+        return;
+      }
+    } else {
+      if (handler.handler(event.nativeEvent, editor)) {
         return;
       }
     }
@@ -304,7 +315,8 @@ export const Editor = React.memo(
       readOnly,
       id,
       renderLeafs,
-      renderElements
+      renderElements,
+      onKeyHandlers
     } = useChief();
     const { theme, ...otherProps } = props;
 
@@ -329,9 +341,9 @@ export const Editor = React.memo(
 
     const keyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
-        return handleKeyDown(event, editor, addons);
+        return handleKeyDown(event, editor, onKeyHandlers);
       },
-      [addons]
+      [onKeyHandlers]
     );
 
     const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {

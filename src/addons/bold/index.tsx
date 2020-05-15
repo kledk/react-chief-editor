@@ -1,19 +1,18 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { useCreateAddon, useRenderLeaf } from "../../chief/chief";
+import { useCreateAddon, useRenderLeaf, useOnKey } from "../../chief/chief";
 import { MarkBtn, toggleFormat } from "../../mark-button";
+import { toKeyName } from "is-hotkey";
+
+const shortcut = "mod+b";
+
+function shortcutText(shortcut: string) {
+  return toKeyName(shortcut).replace("mod", "⌘");
+}
 
 export const BoldImpl: Addon<{ name: string }> = {
   name: "bold",
-  onKeyDown: (event, editor) => {
-    if (event.key === "b" && event.ctrlKey) {
-      event.preventDefault();
-      toggleFormat(editor, "bold");
-      return true;
-    }
-    return false;
-  },
   hoverMenu: {
     order: 1,
     category: "marks",
@@ -23,7 +22,7 @@ export const BoldImpl: Addon<{ name: string }> = {
           // @ts-ignore
           tooltip={{
             label: addon.labels?.name,
-            shortcut: "⌘+B"
+            shortcut: shortcutText(shortcut)
           }}
           formatType="bold"
         >
@@ -42,6 +41,17 @@ export function BoldAddon(props: Addon<{ name: string }>) {
   useRenderLeaf(
     {
       renderLeaf: props => renderLeaf(props, "bold", "strong")
+    },
+    props
+  );
+  useOnKey(
+    {
+      pattern: shortcut,
+      handler: (event, editor) => {
+        event.preventDefault();
+        toggleFormat(editor, "bold");
+        return true;
+      }
     },
     props
   );

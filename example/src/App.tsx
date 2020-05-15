@@ -16,12 +16,10 @@ import {
   LinkAddon,
   useRenderElement,
   InputWrapper,
-  Input,
-  useChief
+  Input
 } from "redia-aeditor";
 import { Node, Element } from "slate";
 import { css } from "styled-components";
-import { useSlate } from "slate-react";
 
 function ExampleVideoAddon(props: Addon) {
   // const editor = useSlate();
@@ -81,11 +79,23 @@ const addons = (
     <UnderlineAddon></UnderlineAddon>
     <StrikethroughAddon></StrikethroughAddon>
     <HeadingsAddon></HeadingsAddon>
-    <ImageAddon onUpload={files => console.log(files)}></ImageAddon>
+    <ImageAddon
+      onUploadRequest={async files => {
+        return new Promise((res, rej) => {
+          setTimeout(
+            () =>
+              res(
+                "https://stepoutbuffalo.com/wp-content/uploads/2018/07/kid-rock-and-brantley-gilbert-e1530892362363.jpg"
+              ),
+            5000
+          );
+        });
+      }}
+    ></ImageAddon>
     <ResetToParagraphAddon></ResetToParagraphAddon>
     <PreventNewlineAddon></PreventNewlineAddon>
     <LinkAddon></LinkAddon>
-    <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon>
+    {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
   </>
 );
 
@@ -102,11 +112,6 @@ function App() {
     {
       type: "image",
       children: [{ text: "" }],
-      url: null
-    },
-    {
-      type: "custom_void_element",
-      children: [{ text: "asd" }],
       url:
         "https://stepoutbuffalo.com/wp-content/uploads/2018/07/kid-rock-and-brantley-gilbert-e1530892362363.jpg"
     }

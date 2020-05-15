@@ -6,7 +6,7 @@ import { useSlate, ReactEditor } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import { useCreateAddon, useRenderElement } from "../../chief/chief";
+import { useCreateAddon, useRenderElement, useOnKey } from "../../chief/chief";
 import { RichEditor } from "../../editor";
 
 export const headingTypes = [
@@ -19,32 +19,6 @@ export const headingTypes = [
 ];
 
 export const HeadingsAddonImpl: Addon = {
-  onKeyDown: (event, editor) => {
-    if (event.keyCode === 13) {
-      const { selection } = editor;
-      if (selection && Range.isCollapsed(selection)) {
-        const [match] = Editor.nodes(editor, {
-          match: n =>
-            typeof n.type === "string" &&
-            Boolean(n.type?.match(/(heading-[1-6])/))
-        });
-        if (match) {
-          event.preventDefault();
-          const [node] = match;
-          if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
-            Transforms.setNodes(editor, { type: "paragraph" });
-          } else {
-            Transforms.insertNodes(editor, {
-              type: "paragraph",
-              children: [{ text: "" }]
-            });
-          }
-          return true;
-        }
-      }
-    }
-    return false;
-  },
   hoverMenu: {
     order: 4,
     category: "heading",
@@ -105,6 +79,37 @@ export function HeadingsAddon(props: Addon) {
     {
       typeMatch: /heading-[1-6]/,
       renderElement: props => <Heading {...props} />
+    },
+    props
+  );
+  useOnKey(
+    {
+      handler: (event, editor) => {
+        if (event.keyCode === 13) {
+          const { selection } = editor;
+          if (selection && Range.isCollapsed(selection)) {
+            const [match] = Editor.nodes(editor, {
+              match: n =>
+                typeof n.type === "string" &&
+                Boolean(n.type?.match(/(heading-[1-6])/))
+            });
+            if (match) {
+              event.preventDefault();
+              const [node] = match;
+              if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
+                Transforms.setNodes(editor, { type: "paragraph" });
+              } else {
+                Transforms.insertNodes(editor, {
+                  type: "paragraph",
+                  children: [{ text: "" }]
+                });
+              }
+              return true;
+            }
+          }
+        }
+        return false;
+      }
     },
     props
   );
