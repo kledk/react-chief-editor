@@ -1,37 +1,24 @@
+import React, { useCallback } from "react";
 import groupBy from "lodash/groupBy";
 import merge from "lodash/merge";
 import orderBy from "lodash/orderBy";
-import React, {
-  useCallback,
-  useMemo,
-  useState,
-  useContext,
-  useEffect,
-  useRef
-} from "react";
 import {
-  createEditor as createSlateEditor,
   Editor as SlateEditor,
   Location,
-  Node,
   NodeEntry,
   Range,
-  Text,
   Transforms
 } from "slate";
-import { withHistory } from "slate-history";
 import {
   Editable,
   ReactEditor,
   RenderElementProps,
   RenderLeafProps,
-  Slate,
   useFocused,
   useSelected,
-  useSlate,
-  withReact
+  useSlate
 } from "slate-react";
-import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
+import styled, { ThemeProvider } from "styled-components";
 import { isDefined } from "ts-is-present";
 import { Addon } from "./addon";
 import { BlockInsert } from "./BlockInsert";
@@ -45,7 +32,11 @@ import { isNodeActive } from "./utils";
 import { OverrideTheme } from "./override-theme";
 import { AeditorTheme } from "./AeditorTheme";
 import { defaultTheme } from "./defaultTheme";
-import { BoldAddon } from "./addons/bold";
+import {
+  InjectedRenderElement,
+  InjectedRenderLeaf,
+  useChief
+} from "./chief/chief";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
@@ -122,7 +113,7 @@ function HoveringToolbars(props: { addons: Addon[] }) {
           <ToolsWrapper>
             {Object.entries(grouped).map(([, orderedAddons]) => (
               <React.Fragment>
-                {orderedAddons.map((addon, i) => {
+                {orderedAddons.map(addon => {
                   if (addon.hoverMenu) {
                     const renderButton = addon.hoverMenu.renderButton;
                     return typeof renderButton === "function"
@@ -153,7 +144,7 @@ function BlockInsertTools(props: { addons: Addon[] }) {
         <ToolsWrapper>
           {Object.entries(grouped).map(([, buttons]) => (
             <React.Fragment>
-              {buttons.map((it, i) => {
+              {buttons.map(it => {
                 if (it) {
                   const renderButton = it.renderButton;
                   return typeof renderButton === "function"
@@ -201,17 +192,12 @@ function Paragraph(props: RenderElementProps) {
 const handleRenderElement = (
   props: RenderElementProps,
   editor: ReactEditor,
-  addons: Addon[]
+  renderElements: InjectedRenderElement[]
 ) => {
   let element: JSX.Element | undefined;
-  for (let addon of addons) {
-    if (
-      addon.element &&
-      addon.element.renderElement &&
-      addon.element.typeMatch &&
-      (props.element?.type as string).match(addon.element.typeMatch)
-    ) {
-      element = addon.element.renderElement(props, editor, addon) || element;
+  for (let renderElement of renderElements) {
+    if ((props.element?.type as string).match(renderElement.typeMatch)) {
+      element = renderElement.renderElement(props, editor) || element;
     }
   }
 
@@ -221,15 +207,13 @@ const handleRenderElement = (
 function handleRenderLeaf(
   props: RenderLeafProps,
   editor: ReactEditor,
-  addons: Addon[]
+  renderLeafs: InjectedRenderLeaf[]
 ) {
   let copy = { ...props };
-  for (const addon of addons) {
-    if (addon.renderLeaf) {
-      const leaf = addon.renderLeaf(copy, editor);
-      if (leaf) {
-        copy = { ...copy, children: leaf };
-      }
+  for (const renderLeaf of renderLeafs) {
+    const leaf = renderLeaf.renderLeaf(copy, editor);
+    if (leaf) {
+      copy = { ...copy, children: leaf };
     }
   }
   return <span {...copy.attributes}>{copy.children}</span>;
@@ -252,14 +236,13 @@ const handleKeyDown = (
 
 const handleKeyUp = (
   event: React.KeyboardEvent<HTMLDivElement>,
-  editor: ReactEditor,
-  addons: Addon[]
+  editor: ReactEditor
 ) => {
   const { selection } = editor;
   if (!selection) {
     return;
   }
-  const [node, path] = SlateEditor.node(editor, selection as Location);
+  const [, path] = SlateEditor.node(editor, selection as Location);
   if (!path.length) {
     return;
   }
@@ -309,139 +292,56 @@ const handleDecorate = (
   return ranges;
 };
 
-const createEditor = (addons: Addon[]): ReactEditor => {
-  const editor = useMemo(() => createSlateEditor(), []);
-  return useMemo(() => {
-    let _editor: ReactEditor = withHistory(withReact(editor));
-    addons.forEach(addon => {
-      if (addon.withPlugin) {
-        _editor = addon.withPlugin(_editor);
-      }
-    });
-    return _editor;
-  }, [addons]);
-};
-
-interface ChiefContextValue {
-  addons: Addon[];
-  editor: ReactEditor;
-  readOnly: boolean;
-  setReadOnly: (readOnly: boolean) => void;
-  id: string;
-  injectAddon: (addon: Addon) => void;
-}
-
-const ChiefContext = React.createContext<ChiefContextValue | null>(null);
-
-let count = 1;
-function useProvideChiefContext(props: React.ComponentProps<typeof Chief>) {
-  const [addons, setAddons] = useState<Addon[]>(props.addons);
-  const editor = createEditor(addons);
-  console.log(editor);
-  const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
-  const { current: id } = useRef(props.id || `chiefeditor${count++}`);
-  function injectAddon(addon: Addon) {
-    setAddons(addons => [...addons, addon]);
-  }
-  const value: ChiefContextValue = {
-    addons: addons,
-    editor,
-    readOnly,
-    setReadOnly,
-    id,
-    injectAddon
-  };
-
-  return {
-    value
-  };
-}
-
-function useChief() {
-  const ctx = useContext(ChiefContext);
-  if (!ctx) {
-    throw new Error(
-      "Chief not found. Wrap your <Chief.Editor/> in a <Chief/>."
-    );
-  }
-  return ctx;
-}
-
-function useAddon(name: string) {
-  const chief = useChief();
-  return chief.addons.find(it => it.name === name);
-}
-
-export const Chief = React.memo(function(props: {
-  children: React.ReactNode;
-  addons: Addon[];
-  readOnly?: boolean;
-  id: string;
-}) {
-  const { children } = props;
-  const { value } = useProvideChiefContext(props);
-  return (
-    <ChiefContext.Provider value={value}>
-      <React.Fragment>{children}</React.Fragment>
-    </ChiefContext.Provider>
-  );
-});
-
-export function useCreateAddon(addon: Addon, overrides?: Addon) {
-  const { injectAddon } = useChief();
-  function AddonComponent() {
-    return null;
-  }
-  useEffect(() => injectAddon({ ...addon, ...overrides }), []);
-
-  return AddonComponent;
-}
-
 export const Editor = React.memo(
   (
     props: {
-      value: Node[];
-      onChange: (value: Node[]) => void;
       theme?: AeditorTheme & { [key: string]: any };
     } & React.ComponentProps<typeof Editable>
   ) => {
-    const { addons, editor, readOnly, id } = useChief();
-    const { value, onChange, theme, ...otherProps } = props;
+    const {
+      addons,
+      editor,
+      readOnly,
+      id,
+      renderLeafs,
+      renderElements
+    } = useChief();
+    const { theme, ...otherProps } = props;
 
     const renderElement = useCallback(
       (props: RenderElementProps) => {
-        return handleRenderElement(props, editor, addons);
+        return handleRenderElement(props, editor, renderElements);
       },
-      [addons]
+      [renderElements]
     );
 
     const renderLeaf = useCallback(
       (props: RenderLeafProps) => {
-        return handleRenderLeaf(props, editor, addons);
+        return handleRenderLeaf(props, editor, renderLeafs);
       },
-      [addons]
+      [renderLeafs]
     );
 
     const decorate = useCallback(
       (entry: NodeEntry) => handleDecorate(entry, editor, addons),
-      []
+      [addons]
     );
 
     const keyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
         return handleKeyDown(event, editor, addons);
       },
-      []
+      [addons]
     );
 
     const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-      handleKeyUp(event, editor, addons);
+      handleKeyUp(event, editor);
     }, []);
 
     const click = useCallback(
       (event: React.MouseEvent<HTMLElement>) =>
         handleClick(event, editor, addons),
-      []
+      [addons]
     );
 
     const paste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
@@ -455,38 +355,36 @@ export const Editor = React.memo(
 
     const _theme = merge({}, defaultTheme, theme);
     return (
-      <Slate editor={editor} value={value} onChange={onChange}>
-        <ThemeProvider theme={_theme}>
-          <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
-            {editableProps => (
-              <div
-                style={{
-                  marginLeft: 20
-                }}
-              >
-                <BlockInsert>
-                  <BlockInsertTools addons={addons} />
-                </BlockInsert>
-                <EditorThemeWrapper>
-                  <Editable
-                    {...editableProps}
-                    renderLeaf={renderLeaf}
-                    renderElement={renderElement}
-                    decorate={decorate}
-                    onKeyDown={keyDown}
-                    onKeyUp={keyUp}
-                    onClick={click}
-                    onPaste={paste}
-                    readOnly={readOnly}
-                    id={`${id}`}
-                    {...otherProps}
-                  />
-                </EditorThemeWrapper>
-              </div>
-            )}
-          </HoverToolProvider>
-        </ThemeProvider>
-      </Slate>
+      <ThemeProvider theme={_theme}>
+        <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
+          {editableProps => (
+            <div
+              style={{
+                marginLeft: 20
+              }}
+            >
+              <BlockInsert>
+                <BlockInsertTools addons={addons} />
+              </BlockInsert>
+              <EditorThemeWrapper>
+                <Editable
+                  {...editableProps}
+                  renderLeaf={renderLeaf}
+                  renderElement={renderElement}
+                  decorate={decorate}
+                  onKeyDown={keyDown}
+                  onKeyUp={keyUp}
+                  onClick={click}
+                  onPaste={paste}
+                  readOnly={readOnly}
+                  id={`${id}`}
+                  {...otherProps}
+                />
+              </EditorThemeWrapper>
+            </div>
+          )}
+        </HoverToolProvider>
+      </ThemeProvider>
     );
   }
 );

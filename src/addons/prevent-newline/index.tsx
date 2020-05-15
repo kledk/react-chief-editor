@@ -1,6 +1,7 @@
 import { Addon } from "../../addon";
+import { useCreateAddon } from "../../chief/chief";
 
-export const PreventNewlineAddon: Addon = {
+export const PreventNewlineAddonImpl: Addon = {
   onKeyDown: (event, editor) => {
     if (event.keyCode === 13) {
       if (event.shiftKey) {
@@ -12,3 +13,8 @@ export const PreventNewlineAddon: Addon = {
     return false;
   }
 };
+
+export function PreventNewlineAddon(props: Addon) {
+  useCreateAddon(PreventNewlineAddonImpl, props);
+  return null;
+}

@@ -1,14 +1,11 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { RichEditor, useCreateAddon } from "../../editor";
+import { useCreateAddon, useRenderLeaf } from "../../chief/chief";
 import { MarkBtn, toggleFormat } from "../../mark-button";
 
 export const BoldImpl: Addon<{ name: string }> = {
   name: "bold",
-  renderLeaf(props) {
-    return renderLeaf(props, "bold", "strong");
-  },
   onKeyDown: (event, editor) => {
     if (event.key === "b" && event.ctrlKey) {
       event.preventDefault();
@@ -41,6 +38,12 @@ export const BoldImpl: Addon<{ name: string }> = {
 };
 
 export function BoldAddon(props: Addon<{ name: string }>) {
-  const Bold = useCreateAddon(BoldImpl, props);
-  return <Bold />;
+  useCreateAddon(BoldImpl, props);
+  useRenderLeaf(
+    {
+      renderLeaf: props => renderLeaf(props, "bold", "strong")
+    },
+    props
+  );
+  return null;
 }

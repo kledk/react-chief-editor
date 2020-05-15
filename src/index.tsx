@@ -1,3 +1,4 @@
+export * from "./chief/chief";
 export * from "./editor";
 export * from "./placeholder-hint";
 export * from "./addon";
@@ -9,6 +10,9 @@ export * from "./addons/underline";
 export * from "./addons/headings";
 export * from "./addons/image";
 export * from "./addons/link";
+export * from "./addons/reset-to-paragraph";
+export * from "./addons/prevent-newline";
 export * from "./AeditorTheme";
 export * from "./defaultTheme";
 export * from "./ToolbarBtn";
+export * from "./InputWrapper";

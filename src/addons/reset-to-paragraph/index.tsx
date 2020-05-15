@@ -1,8 +1,9 @@
 import { Addon } from "../../addon";
 import { ReactEditor } from "slate-react";
 import { Editor, Transforms } from "slate";
+import { useCreateAddon } from "../../chief/chief";
 
-export const ResetToParagraphAddon: Addon = {
+export const ResetToParagraphAddonImpl: Addon = {
   withPlugin: <T extends ReactEditor>(editor: T): T => {
     const { deleteBackward } = editor;
 
@@ -23,3 +24,8 @@ export const ResetToParagraphAddon: Addon = {
     return editor;
   }
 };
+
+export function ResetToParagraphAddon(props: Addon) {
+  useCreateAddon(ResetToParagraphAddonImpl, props);
+  return null;
+}

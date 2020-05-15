@@ -2,11 +2,9 @@ import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
 import { MarkBtn, toggleFormat } from "../../mark-button";
+import { useCreateAddon, useRenderLeaf } from "../../chief/chief";
 
-export const ItalicAddon: Addon = {
-  renderLeaf(props) {
-    return renderLeaf(props, "italic", "em");
-  },
+export const ItalicAddonImpl: Addon = {
   onKeyDown: (event, editor) => {
     if (event.key === "i" && event.ctrlKey) {
       event.preventDefault();
@@ -19,7 +17,27 @@ export const ItalicAddon: Addon = {
     order: 2,
     category: "marks",
     renderButton: () => {
-      return <MarkBtn tooltip={{ label: "Italic", shortcut: "⌘+I" }} formatType="italic">I</MarkBtn>;
+      return (
+        <MarkBtn
+          tooltip={{ label: "Italic", shortcut: "⌘+I" }}
+          formatType="italic"
+        >
+          I
+        </MarkBtn>
+      );
     }
   }
 };
+
+export function ItalicAddon(props: Addon) {
+  useCreateAddon(ItalicAddonImpl, props);
+  useRenderLeaf(
+    {
+      renderLeaf: props => {
+        return renderLeaf(props, "italic", "em");
+      }
+    },
+    props
+  );
+  return null;
+}

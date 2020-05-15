@@ -5,8 +5,9 @@ import { Transforms, Editor, Range, Element } from "slate";
 import { useSlate, ReactEditor } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
-import { RichEditor } from "../../editor";
 import { ToolbarBtn } from "../../ToolbarBtn";
+import { useCreateAddon, useRenderElement } from "../../chief/chief";
+import { RichEditor } from "../../editor";
 
 export const headingTypes = [
   "heading-1",
@@ -17,13 +18,7 @@ export const headingTypes = [
   "heading-6"
 ];
 
-export const HeadingsAddon: Addon = {
-  element: {
-    typeMatch: /heading-[1-6]/,
-    renderElement: props => {
-      return <Heading {...props} />;
-    }
-  },
+export const HeadingsAddonImpl: Addon = {
   onKeyDown: (event, editor) => {
     if (event.keyCode === 13) {
       const { selection } = editor;
@@ -103,6 +98,18 @@ export const HeadingsAddon: Addon = {
     }
   }
 };
+
+export function HeadingsAddon(props: Addon) {
+  useCreateAddon(HeadingsAddonImpl, props);
+  useRenderElement(
+    {
+      typeMatch: /heading-[1-6]/,
+      renderElement: props => <Heading {...props} />
+    },
+    props
+  );
+  return null;
+}
 
 function toggleHeading(editor: Editor, heading: string) {
   const isHeaderOfType = isHeadingType(editor, heading);

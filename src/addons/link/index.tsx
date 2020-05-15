@@ -3,13 +3,13 @@ import { RenderElementProps, ReactEditor, useSlate } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { Addon } from "../../addon";
 import isUrl from "is-url";
-import { RichEditor } from "../../editor";
 import { useHoverTool } from "../../HoveringTool";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
+import { useCreateAddon, useRenderElement } from "../../chief/chief";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -23,14 +23,8 @@ export const Link = (props: RenderElementProps) => {
   );
 };
 
-export const LinkAddon: Addon = {
+export const LinkAddonImpl: Addon = {
   name: "link",
-  element: {
-    typeMatch: /link/,
-    renderElement: props => {
-      return <Link {...props} />;
-    }
-  },
   withPlugin: <T extends ReactEditor>(editor: T): T => {
     const { insertData, insertText, isInline } = editor;
 
@@ -63,6 +57,18 @@ export const LinkAddon: Addon = {
     }
   }
 };
+
+export function LinkAddon(props: Addon) {
+  useCreateAddon(LinkAddonImpl, props);
+  useRenderElement(
+    {
+      typeMatch: /link/,
+      renderElement: props => <Link {...props} />
+    },
+    props
+  );
+  return null;
+}
 
 export const insertLink = (editor: Editor, url: string) => {
   if (editor.selection) {

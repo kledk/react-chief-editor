@@ -1,16 +1,13 @@
 import React from "react";
-import { RenderLeafProps, ReactEditor, RenderElementProps } from "slate-react";
+import { ReactEditor, RenderElementProps } from "slate-react";
 import { NodeEntry, Range } from "slate";
+import { InjectedRenderLeaf, InjectedRenderElement } from "./chief/chief";
 
 export interface Addon<
   TLabels extends Object = { [key: string]: string },
   TData extends Object = {}
 > {
   name?: string;
-  renderLeaf?: (
-    props: RenderLeafProps,
-    editor: ReactEditor
-  ) => JSX.Element | undefined;
   element?: {
     typeMatch: RegExp;
     renderElement: (
@@ -19,6 +16,8 @@ export interface Addon<
       addon: Addon
     ) => JSX.Element | undefined;
   };
+  renderLeaf?: InjectedRenderLeaf;
+  renderElement?: InjectedRenderElement;
   withPlugin?(editor: ReactEditor): ReactEditor;
   decorate?: (entry: NodeEntry, editor: ReactEditor) => Range[];
   onKeyDown?(
@@ -41,7 +40,6 @@ export interface Addon<
     renderButton: (editor: ReactEditor) => React.ReactNode | React.ReactNode;
   };
   data?: TData;
-  labels?: TLabels & {
-    [key: string]: string;
-  };
+  labels?: TLabels;
+  [key: string]: any;
 }
