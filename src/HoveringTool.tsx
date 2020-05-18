@@ -288,7 +288,11 @@ export const HoveringTool = (
       referenceElement={_v}
     >
       {({ ref, style, placement, arrowProps }) => (
-        <div ref={ref} style={style} data-placement={placement}>
+        <div
+          ref={ref}
+          style={{ ...style, zIndex: 10 }}
+          data-placement={placement}
+        >
           <div ref={toolRef} {...otherProps}>
             {children}
           </div>

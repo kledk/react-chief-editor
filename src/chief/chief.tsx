@@ -9,6 +9,7 @@ import {
 import { createEditor as createSlateEditor, Node } from "slate";
 import { withHistory } from "slate-history";
 import merge from "lodash/merge";
+import clone from "lodash/clone";
 import { Addon } from "../addon";
 
 export type InjectedRenderLeaf = {
@@ -209,7 +210,7 @@ export type KeyHandler = {
  * @param overrides
  * @param deps
  */
-export function useOnKey(
+export function useOnKeyDown(
   handler: KeyHandler,
   overrides: Addon,
   deps: any[] = []
@@ -241,15 +242,42 @@ export const Chief = React.memo(function(props: {
   );
 });
 
+// Use this to save the originals of the editor functions
+let originalEntries = {};
+/**
+ * Allows for dynamically hook in and out of plugins.
+ * Only overriding functions of the Editor is supported.
+ * @param editor
+ * @param addons
+ */
+function withChief(editor: ReactEditor, addons: Addon[]) {
+  // We basically take control over each funtion in the editor and route them
+  // to the appropriate addon that has requested overriding it.
+  for (const [prop, value] of Object.entries(editor)) {
+    if (typeof value === "function") {
+      if (!(prop in originalEntries)) {
+        originalEntries[prop] = value;
+      }
+      editor[prop] = (...args: any[]) => {
+        let fn = originalEntries[prop];
+        for (const addon of addons) {
+          if (addon.onPlugin && prop in addon.onPlugin) {
+            fn = addon.onPlugin && addon.onPlugin[prop](fn, editor);
+          }
+        }
+        return fn(...args);
+      };
+    }
+  }
+
+  return editor;
+}
+
 const createEditor = (addons: Addon[]): ReactEditor => {
   const editor = useMemo(() => withReact(withHistory(createSlateEditor())), []);
   return useMemo(() => {
-    let _editor: ReactEditor = editor;
-    addons.forEach(addon => {
-      if (addon.withPlugin) {
-        _editor = addon.withPlugin(_editor);
-      }
-    });
+    let _editor = withChief(editor, addons);
+    console.log(_editor);
     return _editor;
   }, [addons]);
 };

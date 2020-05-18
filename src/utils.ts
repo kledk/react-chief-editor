@@ -193,3 +193,14 @@ export function getNodeFromSelection(editor: Editor, selection: Range | null) {
   }
   return null;
 }
+
+export const findNodes = (editor: Editor, match: (node: Node) => boolean) => {
+  return Editor.nodes(editor, {
+    mode: "all",
+    at: {
+      anchor: Editor.start(editor, []),
+      focus: Editor.end(editor, [])
+    },
+    match
+  });
+};

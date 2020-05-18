@@ -49,6 +49,12 @@ export const LinkAddonImpl: Addon = {
     };
     return editor;
   },
+  onPlugin: {
+    isInline: isInline => element => {
+      // console.log("isInline, link");
+      return isLinkELement(element) ? true : isInline(element);
+    }
+  },
   hoverMenu: {
     order: 5,
     category: "link",

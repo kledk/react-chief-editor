@@ -1,5 +1,5 @@
 export * from "./chief/chief";
-export * from "./editor";
+export * from "./chief/editor";
 export * from "./placeholder-hint";
 export * from "./addon";
 export * from "./core-addons";

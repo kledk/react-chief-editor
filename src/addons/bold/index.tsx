@@ -1,15 +1,12 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { useCreateAddon, useRenderLeaf, useOnKey } from "../../chief/chief";
+import { useCreateAddon, useRenderLeaf, useOnKeyDown } from "../../chief/chief";
 import { MarkBtn, toggleFormat } from "../../mark-button";
 import { toKeyName } from "is-hotkey";
+import { shortcutText } from "../../shortcut";
 
 const shortcut = "mod+b";
-
-function shortcutText(shortcut: string) {
-  return toKeyName(shortcut).replace("mod", "⌘");
-}
 
 export const BoldImpl: Addon<{ name: string }> = {
   name: "bold",
@@ -44,7 +41,7 @@ export function BoldAddon(props: Addon<{ name: string }>) {
     },
     props
   );
-  useOnKey(
+  useOnKeyDown(
     {
       pattern: shortcut,
       handler: (event, editor) => {

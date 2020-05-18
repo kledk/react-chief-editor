@@ -6,8 +6,12 @@ import { useSlate, ReactEditor } from "slate-react";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import { useCreateAddon, useRenderElement, useOnKey } from "../../chief/chief";
-import { RichEditor } from "../../editor";
+import {
+  useCreateAddon,
+  useRenderElement,
+  useOnKeyDown
+} from "../../chief/chief";
+import { RichEditor } from "../../chief/editor";
 
 export const headingTypes = [
   "heading-1",
@@ -82,30 +86,29 @@ export function HeadingsAddon(props: Addon) {
     },
     props
   );
-  useOnKey(
+  useOnKeyDown(
     {
+      pattern: "Enter",
       handler: (event, editor) => {
-        if (event.keyCode === 13) {
-          const { selection } = editor;
-          if (selection && Range.isCollapsed(selection)) {
-            const [match] = Editor.nodes(editor, {
-              match: n =>
-                typeof n.type === "string" &&
-                Boolean(n.type?.match(/(heading-[1-6])/))
-            });
-            if (match) {
-              event.preventDefault();
-              const [node] = match;
-              if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
-                Transforms.setNodes(editor, { type: "paragraph" });
-              } else {
-                Transforms.insertNodes(editor, {
-                  type: "paragraph",
-                  children: [{ text: "" }]
-                });
-              }
-              return true;
+        const { selection } = editor;
+        if (selection && Range.isCollapsed(selection)) {
+          const [match] = Editor.nodes(editor, {
+            match: n =>
+              typeof n.type === "string" &&
+              Boolean(n.type?.match(/(heading-[1-6])/))
+          });
+          if (match) {
+            event.preventDefault();
+            const [node] = match;
+            if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
+              Transforms.setNodes(editor, { type: "paragraph" });
+            } else {
+              Transforms.insertNodes(editor, {
+                type: "paragraph",
+                children: [{ text: "" }]
+              });
             }
+            return true;
           }
         }
         return false;

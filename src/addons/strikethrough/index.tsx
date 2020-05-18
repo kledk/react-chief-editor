@@ -1,8 +1,11 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { MarkBtn } from "../../mark-button";
-import { useCreateAddon, useRenderLeaf } from "../../chief/chief";
+import { MarkBtn, toggleFormat } from "../../mark-button";
+import { useCreateAddon, useRenderLeaf, useOnKeyDown } from "../../chief/chief";
+import { shortcutText } from "../../shortcut";
+
+const shortcut = "mod+s";
 
 export const StrikethroughAddonImpl: Addon = {
   hoverMenu: {
@@ -11,7 +14,10 @@ export const StrikethroughAddonImpl: Addon = {
     renderButton: () => {
       return (
         <MarkBtn
-          tooltip={{ label: "Strike-through", shortcut: "⌘+S" }}
+          tooltip={{
+            label: "Strike-through",
+            shortcut: shortcutText(shortcut)
+          }}
           formatType="strikethrough"
         >
           S
@@ -27,6 +33,17 @@ export function StrikethroughAddon(props: Addon) {
     {
       renderLeaf: props => {
         return renderLeaf(props, "strikethrough", "s");
+      }
+    },
+    props
+  );
+  useOnKeyDown(
+    {
+      pattern: shortcut,
+      handler: (event, editor) => {
+        event.preventDefault();
+        toggleFormat(editor, "strikethrough");
+        return true;
       }
     },
     props

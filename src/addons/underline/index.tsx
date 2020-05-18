@@ -1,8 +1,11 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { MarkBtn } from "../../mark-button";
-import { useCreateAddon, useRenderLeaf } from "../../chief/chief";
+import { MarkBtn, toggleFormat } from "../../mark-button";
+import { useCreateAddon, useRenderLeaf, useOnKeyDown } from "../../chief/chief";
+import { shortcutText } from "../../shortcut";
+
+const shortcut = "mod+u";
 
 export const UnderlineAddonImpl: Addon = {
   hoverMenu: {
@@ -11,7 +14,7 @@ export const UnderlineAddonImpl: Addon = {
     renderButton: () => {
       return (
         <MarkBtn
-          tooltip={{ label: "Underline", shortcut: "⌘+U" }}
+          tooltip={{ label: "Underline", shortcut: shortcutText(shortcut) }}
           formatType="underline"
         >
           U
@@ -27,6 +30,17 @@ export function UnderlineAddon(props: Addon) {
     {
       renderLeaf: props => {
         return renderLeaf(props, "underline", "u");
+      }
+    },
+    props
+  );
+  useOnKeyDown(
+    {
+      pattern: shortcut,
+      handler: (event, editor) => {
+        event.preventDefault();
+        toggleFormat(editor, "underline");
+        return true;
       }
     },
     props

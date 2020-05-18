@@ -1,14 +1,19 @@
 import { Addon } from "../../addon";
-import { useOnKey } from "../../chief/chief";
+import { useOnKeyDown } from "../../chief/chief";
+import { Range } from "slate";
 
 export function PreventNewlineAddon(props: Addon) {
-  useOnKey(
+  useOnKeyDown(
     {
-      pattern: "Enter+Shift",
+      pattern: "enter+shift",
       handler: (event, editor) => {
-        event.preventDefault();
-        editor.insertText("\n");
-        return true;
+        if (editor.selection && Range.isCollapsed(editor.selection)) {
+          event.preventDefault();
+          event.stopPropagation();
+          editor.insertText("\n");
+          return true;
+        }
+        return false;
       }
     },
     props

@@ -29,15 +29,11 @@ function ExampleVideoAddon(props: Addon) {
       labels: {
         name: "Custom void element"
       },
-      withPlugin: editor => {
-        const { isVoid } = editor;
-        editor.isVoid = element => {
-          return Element.isElement(element) &&
-            element.type === "custom_void_element"
+      onPlugin: {
+        isVoid: isVoid => element =>
+          Element.isElement(element) && element.type === "custom_void_element"
             ? true
-            : isVoid(element);
-        };
-        return editor;
+            : isVoid(element)
       },
       hoverMenu: {
         order: 0,
@@ -72,33 +68,6 @@ function ExampleVideoAddon(props: Addon) {
   return null;
 }
 
-const addons = (
-  <>
-    <BoldAddon labels={{ name: "Fed" }}></BoldAddon>
-    <ItalicAddon></ItalicAddon>
-    <UnderlineAddon></UnderlineAddon>
-    <StrikethroughAddon></StrikethroughAddon>
-    <HeadingsAddon></HeadingsAddon>
-    <ImageAddon
-      onUploadRequest={async files => {
-        return new Promise((res, rej) => {
-          setTimeout(
-            () =>
-              res(
-                "https://stepoutbuffalo.com/wp-content/uploads/2018/07/kid-rock-and-brantley-gilbert-e1530892362363.jpg"
-              ),
-            5000
-          );
-        });
-      }}
-    ></ImageAddon>
-    <ResetToParagraphAddon></ResetToParagraphAddon>
-    <PreventNewlineAddon></PreventNewlineAddon>
-    <LinkAddon></LinkAddon>
-    {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
-  </>
-);
-
 function App() {
   const [value, setValue] = useState<Node[]>([
     {
@@ -113,13 +82,40 @@ function App() {
       type: "image",
       children: [{ text: "" }],
       url:
-        "https://stepoutbuffalo.com/wp-content/uploads/2018/07/kid-rock-and-brantley-gilbert-e1530892362363.jpg"
+        "https://newsbreak.dk/wp-content/uploads/2019/10/20191002-135123-L_web-610x377.jpg"
     }
   ]);
 
   // useEffect(() => console.log(value), [value]);
 
   const [preferDark, setPreferDark] = useState(false);
+
+  const addons = (
+    <>
+      <BoldAddon labels={{ name: "Fed" }}></BoldAddon>
+      <ItalicAddon></ItalicAddon>
+      <UnderlineAddon></UnderlineAddon>
+      <StrikethroughAddon></StrikethroughAddon>
+      <HeadingsAddon></HeadingsAddon>
+      <ImageAddon
+        onUploadRequest={async files => {
+          return new Promise((res, rej) => {
+            setTimeout(
+              () =>
+                res(
+                  "https://newsbreak.dk/wp-content/uploads/2019/10/20191002-135123-L_web-610x377.jpg"
+                ),
+              1000
+            );
+          });
+        }}
+      ></ImageAddon>
+      <ResetToParagraphAddon></ResetToParagraphAddon>
+      <PreventNewlineAddon></PreventNewlineAddon>
+      <LinkAddon></LinkAddon>
+      {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
+    </>
+  );
 
   return (
     <div style={{ padding: "1em" }}>

@@ -1,6 +1,20 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, {
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect
+} from "react";
 import { Addon } from "../../addon";
-import { Element, Editor, Transforms, Path, NodeEntry } from "slate";
+import {
+  Element,
+  Editor,
+  Transforms,
+  Path,
+  NodeEntry,
+  Range,
+  Location
+} from "slate";
 import {
   useFocused,
   useSelected,
@@ -8,17 +22,21 @@ import {
   ReactEditor,
   useSlate
 } from "slate-react";
-import { isNodeActive } from "../../utils";
-import { RichEditor } from "../../editor";
+import { isNodeActive, getNodeFromSelection, findNodes } from "../../utils";
+import { RichEditor } from "../../chief/editor";
 import { FileUpload } from "../../FileUpload";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import styled from "styled-components";
-import { useCreateAddon, useRenderElement, useOnKey } from "../../chief/chief";
-import { ElementWrapper } from "../../element-wrapper";
-import { StyledToolBox, StyledToolBase } from "../../StyledToolBox";
+import {
+  useCreateAddon,
+  useRenderElement,
+  useOnKeyDown
+} from "../../chief/chief";
+import { StyledToolBox } from "../../StyledToolBox";
 import { StyledToolbarBtn } from "../../StyledToolbarBtn";
-import { ToolsWrapper } from "../../ToolsWrapper";
 import { Button } from "../../Button";
+import { isDefined, isFilled } from "ts-is-present";
+import { WithAttentionToolbar } from "./StyledFocusToolbar";
 
 export interface AElement extends Element {
   type: string;
@@ -55,50 +73,34 @@ const StyledImageEmptyContainer = styled.div`
   }
 `;
 
-const StyledFocusToolbar = styled(StyledToolBase)`
-  background-color: transparent;
-  ${Button} {
-    background-color: rgba(47, 47, 47, 0.77);
-    &:hover {
-      background-color: rgba(67, 67, 67, 0.77);
-    }
-    font-size: 0.8em;
-    color: white;
-    border: none;
-    &:first-child {
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;
-    }
-    &:last-child {
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;
-    }
-    padding: 4px 8px;
-    margin: 0 1px;
-  }
-`;
-
 export const Image = (
   props: RenderElementProps & {
-    onOpenFileRequest: () => void;
+    onOpenFileRequest?: () => void;
+    onRemoved?: (url: string | null) => void;
     previewData: string[];
   }
 ) => {
   const focused = useFocused();
   const selected = useSelected();
   const editor = useSlate();
-  const { onOpenFileRequest, previewData, ...renderElementProps } = props;
+  const {
+    onOpenFileRequest,
+    onRemoved,
+    previewData,
+    ...renderElementProps
+  } = props;
   const { element, children, attributes } = renderElementProps;
   if (!isImageElement(element)) {
     return null;
   }
 
   const handleDelete = useCallback(() => {
+    onRemoved && onRemoved(element.url);
     Transforms.delete(editor, { at: ReactEditor.findPath(editor, element) });
   }, [element]);
 
   const handleReplace = useCallback(() => {
-    onOpenFileRequest();
+    onOpenFileRequest && onOpenFileRequest();
   }, []);
 
   if (element.url || typeof element.previewId === "number") {
@@ -108,17 +110,14 @@ export const Image = (
       ? props.previewData[element.previewId]
       : "";
     return (
-      <ElementWrapper
+      <WithAttentionToolbar
         {...renderElementProps}
-        attentionChildren={
-          <StyledFocusToolbar>
-            <ToolsWrapper>
-              <Button onClick={handleDelete}>Delete</Button>
-              <Button onClick={handleReplace}>Replace</Button>
-            </ToolsWrapper>
-          </StyledFocusToolbar>
+        btns={
+          <React.Fragment>
+            <Button onClick={handleDelete}>Delete</Button>
+            <Button onClick={handleReplace}>Replace</Button>
+          </React.Fragment>
         }
-        style={{ right: 0, marginTop: 5, marginRight: 5 }}
       >
         <div>
           <div contentEditable={false}>
@@ -138,7 +137,7 @@ export const Image = (
             {children}
           </div>
         </div>
-      </ElementWrapper>
+      </WithAttentionToolbar>
     );
   } else {
     return (
@@ -154,33 +153,15 @@ export const Image = (
 
 export const ImageAddonImpl: Addon<{ name: string }, {}> = {
   name: "image",
-  withPlugin: <T extends Editor>(editor: T): T => {
-    const { isVoid, normalizeNode } = editor;
-
-    editor.isVoid = (element: Element) => {
+  onPlugin: {
+    isVoid: isVoid => element => {
       return isAElement(element) && element.type === "image"
         ? true
         : isVoid(element);
-    };
-
-    // TODO
-    editor.normalizeNode = (entry: NodeEntry) => {
-      const [node, path] = entry;
-      if (isImageElement(node)) {
-        Transforms.insertNodes(
-          editor,
-          {
-            type: "paragraph",
-            children: [{ text: "" }]
-          },
-          { at: Path.next(path) }
-        );
-      } else {
-        normalizeNode(entry);
-      }
-    };
-
-    return editor;
+    },
+    isInline: isInline => element => {
+      return isInline(element);
+    }
   },
   blockInsertMenu: {
     order: 1,
@@ -201,9 +182,16 @@ export const ImageAddonImpl: Addon<{ name: string }, {}> = {
   }
 };
 
+function getAllImageNodes(editor: Editor) {
+  const [...images] = findNodes(editor, n => n.type === "image");
+  return images.map(([node]) => node) as ImageElement[];
+}
+
 export function ImageAddon(
   props: Addon & {
     onUploadRequest?: (files: globalThis.FileList | null) => Promise<string>;
+    onRemoved?: (url: string | null) => void;
+    onChange?: (images: ImageElement[]) => void;
   }
 ) {
   const editor = useSlate();
@@ -230,6 +218,17 @@ export function ImageAddon(
     const imageRef = Editor.rangeRef(editor, editor.selection);
     const onUploadedSuccess = (url: string) => {
       if (!imageRef.current) return;
+      const node = getNodeFromSelection(editor, imageRef.current);
+      if (node && isImageElement(node)) {
+        setPreviewData(d => {
+          if (typeof node.previewId === "number") {
+            const _d = [...d];
+            _d[node.previewId] = "";
+            return _d;
+          }
+          return d;
+        });
+      }
       Transforms.setNodes(
         editor,
         {
@@ -272,16 +271,29 @@ export function ImageAddon(
     }
   };
 
+  let imageUrls: ImageElement[] = [];
+  if (props.onChange) {
+    imageUrls = getAllImageNodes(editor)
+      .map(it => it)
+      .filter(isDefined)
+      .filter(isFilled);
+  }
+
+  useEffect(() => {
+    props.onChange && props.onChange(imageUrls);
+  }, [JSON.stringify(imageUrls), props.onChange]);
+
   const { addon } = useCreateAddon(ImageAddonImpl, props);
 
   useRenderElement(
     {
       typeMatch: /image/,
-      renderElement: props => (
+      renderElement: renderElementProps => (
         <Image
           previewData={previewData}
           onOpenFileRequest={() => fileRef.current && fileRef.current.click()}
-          {...props}
+          onRemoved={props.onRemoved}
+          {...renderElementProps}
         />
       )
     },

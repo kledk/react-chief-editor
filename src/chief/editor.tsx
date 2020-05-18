@@ -20,24 +20,24 @@ import {
 } from "slate-react";
 import styled, { ThemeProvider } from "styled-components";
 import { isDefined } from "ts-is-present";
-import { Addon } from "./addon";
-import { BlockInsert } from "./BlockInsert";
-import { HoverToolProvider } from "./HoveringTool";
-import { PlaceholderHint } from "./placeholder-hint";
-import { StyledToolbarBtn } from "./StyledToolbarBtn";
-import { StyledToolBox } from "./StyledToolBox";
-import { ToolDivider } from "./ToolDivider";
-import { ToolsWrapper } from "./ToolsWrapper";
-import { isNodeActive } from "./utils";
-import { OverrideTheme } from "./override-theme";
-import { AeditorTheme } from "./AeditorTheme";
-import { defaultTheme } from "./defaultTheme";
+import { Addon } from "../addon";
+import { BlockInsert } from "../BlockInsert";
+import { HoverToolProvider } from "../HoveringTool";
+import { PlaceholderHint } from "../placeholder-hint";
+import { StyledToolbarBtn } from "../StyledToolbarBtn";
+import { StyledToolBox } from "../StyledToolBox";
+import { ToolDivider } from "../ToolDivider";
+import { ToolsWrapper } from "../ToolsWrapper";
+import { isNodeActive } from "../utils";
+import { OverrideTheme } from "../override-theme";
+import { AeditorTheme } from "../AeditorTheme";
+import { defaultTheme } from "../defaultTheme";
 import {
   InjectedRenderElement,
   InjectedRenderLeaf,
   useChief,
   KeyHandler
-} from "./chief/chief";
+} from "./chief";
 import isHotkey from "is-hotkey";
 
 export const deselect = Transforms.deselect;

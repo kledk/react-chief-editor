@@ -7,6 +7,19 @@ import {
   KeyHandler
 } from "./chief/chief";
 
+type OnPlugin = {
+  [key in keyof ReactEditor]?: (
+    fn: ReactEditor[key],
+    editor: ReactEditor
+  ) => ReactEditor[key];
+};
+
+type KnownKeys<T> = {
+  [K in keyof T]: string extends K ? never : number extends K ? never : K;
+} extends { [_ in keyof T]: infer U }
+  ? U
+  : never;
+
 export interface Addon<
   TLabels extends Object = { [key: string]: string },
   TData extends Object = {}
@@ -15,12 +28,8 @@ export interface Addon<
   onKey?: KeyHandler;
   renderLeaf?: InjectedRenderLeaf;
   renderElement?: InjectedRenderElement;
-  withPlugin?(editor: ReactEditor): ReactEditor;
+  onPlugin?: Pick<OnPlugin, KnownKeys<OnPlugin>>;
   decorate?: (entry: NodeEntry, editor: ReactEditor) => Range[];
-  onKeyDown?(
-    event: React.KeyboardEvent<HTMLElement>,
-    editor: ReactEditor
-  ): boolean | undefined;
   onClick?(event: React.MouseEvent<HTMLElement>, editor: ReactEditor): void;
   hoverMenu?: {
     order: number;

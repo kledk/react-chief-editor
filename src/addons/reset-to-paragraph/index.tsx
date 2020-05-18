@@ -4,10 +4,8 @@ import { Editor, Transforms } from "slate";
 import { useCreateAddon } from "../../chief/chief";
 
 export const ResetToParagraphAddonImpl: Addon = {
-  withPlugin: <T extends ReactEditor>(editor: T): T => {
-    const { deleteBackward } = editor;
-
-    editor.deleteBackward = (unit: "character" | "word" | "line" | "block") => {
+  onPlugin: {
+    deleteBackward: (deleteBackward, editor) => unit => {
       const [isParagraph] = Editor.nodes(editor, {
         match: n => n.type === "paragraph"
       });
@@ -19,9 +17,7 @@ export const ResetToParagraphAddonImpl: Addon = {
         return Transforms.setNodes(editor, { type: "paragraph" });
       }
       return deleteBackward(unit);
-    };
-
-    return editor;
+    }
   }
 };
 

@@ -110,7 +110,11 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
           ]}
         >
           {({ ref, style, placement, arrowProps }) => (
-            <div ref={ref} style={style} data-placement={placement}>
+            <div
+              ref={ref}
+              style={{ ...style, zIndex: 20 }}
+              data-placement={placement}
+            >
               <div ref={toolboxRef}>{props.children}</div>
               <div ref={arrowProps.ref} style={arrowProps.style} />
             </div>
