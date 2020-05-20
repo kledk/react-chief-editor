@@ -66,7 +66,7 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
       const [rootNode] = Editor.nodes(editor, {
         at: Editor.start(editor, [0, 0])
       });
-      if (rootNode.length > 0 && Node.isNode(rootNode[0])) {
+      if (rootNode && rootNode.length > 0 && Node.isNode(rootNode[0])) {
         const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode[0]);
         const activeDOMNode = ReactEditor.toDOMNode(editor, activenode);
         const rect = activeDOMNode.getBoundingClientRect();
