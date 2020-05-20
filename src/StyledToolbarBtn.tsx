@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CleanButton } from "./clean-button";
+import { CleanButton } from "./ui/clean-button";
 import { OverrideTheme } from "./override-theme";
 
 export const StyledToolbarBtn = styled(CleanButton)<{

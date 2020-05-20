@@ -15,7 +15,7 @@ export * from "./addons/reset-to-paragraph";
 export * from "./addons/prevent-newline";
 export * from "./addons/lists";
 export * from "./addons/block-tab";
-export * from "./AeditorTheme";
+export * from "./chief-editor-theme";
 export * from "./defaultTheme";
 export * from "./ToolbarBtn";
 export * from "./InputWrapper";

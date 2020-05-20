@@ -1,6 +1,6 @@
 import { css } from "styled-components";
 
-export type AeditorTheme = {
+export type ChiefEditorTheme = {
   colors?: {
     primary: string;
     seconday: string;

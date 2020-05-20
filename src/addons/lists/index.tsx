@@ -1,4 +1,4 @@
-import { Addon } from "../../addon";
+import { toggleList } from "./transforms";
 import {
   useRenderElement,
   ChiefElement,
@@ -7,26 +7,32 @@ import {
 } from "../../chief/chief";
 import { renderElement } from "../../element-renderer";
 import { Editor, Transforms, Element } from "slate";
-import { ReactEditor, useSlate } from "slate-react";
-import { isElementActive, isElementEmpty } from "../../element-utils";
+import { ReactEditor } from "slate-react";
+import { isElementEmpty } from "../../element-utils";
 import { getState } from "../../chief/chief-state";
 import { getAncestor, getActiveNode } from "../../utils";
 
-const LIST_ITEM = "list-item";
+export const TYPE_LIST_ITEM = "list-item";
+export const TYPE_UNORDERED_LIST = "unordered-list";
+export const TYPE_ORDERED_LIST = "ordered-list";
+export const LIST_TYPES = [
+  TYPE_LIST_ITEM,
+  TYPE_UNORDERED_LIST,
+  TYPE_ORDERED_LIST
+];
 
-type ListElement = {
-  type: "list-item" | "ordered-list" | "unordered-list";
-} & ChiefElement;
+type ListElement = {} & ChiefElement;
 
-export function ListsAddon(props: Addon) {
+export function ListsAddon() {
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
-      if (node.type === "list-item") {
+      if (node.type === TYPE_LIST_ITEM) {
         const [parent] = Editor.parent(editor, path);
         if (
           parent &&
-          parent.type !== "ordered-list" &&
-          parent.type !== "unordered-list"
+          ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+            parent.type as string
+          )
         ) {
           Transforms.setNodes(editor, { type: "paragraph" }, { at: path });
         }
@@ -34,16 +40,17 @@ export function ListsAddon(props: Addon) {
       return normalizeNode([node, path]);
     }
   });
+
   useRenderElement<ListElement>({
-    typeMatch: ["list-item", "ordered-list", "unordered-list"],
+    typeMatch: LIST_TYPES,
     renderElement: props => {
       switch (props.element.type) {
-        case "unordered-list":
+        case TYPE_UNORDERED_LIST:
           return renderElement(props, props.element.type, "ul");
-        case "ordered-list":
+        case TYPE_ORDERED_LIST:
           return renderElement(props, props.element.type, "ol");
         default:
-          return renderElement(props, "list-item", "li");
+          return renderElement(props, TYPE_LIST_ITEM, "li");
       }
     }
   });
@@ -52,14 +59,16 @@ export function ListsAddon(props: Addon) {
     pattern: "enter",
     handler: (e, editor) => {
       const { elementType, element } = getState(editor);
-      if (elementType !== LIST_ITEM) {
+      if (elementType !== TYPE_LIST_ITEM) {
         return false;
       }
       let ancestor = getAncestor(editor, element as Element, 1);
 
       if (
         !ancestor ||
-        !["ordered-list", "unordered-list"].includes(ancestor!.type as string)
+        ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+          ancestor!.type as string
+        )
       ) {
         return false;
       }
@@ -67,7 +76,7 @@ export function ListsAddon(props: Addon) {
       if (!isElementEmpty(editor)) {
         Editor.withoutNormalizing(editor, () => {
           Transforms.insertNodes(editor, {
-            type: "list-item",
+            type: TYPE_LIST_ITEM,
             children: [{ text: "" }]
           });
         });
@@ -79,7 +88,7 @@ export function ListsAddon(props: Addon) {
         const list = getAncestor(editor, active, 1) as Element;
         const listParent = getAncestor(editor, active, 2);
 
-        if (listParent && listParent.children[0].type === "list-item") {
+        if (listParent && listParent.children[0].type === TYPE_LIST_ITEM) {
           //2. If nested then unwrap and move left
           Transforms.unwrapNodes(editor, {
             match: n => n.type === list.type,
@@ -98,14 +107,16 @@ export function ListsAddon(props: Addon) {
     pattern: "tab",
     handler: (e, editor) => {
       const { elementType, element } = getState(editor);
-      if (!element || elementType !== "list-item") {
+      if (!element || elementType !== TYPE_LIST_ITEM) {
         return false;
       }
 
       let ancestor = getAncestor(editor, element, 1);
       if (
         !ancestor ||
-        !["ordered-list", "unordered-list"].includes(ancestor!.type as string)
+        ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+          ancestor!.type as string
+        )
       ) {
         return false;
       }
@@ -113,7 +124,7 @@ export function ListsAddon(props: Addon) {
       if (ancestor.children.length > 1) {
         e.preventDefault();
         const index = ancestor?.children.indexOf(element) - 1;
-        if (ancestor.children[index].type !== "list-item") {
+        if (ancestor.children[index].type !== TYPE_LIST_ITEM) {
           // 3a. tab = move right. If the node above is a list then append to it.
           const otherList = ancestor.children[index] as Element;
           const destination = ReactEditor.findPath(
@@ -137,14 +148,16 @@ export function ListsAddon(props: Addon) {
     pattern: "shift+tab",
     handler: (e, editor) => {
       const { elementType, element } = getState(editor);
-      if (!element || elementType !== "list-item") {
+      if (!element || elementType !== TYPE_LIST_ITEM) {
         return false;
       }
 
       let ancestor = getAncestor(editor, element, 1);
       if (
         !ancestor ||
-        !["ordered-list", "unordered-list"].includes(ancestor!.type as string)
+        ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+          ancestor!.type as string
+        )
       ) {
         return false;
       }
@@ -152,7 +165,7 @@ export function ListsAddon(props: Addon) {
       if (e.shiftKey) {
         let ancestor = getAncestor(editor, element, 2);
         // 1. tab+shift = move left to grandparent list if nested
-        if (ancestor?.children.find(child => child.type === "list-item")) {
+        if (ancestor?.children.find(child => child.type === TYPE_LIST_ITEM)) {
           Transforms.liftNodes(editor);
         } else {
           const options = {
@@ -173,23 +186,3 @@ export function ListsAddon(props: Addon) {
   });
   return null;
 }
-
-export const toggleList = (editor: ReactEditor, type: string) => {
-  const isActive = isElementActive(editor, type);
-
-  Transforms.unwrapNodes(editor, {
-    match: n => n.type === type,
-    split: true
-  });
-
-  Editor.withoutNormalizing(editor, () => {
-    Transforms.setNodes(editor, {
-      type: isActive ? "paragraph" : "list-item"
-    });
-
-    if (!isActive) {
-      const list = { type, children: [] };
-      Transforms.wrapNodes(editor, list);
-    }
-  });
-};

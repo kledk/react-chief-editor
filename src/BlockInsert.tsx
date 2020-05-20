@@ -9,7 +9,7 @@ import { useSlate, ReactEditor } from "slate-react";
 import { Node, Editor, Range, Element } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
-import { CleanButton } from "./clean-button";
+import { CleanButton } from "./ui/clean-button";
 import { getState } from "./chief/chief-state";
 
 export const BlockInsertBtn = styled(CleanButton)`

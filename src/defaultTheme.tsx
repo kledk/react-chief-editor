@@ -1,6 +1,6 @@
-import { AeditorTheme } from "./AeditorTheme";
+import { ChiefEditorTheme } from "./chief-editor-theme";
 
-export const defaultTheme: AeditorTheme = {
+export const defaultTheme: ChiefEditorTheme = {
   colors: {
     primary: "#4299E1",
     seconday: "#38B2AC",

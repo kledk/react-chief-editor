@@ -27,7 +27,7 @@ import { ToolDivider } from "../ToolDivider";
 import { ToolsWrapper } from "../ToolsWrapper";
 import { isNodeActive } from "../utils";
 import { OverrideTheme } from "../override-theme";
-import { AeditorTheme } from "../AeditorTheme";
+import { ChiefEditorTheme } from "../chief-editor-theme";
 import { defaultTheme } from "../defaultTheme";
 import {
   InjectedRenderElement,
@@ -296,7 +296,7 @@ const handleDecorate = (
 export const Editor = React.memo(
   (
     props: {
-      theme?: AeditorTheme & { [key: string]: any };
+      theme?: ChiefEditorTheme & { [key: string]: any };
     } & React.ComponentProps<typeof Editable>
   ) => {
     const {

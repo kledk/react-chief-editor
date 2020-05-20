@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { ElementWrapper } from "../../element-wrapper";
 import { StyledToolBase } from "../../StyledToolBox";
 import { ToolsWrapper } from "../../ToolsWrapper";
-import { CleanButton } from "../../clean-button";
+import { CleanButton } from "../../ui/clean-button";
 
 const StyledFocusToolbar = styled(StyledToolBase)`
   background-color: transparent;
