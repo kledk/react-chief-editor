@@ -1,4 +1,11 @@
-import React, { useState, useRef, useContext, useMemo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useContext,
+  useMemo,
+  useEffect,
+  useCallback
+} from "react";
 import {
   RenderLeafProps,
   ReactEditor,
@@ -10,6 +17,9 @@ import { createEditor as createSlateEditor, Node, Element } from "slate";
 import { withHistory } from "slate-history";
 import merge from "lodash/merge";
 import { Addon, OnPlugin } from "../addon";
+import { ChiefEditorTheme } from "../chief-editor-theme";
+import { ThemeProvider } from "styled-components";
+import { defaultTheme } from "../defaultTheme";
 
 export function isChiefElement(element: unknown): element is ChiefElement {
   return (element as ChiefElement).type !== undefined;
@@ -25,6 +35,8 @@ export type ChiefRenderElementProps<
   element: T;
 };
 
+export type ElementTypeMatch = RegExp | string | string[];
+
 export type InjectedRenderLeaf = {
   renderLeaf: (
     props: RenderLeafProps,
@@ -33,7 +45,7 @@ export type InjectedRenderLeaf = {
 };
 
 export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
-  typeMatch?: RegExp | string | string[];
+  typeMatch?: ElementTypeMatch;
   renderElement:
     | JSX.Element
     | ((
@@ -41,6 +53,9 @@ export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
         editor: ReactEditor
       ) => JSX.Element | undefined);
 };
+
+export type InjectedLabels = { [key: string]: string | undefined };
+export type Label = { key: string; defaultLabel: string };
 
 interface ChiefContextValue {
   addons: Addon[];
@@ -62,6 +77,8 @@ interface ChiefContextValue {
   injectPlugin: (plugin: OnPlugin) => void;
   removePlugin: (plugin: OnPlugin) => void;
   injectedPlugins: OnPlugin[];
+  injectedLabels: InjectedLabels;
+  injectLabels: (labels: InjectedLabels) => void;
 }
 
 const ChiefContext = React.createContext<ChiefContextValue | null>(null);
@@ -78,6 +95,7 @@ function useProvideChiefContext(props: {
   const [renderElements, setRenderElements] = useState<InjectedRenderElement[]>(
     []
   );
+  const [injectedLabels, setInjectedLabels] = useState<InjectedLabels>({});
   const [onKeyHandlers, setOnKeyHandlers] = useState<KeyHandler[]>([]);
   const editor = createEditor(injectedPlugins);
   const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
@@ -147,6 +165,10 @@ function useProvideChiefContext(props: {
     });
   }
 
+  function injectLabels(labels: InjectedLabels) {
+    setInjectedLabels(it => ({ ...it, ...labels }));
+  }
+
   const value: ChiefContextValue = {
     addons: addons,
     editor,
@@ -166,7 +188,9 @@ function useProvideChiefContext(props: {
     onKeyHandlers,
     injectPlugin,
     removePlugin,
-    injectedPlugins
+    injectedPlugins,
+    injectedLabels,
+    injectLabels
   };
 
   return {
@@ -202,16 +226,11 @@ export function useCreateAddon<TAddon extends Addon>(
   return { addon: injectedAddon };
 }
 
-export function useRenderLeaf(
-  irl: InjectedRenderLeaf,
-  overrides: Addon,
-  deps: any[] = []
-) {
+export function useRenderLeaf(irl: InjectedRenderLeaf, deps: any[] = []) {
   const chief = useChief();
   useEffect(() => {
-    const _irl = merge({}, irl, overrides?.renderLeaf);
-    chief.injectRenderLeaf(_irl);
-    return () => chief.removeRenderLeaf(_irl);
+    chief.injectRenderLeaf(irl);
+    return () => chief.removeRenderLeaf(irl);
   }, deps);
 }
 
@@ -261,6 +280,27 @@ export function usePlugin(plugin: OnPlugin) {
   }, []);
 }
 
+export function useLabels(labels?: InjectedLabels) {
+  const { injectedLabels, injectLabels } = useChief();
+  const getLabel = useCallback(
+    (label: Label) => {
+      if (typeof injectedLabels[label.key] === "string") {
+        return injectedLabels[label.key];
+      }
+      return label.defaultLabel;
+    },
+    [injectedLabels]
+  );
+
+  useEffect(() => {
+    if (labels) {
+      injectLabels(labels);
+    }
+  }, []);
+
+  return [getLabel, injectLabels] as const;
+}
+
 export const Chief = React.memo(function(props: {
   value: Node[];
   onChange: (value: Node[]) => void;
@@ -268,13 +308,17 @@ export const Chief = React.memo(function(props: {
   addons?: Addon[];
   readOnly?: boolean;
   id?: string;
+  theme?: ChiefEditorTheme & { [key: string]: any };
 }) {
-  const { children, onChange, value, readOnly, id, addons } = props;
+  const { children, onChange, value, readOnly, id, addons, theme } = props;
+  const _theme = merge({}, defaultTheme, theme);
   const chief = useProvideChiefContext({ readOnly, addons, id });
   return (
     <Slate editor={chief.value.editor} value={value} onChange={onChange}>
       <ChiefContext.Provider value={chief.value}>
-        <React.Fragment>{children}</React.Fragment>
+        <ThemeProvider theme={_theme}>
+          <React.Fragment>{children}</React.Fragment>
+        </ThemeProvider>
       </ChiefContext.Provider>
     </Slate>
   );

@@ -4,11 +4,12 @@ import usePopper from "react-overlays/usePopper";
 import Overlay from "react-overlays/Overlay";
 import { useHover } from "./utils";
 import styled, { css } from "styled-components";
+import { useLabels, Label } from "./chief/chief";
 
 export type Ref = HTMLElement;
 
 type Props = {
-  tooltip?: { label?: string; shortcut?: string };
+  tooltip?: { label: Label; shortcut?: string };
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 } & React.ComponentProps<typeof StyledToolbarBtn>;
@@ -17,6 +18,7 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
   const { onClick, onMouseDown, tooltip, ...otherProps } = props;
   const containerRef = useRef(null);
   const [triggerRef, show] = useHover<HTMLDivElement>();
+  const [labels] = useLabels();
 
   return (
     <div ref={containerRef}>
@@ -50,7 +52,7 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
             {tooltip && (
               <StyledTooltipBody>
                 <div>
-                  <strong>{tooltip.label}</strong>
+                  <strong>{labels(tooltip.label)}</strong>
                 </div>
                 <div>{tooltip.shortcut}</div>
               </StyledTooltipBody>

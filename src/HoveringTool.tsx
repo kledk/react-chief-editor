@@ -23,7 +23,6 @@ type HoverToolContext = {
   saveSelection: (selection: Range | null) => () => void;
   perform: (fn: (selection: Range) => void) => void;
   useToolWindow: () => typeof ToolWindow;
-  editableProps: EditableProps;
 };
 
 const hoverToolContext = React.createContext<HoverToolContext | undefined>(
@@ -98,8 +97,7 @@ function useProvideContext() {
     saveSelection: () => () => null,
     perform: () => () => null,
     selection: null,
-    useToolWindow: getUseToolWindow(),
-    editableProps: {}
+    useToolWindow: getUseToolWindow()
   });
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
@@ -185,7 +183,7 @@ export function useHoverTool() {
 }
 
 export function HoverToolProvider(props: {
-  children?: React.ReactNode | ((props: EditableProps) => React.ReactNode);
+  children?: React.ReactNode;
   hoverTool: React.ReactNode;
 }) {
   const { ctx, setEnabled } = useProvideContext();
@@ -197,9 +195,7 @@ export function HoverToolProvider(props: {
       >
         {props.hoverTool}
       </HoveringTool>
-      {typeof props.children === "function"
-        ? props.children(ctx.editableProps)
-        : props.children}
+      {props.children}
     </hoverToolContext.Provider>
   );
 }

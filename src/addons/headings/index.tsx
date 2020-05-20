@@ -12,6 +12,7 @@ import {
   useOnKeyDown
 } from "../../chief/chief";
 import { RichEditor } from "../../chief/editor";
+import { Control } from "../../control";
 
 export const headingTypes = [
   "heading-1",
@@ -22,63 +23,41 @@ export const headingTypes = [
   "heading-6"
 ];
 
-export const HeadingsAddonImpl: Addon = {
-  hoverMenu: {
-    order: 4,
-    category: "heading",
-    renderButton: () => {
-      return (
-        <React.Fragment>
-          <HeadingBtn headingType="heading-1">H1</HeadingBtn>
-          <HeadingBtn headingType="heading-2">H2</HeadingBtn>
-          <HeadingBtn headingType="heading-3">H3</HeadingBtn>
-          <HeadingBtn headingType="heading-4">H4</HeadingBtn>
-          <HeadingBtn headingType="heading-5">H5</HeadingBtn>
-        </React.Fragment>
-      );
-    }
-  },
-  blockInsertMenu: {
-    order: 1,
-    category: "heading",
-    renderButton: editor => {
-      return (
-        <React.Fragment>
+export const headingBlockControls: Control[] = [
+  {
+    category: "headings",
+    render: editor => (
+      <React.Fragment>
+        {headingTypes.map((it, i) => (
           <ToolbarBtn
-            isActive={isNodeActive(editor, "heading-1")}
+            isActive={isNodeActive(editor, it)}
             onClick={() => {
-              RichEditor.insertBlock(editor, "heading-1");
+              RichEditor.insertBlock(editor, it);
               ReactEditor.focus(editor);
             }}
           >
-            H1
+            {`H${i + 1}`}
           </ToolbarBtn>
-          <ToolbarBtn
-            isActive={isNodeActive(editor, "heading-2")}
-            onClick={() => {
-              RichEditor.insertBlock(editor, "heading-2");
-              ReactEditor.focus(editor);
-            }}
-          >
-            H2
-          </ToolbarBtn>
-          <ToolbarBtn
-            isActive={isNodeActive(editor, "heading-3")}
-            onClick={() => {
-              RichEditor.insertBlock(editor, "heading-3");
-              ReactEditor.focus(editor);
-            }}
-          >
-            H3
-          </ToolbarBtn>
-        </React.Fragment>
-      );
-    }
+        ))}
+      </React.Fragment>
+    )
   }
-};
+];
+
+export const headingContextControls: Control[] = [
+  {
+    category: "headings",
+    render: editor => (
+      <React.Fragment>
+        {headingTypes.map((it, i) => (
+          <HeadingBtn headingType={it}>{`H${i + 1}`}</HeadingBtn>
+        ))}
+      </React.Fragment>
+    )
+  }
+];
 
 export function HeadingsAddon(props: Addon) {
-  useCreateAddon(HeadingsAddonImpl, props);
   useRenderElement({
     typeMatch: /heading-[1-6]/,
     renderElement: props => <Heading {...props} />

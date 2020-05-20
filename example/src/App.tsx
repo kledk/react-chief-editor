@@ -20,7 +20,19 @@ import {
   usePlugin,
   ListsAddon,
   BlockTabAddon,
-  ParagraphAddon
+  ParagraphAddon,
+  headingBlockControls,
+  BlockInsert,
+  BlockInsertControls,
+  HoverToolProvider,
+  imageBlockControls,
+  HoverToolControls,
+  boldControl,
+  italicControl,
+  strikethroughControl,
+  underlineControl,
+  headingContextControls,
+  linkControl
 } from "chief-editor";
 import { Node, Element } from "slate";
 import { css } from "styled-components";
@@ -74,12 +86,25 @@ function App() {
   const [value, setValue] = useState<Node[]>([
     {
       type: "heading-1",
-      children: [{ text: "Header1" }]
+      children: [{ text: "Dark" }]
+    },
+    {
+      type: "paragraph",
+      children: [
+        {
+          text:
+            "Dark er en tysksproget web-tv-serie skabt af Baran bo Odar og Jantje Friese for Netflix. Serien havde premiere på Netflix 1. december 2017. Den første sæson – på ti afsnit – blev hovedsagelig godt modtaget, med positive og negative sammenligninger med Stranger Things, en anden overnaturlig thrillerserie fra Netflix"
+        }
+      ]
+    },
+    {
+      type: "heading-1",
+      children: [{ text: "Images" }]
     },
     {
       type: "image",
       url:
-        "https://www.platekompaniet.no/globalassets/imported-images/cd/2000334734.jpg?preset=ProductPage",
+        "https://occ-0-1068-1723.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABSJBCX9UxJkkZH_NLhm0nynLxHTqy99ETHJuidWOohECj4qKD3kqC8kr4gk2anceRXPMLULS3hruYHK56hpZCSsWD1GqNO4GaWrot7bwzPHJqxfT.jpg?r=2af",
       children: [
         {
           text: "asd"
@@ -87,46 +112,42 @@ function App() {
       ]
     },
     {
+      type: "heading-1",
+      children: [{ text: "Lists" }]
+    },
+    {
+      type: "heading-2",
+      children: [{ text: "Ordered" }]
+    },
+    {
       type: "ordered-list",
       children: [
-        { type: "list-item", children: [{ text: "kasper" }] },
-        { type: "list-item", children: [{ text: "laura" }] }
+        { type: "list-item", children: [{ text: "Item 1" }] },
+        { type: "list-item", children: [{ text: "item 2" }] }
       ]
+    },
+    {
+      type: "heading-2",
+      children: [{ text: "Unordered" }]
     },
     {
       type: "unordered-list",
       children: [
-        { type: "list-item", children: [{ text: "kasper" }] },
-        { type: "list-item", children: [{ text: "laura" }] }
+        { type: "list-item", children: [{ text: "Item " }] },
+        { type: "list-item", children: [{ text: "item" }] }
       ]
     }
   ]);
 
-  // useEffect(() => console.log(value), [value]);
-
-  const [preferDark, setPreferDark] = useState(false);
-
   const addons = (
     <>
       <ParagraphAddon></ParagraphAddon>
-      <BoldAddon labels={{ name: "Fed" }}></BoldAddon>
+      <BoldAddon></BoldAddon>
       <ItalicAddon></ItalicAddon>
       <UnderlineAddon></UnderlineAddon>
       <StrikethroughAddon></StrikethroughAddon>
       <HeadingsAddon></HeadingsAddon>
-      <ImageAddon
-        onUploadRequest={async files => {
-          return new Promise((res, rej) => {
-            setTimeout(
-              () =>
-                res(
-                  "https://newsbreak.dk/wp-content/uploads/2019/10/20191002-135123-L_web-610x377.jpg"
-                ),
-              1000
-            );
-          });
-        }}
-      ></ImageAddon>
+      <ImageAddon></ImageAddon>
       <ResetToParagraphAddon></ResetToParagraphAddon>
       <PreventNewlineAddon></PreventNewlineAddon>
       <LinkAddon></LinkAddon>
@@ -138,50 +159,93 @@ function App() {
 
   return (
     <div style={{ padding: "1em" }}>
-      <Chief value={value} onChange={value => setValue(value)}>
+      <Chief
+        value={value}
+        onChange={value => setValue(value)}
+        theme={{
+          overrides: {
+            Editor: css`
+              font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #151515;
+              color: rgba(28, 98, 116);
+              font-size: 18px;
+              h1,
+              h2,
+              h3,
+              h4,
+              h5,
+              h6 {
+                color: rgba(153, 109, 33);
+              }
+              a {
+                color: rgba(153, 109, 33);
+              }
+              ol,
+              ul {
+                margin: 0;
+                padding-inline-start: 25px;
+              }
+              ol ol ol ol,
+              ol {
+                list-style: decimal outside none;
+              }
+              ol ol ol ol ol,
+              ol ol {
+                list-style: lower-latin outside none;
+              }
+              ol ol ol ol ol ol,
+              ol ol ol {
+                list-style: lower-roman outside none;
+              }
+              ul ul ul ul,
+              ul {
+                list-style: square outside none;
+              }
+
+              ul ul ul ul ul,
+              ul ul {
+                list-style: circle outside none;
+              }
+
+              ul ul ul ul ul ul,
+              ul ul ul {
+                list-style: disc outside none;
+              }
+            `
+          }
+        }}
+      >
         {addons}
-        <Editor
-          theme={{
-            overrides: {
-              Editor: css`
-                font-size: 14px;
-                ol,
-                ul {
-                  margin: 0;
-                  padding-inline-start: 15px;
-                }
-                ol ol ol ol,
-                ol {
-                  list-style: decimal outside none;
-                }
-                ol ol ol ol ol,
-                ol ol {
-                  list-style: lower-latin outside none;
-                }
-                ol ol ol ol ol ol,
-                ol ol ol {
-                  list-style: lower-roman outside none;
-                }
-                ul ul ul ul,
-                ul {
-                  list-style: square outside none;
-                }
-
-                ul ul ul ul ul,
-                ul ul {
-                  list-style: circle outside none;
-                }
-
-                ul ul ul ul ul ul,
-                ul ul ul {
-                  list-style: disc outside none;
-                }
-              `
-            }
+        <div
+          style={{
+            marginLeft: 20
           }}
-          spellCheck={false}
-          style={{ margin: 10, overflow: "auto", minHeight: 500 }}
-        ></Editor>
+        >
+          <BlockInsert>
+            <BlockInsertControls
+              controls={[...headingBlockControls, ...imageBlockControls]}
+            />
+          </BlockInsert>
+          <HoverToolProvider
+            hoverTool={
+              <HoverToolControls
+                controls={[
+                  BoldAddon.Control,
+                  italicControl,
+                  strikethroughControl,
+                  underlineControl,
+                  ...headingContextControls,
+                  linkControl
+                ]}
+              />
+            }
+          >
+            <Editor
+              spellCheck={false}
+              style={{ margin: 10, overflow: "auto", minHeight: 500 }}
+            ></Editor>
+          </HoverToolProvider>
+        </div>
       </Chief>
 
       {/* <textarea

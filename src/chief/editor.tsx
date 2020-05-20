@@ -16,10 +16,9 @@ import {
   RenderLeafProps,
   useSlate
 } from "slate-react";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import { isDefined } from "ts-is-present";
 import { Addon } from "../addon";
-import { BlockInsert } from "../BlockInsert";
 import { HoverToolProvider } from "../HoveringTool";
 import { StyledToolbarBtn } from "../StyledToolbarBtn";
 import { StyledToolBox } from "../StyledToolBox";
@@ -27,16 +26,18 @@ import { ToolDivider } from "../ToolDivider";
 import { ToolsWrapper } from "../ToolsWrapper";
 import { isNodeActive } from "../utils";
 import { OverrideTheme } from "../override-theme";
-import { ChiefEditorTheme } from "../chief-editor-theme";
-import { defaultTheme } from "../defaultTheme";
+
 import {
   InjectedRenderElement,
   InjectedRenderLeaf,
   useChief,
   KeyHandler,
-  ChiefRenderElementProps
+  ChiefRenderElementProps,
+  ElementTypeMatch,
+  ChiefElement
 } from "./chief";
 import isHotkey from "is-hotkey";
+import { Control } from "../control";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
@@ -64,63 +65,44 @@ const EditorThemeWrapper = styled.div`
   font-size: 14px;
   ${props => props.theme.overrides.editor}
   ${props => OverrideTheme("Editor", props)}
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-    background-color: ${props.theme.darkTheme.background};
-    color: ${props.theme.darkTheme.foreground};
-    & ::selection {
-      color: white;
-      background: #cbcbcb
-    }
-  }`}
 `;
 
-function HoveringToolbars(props: { addons: Addon[] }) {
-  const { addons } = props;
+export function HoverToolControls(props: { controls: Control[] }) {
+  const { controls } = props;
   const editor = useSlate();
-  // const { selection } = useHoverTool();
   const { selection } = editor;
   if (selection) {
-    const addonsWithBtns = addons
-      // .map(it => it.hoverMenu)
-      .filter(addon => isDefined(addon.hoverMenu))
-      .filter(addon => {
-        const [match] = SlateEditor.nodes(editor, {
-          match: n => {
-            if (addon.hoverMenu?.typeMatch && typeof n.type === "string") {
-              if (n.type.match(addon.hoverMenu.typeMatch)) {
-                return true;
-              }
-            } else if (
-              !addon.hoverMenu?.typeMatch &&
-              !SlateEditor.isVoid(editor, n) &&
-              typeof n.type === "string"
-            ) {
+    const eligableControls = controls.filter(control => {
+      const [match] = SlateEditor.nodes(editor, {
+        match: n => {
+          if (control.typeMatch && typeof n.type === "string") {
+            if (matchesType(n as ChiefElement, control.typeMatch)) {
               return true;
             }
-            return false;
+          } else if (
+            !control.typeMatch &&
+            !SlateEditor.isVoid(editor, n) &&
+            typeof n.type === "string"
+          ) {
+            return true;
           }
-        });
-        return Boolean(match);
+          return false;
+        }
       });
-    if (addonsWithBtns.length > 0) {
-      const ordered = orderBy(addonsWithBtns, "hoverMenu.order");
-      const grouped = groupBy(ordered, "hoverMenu.category");
+      return Boolean(match);
+    });
+    if (eligableControls.length > 0) {
+      const groupedControls = groupBy(eligableControls, "category");
       return (
         <StyledToolBox>
           <ToolsWrapper>
-            {Object.entries(grouped).map(([, orderedAddons]) => (
+            {Object.entries(groupedControls).map(([, groupedControls]) => (
               <React.Fragment>
-                {orderedAddons.map(addon => {
-                  if (addon.hoverMenu) {
-                    const renderButton = addon.hoverMenu.renderButton;
-                    return typeof renderButton === "function"
-                      ? renderButton(editor, addon)
-                      : renderButton;
-                  }
-                  return null;
+                {groupedControls.map(control => {
+                  const renderControl = control.render;
+                  return typeof renderControl === "function"
+                    ? renderControl(editor)
+                    : renderControl;
                 })}
                 <ToolDivider />
               </React.Fragment>
@@ -133,20 +115,19 @@ function HoveringToolbars(props: { addons: Addon[] }) {
   return null;
 }
 
-function BlockInsertTools(props: { addons: Addon[] }) {
+export function BlockInsertControls(props: { controls: Control[] }) {
   const editor = useSlate();
-  const buttons = props.addons.map(it => it.blockInsertMenu).filter(isDefined);
-  if (buttons.length > 0) {
-    const ordered = orderBy(buttons, "order");
-    const grouped = groupBy(ordered, "category");
+  const controls = props.controls;
+  if (controls.length > 0) {
+    const grouped = groupBy(controls, "category");
     return (
       <StyledToolBox>
         <ToolsWrapper>
-          {Object.entries(grouped).map(([, buttons]) => (
+          {Object.entries(grouped).map(([, control]) => (
             <React.Fragment>
-              {buttons.map(it => {
+              {control.map(it => {
                 if (it) {
-                  const renderButton = it.renderButton;
+                  const renderButton = it.render;
                   return typeof renderButton === "function"
                     ? renderButton(editor)
                     : renderButton;
@@ -172,6 +153,17 @@ function BlockInsertTools(props: { addons: Addon[] }) {
   return null;
 }
 
+export function matchesType(
+  element: ChiefElement,
+  typeMatch?: ElementTypeMatch
+): element is ChiefElement {
+  return (
+    (Array.isArray(typeMatch) && typeMatch.includes(element.type)) ||
+    (typeof typeMatch === "string" && typeMatch === element.type) ||
+    Boolean(typeMatch instanceof RegExp && element.type.match(typeMatch))
+  );
+}
+
 const handleRenderElement = (
   props: ChiefRenderElementProps,
   editor: ReactEditor,
@@ -179,15 +171,9 @@ const handleRenderElement = (
 ) => {
   let element: JSX.Element | undefined;
   for (let renderElement of renderElements) {
-    const elementType = props.element.type;
     if (
       renderElement.typeMatch === undefined ||
-      (Array.isArray(renderElement.typeMatch) &&
-        renderElement.typeMatch.includes(elementType)) ||
-      (typeof renderElement.typeMatch === "string" &&
-        renderElement.typeMatch === elementType) ||
-      (renderElement.typeMatch instanceof RegExp &&
-        elementType.match(renderElement.typeMatch))
+      matchesType(props.element, renderElement.typeMatch)
     ) {
       element =
         typeof renderElement.renderElement === "function"
@@ -296,7 +282,7 @@ const handleDecorate = (
 export const Editor = React.memo(
   (
     props: {
-      theme?: ChiefEditorTheme & { [key: string]: any };
+      children?: React.ReactNode;
     } & React.ComponentProps<typeof Editable>
   ) => {
     const {
@@ -308,7 +294,7 @@ export const Editor = React.memo(
       renderElements,
       onKeyHandlers
     } = useChief();
-    const { theme, ...otherProps } = props;
+    const { children, ...otherProps } = props;
 
     const renderElement = useCallback(
       (props: RenderElementProps) => {
@@ -359,38 +345,24 @@ export const Editor = React.memo(
       editor.insertText(pastedData);
     }, []);
 
-    const _theme = merge({}, defaultTheme, theme);
     return (
-      <ThemeProvider theme={_theme}>
-        <HoverToolProvider hoverTool={<HoveringToolbars addons={addons} />}>
-          {editableProps => (
-            <div
-              style={{
-                marginLeft: 20
-              }}
-            >
-              <BlockInsert>
-                <BlockInsertTools addons={addons} />
-              </BlockInsert>
-              <EditorThemeWrapper>
-                <Editable
-                  {...editableProps}
-                  renderLeaf={renderLeaf}
-                  renderElement={renderElement}
-                  decorate={decorate}
-                  onKeyDown={keyDown}
-                  onKeyUp={keyUp}
-                  onClick={click}
-                  onPaste={paste}
-                  readOnly={readOnly}
-                  id={`${id}`}
-                  {...otherProps}
-                />
-              </EditorThemeWrapper>
-            </div>
-          )}
-        </HoverToolProvider>
-      </ThemeProvider>
+      <React.Fragment>
+        <EditorThemeWrapper>
+          {children}
+          <Editable
+            renderLeaf={renderLeaf}
+            renderElement={renderElement}
+            decorate={decorate}
+            onKeyDown={keyDown}
+            onKeyUp={keyUp}
+            onClick={click}
+            onPaste={paste}
+            readOnly={readOnly}
+            id={`${id}`}
+            {...otherProps}
+          />
+        </EditorThemeWrapper>
+      </React.Fragment>
     );
   }
 );

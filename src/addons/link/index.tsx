@@ -9,7 +9,13 @@ import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import { useCreateAddon, useRenderElement, usePlugin } from "../../chief/chief";
+import {
+  useCreateAddon,
+  useRenderElement,
+  usePlugin,
+  useLabels
+} from "../../chief/chief";
+import { Control } from "../../control";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -23,20 +29,13 @@ export const Link = (props: RenderElementProps) => {
   );
 };
 
-export const LinkAddonImpl: Addon = {
-  name: "link",
-  hoverMenu: {
-    order: 5,
-    category: "link",
-    renderButton: () => {
-      return <LinkBtn>Link</LinkBtn>;
-    }
-  }
+export const linkControl: Control = {
+  category: "link",
+  render: () => <LinkBtn />
 };
 
 export function LinkAddon(props: Addon) {
-  useCreateAddon(LinkAddonImpl, props);
-
+  useLabels(props.labels);
   usePlugin({
     insertText: (insertText, editor) => text => {
       if (text && isUrl(text)) {
@@ -180,7 +179,7 @@ function LinkPopup(props: { onClose: () => void }) {
   );
 }
 
-export function LinkBtn(props: { children: React.ReactNode }) {
+export function LinkBtn() {
   const editor = useSlate();
   const isActive = isLinkActive(editor);
   const { useToolWindow } = useHoverTool();
@@ -194,11 +193,17 @@ export function LinkBtn(props: { children: React.ReactNode }) {
       )}
       renderToolBtn={(tprops, show) => (
         <ToolbarBtn
-          tooltip={{ label: "Add link", shortcut: "⌘+K" }}
+          tooltip={{
+            label: {
+              key: "elements.link",
+              defaultLabel: "Add link"
+            },
+            shortcut: "⌘+K"
+          }}
           {...tprops}
           isActive={isActive || show}
         >
-          {props.children}
+          Link
         </ToolbarBtn>
       )}
     />

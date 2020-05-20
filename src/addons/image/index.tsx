@@ -20,6 +20,7 @@ import { HistoryEditor } from "slate-history";
 import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageElement } from "./image-element";
+import { Control } from "../../control";
 
 export interface ImageElement extends ChiefElement {
   type: "image";
@@ -32,26 +33,22 @@ export function isImageElement(element: unknown): element is ImageElement {
   return isChiefElement(element) && element.type === "image";
 }
 
-export const ImageAddonImpl: Addon<{}, {}> = {
-  name: "image",
-  blockInsertMenu: {
-    order: 1,
-    category: "image",
-    renderButton: editor => {
-      return (
-        <ToolbarBtn
-          isActive={isNodeActive(editor, "image")}
-          onClick={() => {
-            RichEditor.insertBlock(editor, "image");
-            ReactEditor.focus(editor);
-          }}
-        >
-          Image
-        </ToolbarBtn>
-      );
-    }
+export const imageBlockControls: Control[] = [
+  {
+    category: "headings",
+    render: editor => (
+      <ToolbarBtn
+        isActive={isNodeActive(editor, "image")}
+        onClick={() => {
+          RichEditor.insertBlock(editor, "image");
+          ReactEditor.focus(editor);
+        }}
+      >
+        Image
+      </ToolbarBtn>
+    )
   }
-};
+];
 
 export const isImageUrl = (url: string, extensions = ImageExtensions) => {
   if (!url) return false;
@@ -79,7 +76,6 @@ export function ImageAddon(
 ) {
   const editor = useSlate();
   const fileRef = useRef<HTMLInputElement>(null);
-  useCreateAddon(ImageAddonImpl, props);
 
   usePlugin({
     isVoid: isVoid => element =>

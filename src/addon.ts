@@ -4,7 +4,8 @@ import { NodeEntry, Range } from "slate";
 import {
   InjectedRenderLeaf,
   InjectedRenderElement,
-  KeyHandler
+  KeyHandler,
+  InjectedLabels
 } from "./chief/chief";
 
 type OnPluginMap = {
@@ -48,6 +49,6 @@ export interface Addon<
     renderButton: (editor: ReactEditor) => React.ReactNode | React.ReactNode;
   };
   data?: TData;
-  labels?: TLabels;
+  labels?: InjectedLabels;
   [key: string]: any;
 }

@@ -1,46 +1,44 @@
 import React from "react";
 import { Addon } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import { useCreateAddon, useRenderLeaf, useOnKeyDown } from "../../chief/chief";
+import {
+  useCreateAddon,
+  useRenderLeaf,
+  useOnKeyDown,
+  useLabels,
+  InjectedLabels
+} from "../../chief/chief";
 import { MarkBtn, toggleFormat } from "../../mark-button";
-import { toKeyName } from "is-hotkey";
 import { shortcutText } from "../../shortcut";
+import { Control } from "../../control";
 
 const shortcut = "mod+b";
 
-export const BoldImpl: Addon<{ name: string }> = {
-  name: "bold",
-  hoverMenu: {
-    order: 1,
-    category: "marks",
-    renderButton: (editor, addon) => {
-      return (
-        <MarkBtn
-          // @ts-ignore
-          tooltip={{
-            label: addon.labels?.name,
-            shortcut: shortcutText(shortcut)
-          }}
-          formatType="bold"
-        >
-          B
-        </MarkBtn>
-      );
-    }
-  },
-  labels: {
-    name: "Bold"
+export const boldControl: Control = {
+  category: "marks",
+  render: () => {
+    return (
+      <MarkBtn
+        tooltip={{
+          label: {
+            key: "marks.bold",
+            defaultLabel: "Bold"
+          },
+          shortcut: shortcutText(shortcut)
+        }}
+        formatType="bold"
+      >
+        B
+      </MarkBtn>
+    );
   }
 };
 
-export function BoldAddon(props: Addon<{ name: string }>) {
-  useCreateAddon(BoldImpl, props);
-  useRenderLeaf(
-    {
-      renderLeaf: props => renderLeaf(props, "bold", "strong")
-    },
-    props
-  );
+export function BoldAddon(props: Addon) {
+  useLabels(props.labels);
+  useRenderLeaf({
+    renderLeaf: props => renderLeaf(props, "bold", "strong")
+  });
   useOnKeyDown({
     pattern: shortcut,
     handler: (event, editor) => {
@@ -51,3 +49,5 @@ export function BoldAddon(props: Addon<{ name: string }>) {
   });
   return null;
 }
+
+BoldAddon.Control = boldControl;

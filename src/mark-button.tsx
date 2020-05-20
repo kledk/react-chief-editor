@@ -2,6 +2,7 @@ import React from "react";
 import { useSlate } from "slate-react";
 import { ToolbarBtn } from "./ToolbarBtn";
 import { Editor, Transforms, Text } from "slate";
+import { useLabels } from "./chief/chief";
 
 export function toggleFormat(editor: Editor, format: string) {
   let isFormatted = isTextFormat(editor, format);

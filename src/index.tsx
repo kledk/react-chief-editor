@@ -3,6 +3,8 @@ export * from "./chief/editor";
 export * from "./placeholder-hint";
 export * from "./addon";
 export * from "./core-addons";
+export * from "./BlockInsert";
+export * from "./HoveringTool";
 export * from "./addons/paragraph";
 export * from "./addons/bold";
 export * from "./addons/italic";
