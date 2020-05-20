@@ -1,11 +1,6 @@
 import { AeditorTheme } from "./AeditorTheme";
 
 export const defaultTheme: AeditorTheme = {
-  preferDarkOption: false,
-  darkTheme: {
-    background: "#000",
-    foreground: "#fff"
-  },
   colors: {
     primary: "#4299E1",
     seconday: "#38B2AC",

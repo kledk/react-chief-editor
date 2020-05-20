@@ -1,7 +1,7 @@
 {
-  "name": "redia-aeditor",
-  "version": "1.0.0",
-  "description": "Redia WYSIWYG",
+  "name": "chief-editor",
+  "version": "0.1.0",
+  "description": "Redia WYSIWYG editor.",
   "author": "kledk",
   "license": "MIT",
   "repository": "&quot;&quot;",

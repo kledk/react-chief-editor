@@ -21,7 +21,7 @@ import {
   ListsAddon,
   BlockTabAddon,
   ParagraphAddon
-} from "redia-aeditor";
+} from "chief-editor";
 import { Node, Element } from "slate";
 import { css } from "styled-components";
 

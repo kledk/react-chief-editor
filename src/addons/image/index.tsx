@@ -224,7 +224,7 @@ export const Image = (
   );
 };
 
-export const ImageAddonImpl: Addon<{ name: string }, {}> = {
+export const ImageAddonImpl: Addon<{}, {}> = {
   name: "image",
   blockInsertMenu: {
     order: 1,
