@@ -1,8 +1,8 @@
 import styled from "styled-components";
-import { Button } from "./Button";
+import { CleanButton } from "./clean-button";
 import { OverrideTheme } from "./override-theme";
 
-export const StyledToolbarBtn = styled(Button)<{
+export const StyledToolbarBtn = styled(CleanButton)<{
   isActive?: boolean;
   rounded?: boolean;
 }>`
@@ -26,18 +26,5 @@ export const StyledToolbarBtn = styled(Button)<{
   padding: 8px;
   color: ${props => (props.isActive ? props.theme.colors.primary : undefined)};
   border: none;
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-  background-color: grey;
-  color: ${props.isActive ? "white" : undefined};
-  &:hover {
-    background-color: dimgrey;
-  }
-  &:active {
-    background-color: darkgrey;
-  }
-  }`}
   ${props => OverrideTheme("StyledToolbarBtn", props)}
 `;

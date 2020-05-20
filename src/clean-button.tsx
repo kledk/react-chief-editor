@@ -1,5 +1,5 @@
 import styled from "styled-components";
-export const Button = styled.button`
+export const CleanButton = styled.button`
   font-family: inherit;
   font-size: 100%;
   line-height: 1.15;

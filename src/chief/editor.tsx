@@ -14,8 +14,6 @@ import {
   ReactEditor,
   RenderElementProps,
   RenderLeafProps,
-  useFocused,
-  useSelected,
   useSlate
 } from "slate-react";
 import styled, { ThemeProvider } from "styled-components";
@@ -23,7 +21,6 @@ import { isDefined } from "ts-is-present";
 import { Addon } from "../addon";
 import { BlockInsert } from "../BlockInsert";
 import { HoverToolProvider } from "../HoveringTool";
-import { PlaceholderHint } from "../placeholder-hint";
 import { StyledToolbarBtn } from "../StyledToolbarBtn";
 import { StyledToolBox } from "../StyledToolBox";
 import { ToolDivider } from "../ToolDivider";
@@ -36,7 +33,8 @@ import {
   InjectedRenderElement,
   InjectedRenderLeaf,
   useChief,
-  KeyHandler
+  KeyHandler,
+  ChiefRenderElementProps
 } from "./chief";
 import isHotkey from "is-hotkey";
 
@@ -174,31 +172,23 @@ function BlockInsertTools(props: { addons: Addon[] }) {
   return null;
 }
 
-function Paragraph(props: RenderElementProps) {
-  const editor = useSlate();
-  const isFocused = useFocused();
-  const isSelected = useSelected();
-  return (
-    <p {...props.attributes}>
-      <PlaceholderHint
-        isEmpty={SlateEditor.isEmpty(editor, props.element)}
-        hoverHint={"Click to start typing"}
-        placeholder={isFocused && isSelected ? "Text" : undefined}
-      >
-        {React.Children.map(props.children, it => it)}
-      </PlaceholderHint>
-    </p>
-  );
-}
-
 const handleRenderElement = (
-  props: RenderElementProps,
+  props: ChiefRenderElementProps,
   editor: ReactEditor,
   renderElements: InjectedRenderElement[]
 ) => {
   let element: JSX.Element | undefined;
   for (let renderElement of renderElements) {
-    if ((props.element?.type as string).match(renderElement.typeMatch)) {
+    const elementType = props.element.type;
+    if (
+      renderElement.typeMatch === undefined ||
+      (Array.isArray(renderElement.typeMatch) &&
+        renderElement.typeMatch.includes(elementType)) ||
+      (typeof renderElement.typeMatch === "string" &&
+        renderElement.typeMatch === elementType) ||
+      (renderElement.typeMatch instanceof RegExp &&
+        elementType.match(renderElement.typeMatch))
+    ) {
       element =
         typeof renderElement.renderElement === "function"
           ? renderElement.renderElement(props, editor)
@@ -206,7 +196,7 @@ const handleRenderElement = (
     }
   }
 
-  return (element = element || <Paragraph {...props} />);
+  return (element = element || <React.Fragment>{null}</React.Fragment>);
 };
 
 function handleRenderLeaf(
@@ -322,7 +312,11 @@ export const Editor = React.memo(
 
     const renderElement = useCallback(
       (props: RenderElementProps) => {
-        return handleRenderElement(props, editor, renderElements);
+        return handleRenderElement(
+          props as ChiefRenderElementProps,
+          editor,
+          renderElements
+        );
       },
       [renderElements]
     );

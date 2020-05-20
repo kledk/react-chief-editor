@@ -9,7 +9,14 @@ export function ElementWrapper(
     style?: React.CSSProperties;
   }
 ) {
-  const { children, element, attentionChildren, style, ...otherProps } = props;
+  const {
+    children,
+    element,
+    attentionChildren,
+    style,
+    attributes,
+    ...otherProps
+  } = props;
   const { isFocusedWithin } = useFocused(element);
   const [inside, setInside] = useState(false);
   const handleEnter = () => {
@@ -24,12 +31,10 @@ export function ElementWrapper(
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       style={{ position: "relative" }}
+      {...otherProps}
     >
       <Show when={isFocusedWithin || inside}>
-        <div
-          contentEditable={false}
-          style={{ position: "absolute", zIndex: 2, ...style }}
-        >
+        <div style={{ position: "absolute", zIndex: 2, ...style }}>
           {attentionChildren}
         </div>
       </Show>

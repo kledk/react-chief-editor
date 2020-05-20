@@ -34,16 +34,13 @@ export function ItalicAddon(props: Addon) {
     },
     props
   );
-  useOnKeyDown(
-    {
-      pattern: shortcut,
-      handler: (event, editor) => {
-        event.preventDefault();
-        toggleFormat(editor, "italic");
-        return true;
-      }
-    },
-    props
-  );
+  useOnKeyDown({
+    pattern: shortcut,
+    handler: (event, editor) => {
+      event.preventDefault();
+      toggleFormat(editor, "italic");
+      return true;
+    }
+  });
   return null;
 }

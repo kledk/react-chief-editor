@@ -1,11 +1,6 @@
 import { css } from "styled-components";
 
 export type AeditorTheme = {
-  preferDarkOption: boolean;
-  darkTheme: {
-    background: string;
-    foreground: string;
-  };
   colors?: {
     primary: string;
     seconday: string;

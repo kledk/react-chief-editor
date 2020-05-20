@@ -1,27 +1,24 @@
-import { Addon } from "../../addon";
-import { ReactEditor } from "slate-react";
-import { Editor, Transforms } from "slate";
-import { useCreateAddon } from "../../chief/chief";
+import { Editor, Transforms, Range } from "slate";
+import { usePlugin } from "../../chief/chief";
 
-export const ResetToParagraphAddonImpl: Addon = {
-  onPlugin: {
-    deleteBackward: (deleteBackward, editor) => unit => {
-      const [isParagraph] = Editor.nodes(editor, {
-        match: n => n.type === "paragraph"
-      });
-      if (
-        !isParagraph &&
-        editor.selection &&
-        editor.selection.focus.offset === 0
-      ) {
-        return Transforms.setNodes(editor, { type: "paragraph" });
+export function ResetToParagraphAddon() {
+  usePlugin({
+    deleteBackward: (deleteBackward, editor) => (...args) => {
+      const { selection } = editor;
+      if (selection && Range.isCollapsed(selection)) {
+        const [parent, path] = Editor.parent(editor, selection);
+        const isParagraph = parent.type === "paragraph";
+        if (
+          path.length === 1 &&
+          !isParagraph &&
+          selection &&
+          selection.focus.offset === 0
+        ) {
+          return Transforms.setNodes(editor, { type: "paragraph" });
+        }
       }
-      return deleteBackward(unit);
+      return deleteBackward(...args);
     }
-  }
-};
-
-export function ResetToParagraphAddon(props: Addon) {
-  useCreateAddon(ResetToParagraphAddonImpl, props);
+  });
   return null;
 }

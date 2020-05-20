@@ -79,43 +79,37 @@ export const HeadingsAddonImpl: Addon = {
 
 export function HeadingsAddon(props: Addon) {
   useCreateAddon(HeadingsAddonImpl, props);
-  useRenderElement(
-    {
-      typeMatch: /heading-[1-6]/,
-      renderElement: props => <Heading {...props} />
-    },
-    props
-  );
-  useOnKeyDown(
-    {
-      pattern: "Enter",
-      handler: (event, editor) => {
-        const { selection } = editor;
-        if (selection && Range.isCollapsed(selection)) {
-          const [match] = Editor.nodes(editor, {
-            match: n =>
-              typeof n.type === "string" &&
-              Boolean(n.type?.match(/(heading-[1-6])/))
-          });
-          if (match) {
-            event.preventDefault();
-            const [node] = match;
-            if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
-              Transforms.setNodes(editor, { type: "paragraph" });
-            } else {
-              Transforms.insertNodes(editor, {
-                type: "paragraph",
-                children: [{ text: "" }]
-              });
-            }
-            return true;
+  useRenderElement({
+    typeMatch: /heading-[1-6]/,
+    renderElement: props => <Heading {...props} />
+  });
+  useOnKeyDown({
+    pattern: "Enter",
+    handler: (event, editor) => {
+      const { selection } = editor;
+      if (selection && Range.isCollapsed(selection)) {
+        const [match] = Editor.nodes(editor, {
+          match: n =>
+            typeof n.type === "string" &&
+            Boolean(n.type?.match(/(heading-[1-6])/))
+        });
+        if (match) {
+          event.preventDefault();
+          const [node] = match;
+          if (Element.isElement(node) && Editor.isEmpty(editor, node)) {
+            Transforms.setNodes(editor, { type: "paragraph" });
+          } else {
+            Transforms.insertNodes(editor, {
+              type: "paragraph",
+              children: [{ text: "" }]
+            });
           }
+          return true;
         }
-        return false;
       }
-    },
-    props
-  );
+      return false;
+    }
+  });
   return null;
 }
 

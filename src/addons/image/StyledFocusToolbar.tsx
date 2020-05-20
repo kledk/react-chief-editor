@@ -4,10 +4,11 @@ import styled from "styled-components";
 import { ElementWrapper } from "../../element-wrapper";
 import { StyledToolBase } from "../../StyledToolBox";
 import { ToolsWrapper } from "../../ToolsWrapper";
-import { Button } from "../../Button";
+import { CleanButton } from "../../clean-button";
+
 const StyledFocusToolbar = styled(StyledToolBase)`
   background-color: transparent;
-  ${Button} {
+  ${CleanButton} {
     background-color: rgba(47, 47, 47, 0.67);
     &:hover {
       background-color: rgba(67, 67, 67, 0.67);
@@ -27,14 +28,25 @@ const StyledFocusToolbar = styled(StyledToolBase)`
     margin: 0 1px;
   }
 `;
-export function WithAttentionToolbar(props: RenderElementProps & {
-  children: React.ReactNode;
-  btns: React.ReactNode;
-}) {
+
+export function WithAttentionToolbar(
+  props: RenderElementProps & {
+    children: React.ReactNode;
+    btns: React.ReactNode;
+  }
+) {
   const { btns, children, ...renderElementProps } = props;
-  return (<ElementWrapper {...renderElementProps} attentionChildren={<StyledFocusToolbar>
-    <ToolsWrapper>{btns}</ToolsWrapper>
-  </StyledFocusToolbar>} style={{ right: 0, marginTop: 5, marginRight: 5 }}>
-    {children}
-  </ElementWrapper>);
+  return (
+    <ElementWrapper
+      {...renderElementProps}
+      attentionChildren={
+        <StyledFocusToolbar>
+          <ToolsWrapper>{btns}</ToolsWrapper>
+        </StyledFocusToolbar>
+      }
+      style={{ right: 0, marginTop: 5, marginRight: 5 }}
+    >
+      {children}
+    </ElementWrapper>
+  );
 }

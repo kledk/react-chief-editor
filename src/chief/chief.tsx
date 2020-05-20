@@ -6,11 +6,24 @@ import {
   Slate,
   withReact
 } from "slate-react";
-import { createEditor as createSlateEditor, Node } from "slate";
+import { createEditor as createSlateEditor, Node, Element } from "slate";
 import { withHistory } from "slate-history";
 import merge from "lodash/merge";
-import clone from "lodash/clone";
-import { Addon } from "../addon";
+import { Addon, OnPlugin } from "../addon";
+
+export function isChiefElement(element: unknown): element is ChiefElement {
+  return (element as ChiefElement).type !== undefined;
+}
+
+export type ChiefElement = Element & {
+  type: string;
+};
+
+export type ChiefRenderElementProps<
+  T extends ChiefElement = ChiefElement
+> = RenderElementProps & {
+  element: T;
+};
 
 export type InjectedRenderLeaf = {
   renderLeaf: (
@@ -19,12 +32,12 @@ export type InjectedRenderLeaf = {
   ) => JSX.Element | undefined;
 };
 
-export type InjectedRenderElement = {
-  typeMatch: RegExp;
+export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
+  typeMatch?: RegExp | string | string[];
   renderElement:
     | JSX.Element
     | ((
-        props: RenderElementProps,
+        props: ChiefRenderElementProps<T>,
         editor: ReactEditor
       ) => JSX.Element | undefined);
 };
@@ -40,12 +53,15 @@ interface ChiefContextValue {
   injectRenderLeaf: (irl: InjectedRenderLeaf) => void;
   removeRenderLeaf: (irl: InjectedRenderLeaf) => void;
   renderLeafs: Array<InjectedRenderLeaf>;
-  injectRenderElement: (irl: InjectedRenderElement) => void;
-  removeRenderElement: (irl: InjectedRenderElement) => void;
+  injectRenderElement: (irl: InjectedRenderElement<any>) => void;
+  removeRenderElement: (irl: InjectedRenderElement<any>) => void;
   renderElements: InjectedRenderElement[];
   injectOnKeyHandler: (keyHandler: KeyHandler) => void;
   removeOnKeyHandler: (keyHandler: KeyHandler) => void;
   onKeyHandlers: KeyHandler[];
+  injectPlugin: (plugin: OnPlugin) => void;
+  removePlugin: (plugin: OnPlugin) => void;
+  injectedPlugins: OnPlugin[];
 }
 
 const ChiefContext = React.createContext<ChiefContextValue | null>(null);
@@ -57,14 +73,27 @@ function useProvideChiefContext(props: {
   id?: string;
 }) {
   const [addons, setAddons] = useState<Addon[]>(props.addons || []);
+  const [injectedPlugins, setInjectedPlugins] = useState<OnPlugin[]>([]);
   const [renderLeafs, setRenderLeafs] = useState<InjectedRenderLeaf[]>([]);
   const [renderElements, setRenderElements] = useState<InjectedRenderElement[]>(
     []
   );
   const [onKeyHandlers, setOnKeyHandlers] = useState<KeyHandler[]>([]);
-  const editor = createEditor(addons);
+  const editor = createEditor(injectedPlugins);
   const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
   const { current: id } = useRef(props.id || `chiefeditor${count++}`);
+
+  function injectPlugin(plugin: OnPlugin) {
+    setInjectedPlugins(plugins => [...plugins, plugin]);
+  }
+
+  function removePlugin(plugin: OnPlugin) {
+    setInjectedPlugins(it => {
+      const toSlicer = [...it];
+      toSlicer.splice(toSlicer.indexOf(plugin), 1);
+      return toSlicer;
+    });
+  }
 
   function injectAddon(addon: Addon) {
     setAddons(addons => [...addons, addon]);
@@ -103,7 +132,11 @@ function useProvideChiefContext(props: {
   }
 
   function injectOnKeyHandler(keyHandler: KeyHandler) {
-    setOnKeyHandlers(it => [...it, keyHandler]);
+    setOnKeyHandlers(it =>
+      [...it, keyHandler].sort((a, b) =>
+        a.priority === b.priority ? 0 : a.priority === "low" ? 1 : -1
+      )
+    );
   }
 
   function removeOnKeyHandler(keyHandler: KeyHandler) {
@@ -130,7 +163,10 @@ function useProvideChiefContext(props: {
     removeRenderElement,
     injectOnKeyHandler,
     removeOnKeyHandler,
-    onKeyHandlers
+    onKeyHandlers,
+    injectPlugin,
+    removePlugin,
+    injectedPlugins
   };
 
   return {
@@ -179,16 +215,14 @@ export function useRenderLeaf(
   }, deps);
 }
 
-export function useRenderElement(
-  ire: InjectedRenderElement,
-  overrides: Addon,
+export function useRenderElement<T extends ChiefElement = ChiefElement>(
+  ire: InjectedRenderElement<T>,
   deps: any[] = []
 ) {
   const chief = useChief();
   useEffect(() => {
-    const _ire = merge({}, ire, overrides?.renderElement);
-    chief.injectRenderElement(_ire);
-    return () => chief.removeRenderElement(_ire);
+    chief.injectRenderElement(ire);
+    return () => chief.removeRenderElement(ire);
   }, deps);
 }
 
@@ -200,6 +234,7 @@ export type KeyHandler = {
     e: KeyboardEvent,
     editor: ReactEditor
   ) => boolean | undefined | void;
+  priority?: "high" | "low";
 };
 
 /**
@@ -210,17 +245,20 @@ export type KeyHandler = {
  * @param overrides
  * @param deps
  */
-export function useOnKeyDown(
-  handler: KeyHandler,
-  overrides: Addon,
-  deps: any[] = []
-) {
+export function useOnKeyDown(handler: KeyHandler, deps: any[] = []) {
   const chief = useChief();
   useEffect(() => {
-    const _handler = merge({}, handler, overrides?.onKey);
-    chief.injectOnKeyHandler(_handler);
-    return () => chief.removeOnKeyHandler(_handler);
+    chief.injectOnKeyHandler(handler);
+    return () => chief.removeOnKeyHandler(handler);
   }, deps);
+}
+
+export function usePlugin(plugin: OnPlugin) {
+  const chief = useChief();
+  useEffect(() => {
+    chief.injectPlugin(plugin);
+    return () => chief.removePlugin(plugin);
+  }, []);
 }
 
 export const Chief = React.memo(function(props: {
@@ -250,7 +288,7 @@ let originalEntries = {};
  * @param editor
  * @param addons
  */
-function withChief(editor: ReactEditor, addons: Addon[]) {
+function withChiefOnPlugIn(editor: ReactEditor, plugins: OnPlugin[]) {
   // We basically take control over each funtion in the editor and route them
   // to the appropriate addon that has requested overriding it.
   for (const [prop, value] of Object.entries(editor)) {
@@ -260,9 +298,9 @@ function withChief(editor: ReactEditor, addons: Addon[]) {
       }
       editor[prop] = (...args: any[]) => {
         let fn = originalEntries[prop];
-        for (const addon of addons) {
-          if (addon.onPlugin && prop in addon.onPlugin) {
-            fn = addon.onPlugin && addon.onPlugin[prop](fn, editor);
+        for (const plugin of plugins) {
+          if (plugin && prop in plugin) {
+            fn = plugin && plugin[prop](fn, editor);
           }
         }
         return fn(...args);
@@ -273,11 +311,7 @@ function withChief(editor: ReactEditor, addons: Addon[]) {
   return editor;
 }
 
-const createEditor = (addons: Addon[]): ReactEditor => {
+const createEditor = (plugins: OnPlugin[]): ReactEditor => {
   const editor = useMemo(() => withReact(withHistory(createSlateEditor())), []);
-  return useMemo(() => {
-    let _editor = withChief(editor, addons);
-    console.log(_editor);
-    return _editor;
-  }, [addons]);
+  return useMemo(() => withChiefOnPlugIn(editor, plugins), [plugins]);
 };

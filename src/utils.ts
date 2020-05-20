@@ -204,3 +204,23 @@ export const findNodes = (editor: Editor, match: (node: Node) => boolean) => {
     match
   });
 };
+
+export const getAncestor = (editor: ReactEditor, node: Node, level = 1) => {
+  let parent: Node | null = null;
+  let count = 0;
+  while (node && count !== level) {
+    count++;
+    try {
+      const path = ReactEditor.findPath(editor, node);
+      if (path.length === 0) {
+        return null;
+      }
+      parent = Editor.parent(editor, path)[0];
+      if (parent === editor) {
+        return null;
+      }
+      node = parent;
+    } catch (e) {}
+  }
+  return parent;
+};

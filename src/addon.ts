@@ -7,7 +7,7 @@ import {
   KeyHandler
 } from "./chief/chief";
 
-type OnPlugin = {
+type OnPluginMap = {
   [key in keyof ReactEditor]?: (
     fn: ReactEditor[key],
     editor: ReactEditor
@@ -20,6 +20,8 @@ type KnownKeys<T> = {
   ? U
   : never;
 
+export type OnPlugin = Pick<OnPluginMap, KnownKeys<OnPluginMap>>;
+
 export interface Addon<
   TLabels extends Object = { [key: string]: string },
   TData extends Object = {}
@@ -28,7 +30,7 @@ export interface Addon<
   onKey?: KeyHandler;
   renderLeaf?: InjectedRenderLeaf;
   renderElement?: InjectedRenderElement;
-  onPlugin?: Pick<OnPlugin, KnownKeys<OnPlugin>>;
+  onPlugin?: OnPlugin;
   decorate?: (entry: NodeEntry, editor: ReactEditor) => Range[];
   onClick?(event: React.MouseEvent<HTMLElement>, editor: ReactEditor): void;
   hoverMenu?: {

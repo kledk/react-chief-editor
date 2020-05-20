@@ -41,16 +41,13 @@ export function BoldAddon(props: Addon<{ name: string }>) {
     },
     props
   );
-  useOnKeyDown(
-    {
-      pattern: shortcut,
-      handler: (event, editor) => {
-        event.preventDefault();
-        toggleFormat(editor, "bold");
-        return true;
-      }
-    },
-    props
-  );
+  useOnKeyDown({
+    pattern: shortcut,
+    handler: (event, editor) => {
+      event.preventDefault();
+      toggleFormat(editor, "bold");
+      return true;
+    }
+  });
   return null;
 }

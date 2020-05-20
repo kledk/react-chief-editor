@@ -9,7 +9,7 @@ import { StyledToolbarBtn } from "../../StyledToolbarBtn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import { useCreateAddon, useRenderElement } from "../../chief/chief";
+import { useCreateAddon, useRenderElement, usePlugin } from "../../chief/chief";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -25,36 +25,6 @@ export const Link = (props: RenderElementProps) => {
 
 export const LinkAddonImpl: Addon = {
   name: "link",
-  withPlugin: <T extends ReactEditor>(editor: T): T => {
-    const { insertData, insertText, isInline } = editor;
-
-    editor.isInline = element => {
-      return isLinkELement(element) ? true : isInline(element);
-    };
-
-    editor.insertText = text => {
-      if (text && isUrl(text)) {
-        wrapLink(editor, text);
-      } else {
-        insertText(text);
-      }
-    };
-    editor.insertData = data => {
-      const text = data.getData("text/plain");
-      if (text && isUrl(text)) {
-        wrapLink(editor, text);
-      } else {
-        insertData(data);
-      }
-    };
-    return editor;
-  },
-  onPlugin: {
-    isInline: isInline => element => {
-      // console.log("isInline, link");
-      return isLinkELement(element) ? true : isInline(element);
-    }
-  },
   hoverMenu: {
     order: 5,
     category: "link",
@@ -66,13 +36,33 @@ export const LinkAddonImpl: Addon = {
 
 export function LinkAddon(props: Addon) {
   useCreateAddon(LinkAddonImpl, props);
-  useRenderElement(
-    {
-      typeMatch: /link/,
-      renderElement: props => <Link {...props} />
+
+  usePlugin({
+    insertText: (insertText, editor) => text => {
+      if (text && isUrl(text)) {
+        wrapLink(editor, text);
+      } else {
+        insertText(text);
+      }
     },
-    props
-  );
+    insertData: (insertData, editor) => data => {
+      const text = data.getData("text/plain");
+      if (text && isUrl(text)) {
+        wrapLink(editor, text);
+      } else {
+        insertData(data);
+      }
+    },
+    isInline: isInline => element => {
+      // console.log("isInline, link");
+      return isLinkELement(element) ? true : isInline(element);
+    }
+  });
+
+  useRenderElement({
+    typeMatch: "link",
+    renderElement: props => <Link {...props} />
+  });
   return null;
 }
 

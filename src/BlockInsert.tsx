@@ -1,12 +1,18 @@
-import { isBlockEmpty, getActiveNode, useOnClickOutside } from "./utils";
+import {
+  isBlockEmpty,
+  getActiveNode,
+  useOnClickOutside,
+  getAncestor
+} from "./utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
-import { Node, Editor, Range } from "slate";
+import { Node, Editor, Range, Element } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
-import { Button } from "./Button";
+import { CleanButton } from "./clean-button";
+import { getState } from "./chief/chief-state";
 
-export const BlockInsertBtn = styled(Button)`
+export const BlockInsertBtn = styled(CleanButton)`
   user-select: none;
   border: none;
   background: transparent;
@@ -71,8 +77,10 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
       }
     }
   }, [selection, activenode, editor]);
+
   if (
     !selection ||
+    selection.anchor.path.length !== 2 ||
     Range.isExpanded(selection) ||
     Range.start(selection).offset !== 0 ||
     !isBlockEmpty(editor) ||

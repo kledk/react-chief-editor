@@ -34,16 +34,13 @@ export function UnderlineAddon(props: Addon) {
     },
     props
   );
-  useOnKeyDown(
-    {
-      pattern: shortcut,
-      handler: (event, editor) => {
-        event.preventDefault();
-        toggleFormat(editor, "underline");
-        return true;
-      }
-    },
-    props
-  );
+  useOnKeyDown({
+    pattern: shortcut,
+    handler: (event, editor) => {
+      event.preventDefault();
+      toggleFormat(editor, "underline");
+      return true;
+    }
+  });
   return null;
 }

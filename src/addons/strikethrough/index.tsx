@@ -37,16 +37,13 @@ export function StrikethroughAddon(props: Addon) {
     },
     props
   );
-  useOnKeyDown(
-    {
-      pattern: shortcut,
-      handler: (event, editor) => {
-        event.preventDefault();
-        toggleFormat(editor, "strikethrough");
-        return true;
-      }
-    },
-    props
-  );
+  useOnKeyDown({
+    pattern: shortcut,
+    handler: (event, editor) => {
+      event.preventDefault();
+      toggleFormat(editor, "strikethrough");
+      return true;
+    }
+  });
   return null;
 }
