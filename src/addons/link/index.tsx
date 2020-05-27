@@ -1,20 +1,18 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { RenderElementProps, ReactEditor, useSlate } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
-import { Addon } from "../../addon";
+import { AddonProps } from "../../addon";
 import isUrl from "is-url";
 import { useHoverTool } from "../../HoveringTool";
+import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
-import { StyledToolbarBtn } from "../../StyledToolbarBtn";
+import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import {
-  useCreateAddon,
-  useRenderElement,
-  usePlugin,
-  useLabels
-} from "../../chief/chief";
+import { useRenderElement } from "../../chief/hooks/use-render-element";
+import { usePlugin } from "../../chief/hooks/use-plugin";
+import { useLabels } from "../../chief/hooks/use-labels";
 import { Control } from "../../control";
 
 export const isLinkELement = (element: Element) => {
@@ -31,10 +29,10 @@ export const Link = (props: RenderElementProps) => {
 
 export const linkControl: Control = {
   category: "link",
-  render: () => <LinkBtn />
+  Component: LinkBtn
 };
 
-export function LinkAddon(props: Addon) {
+export function LinkAddon(props: AddonProps) {
   useLabels(props.labels);
   usePlugin({
     insertText: (insertText, editor) => text => {
@@ -64,6 +62,8 @@ export function LinkAddon(props: Addon) {
   });
   return null;
 }
+
+LinkAddon.Control = linkControl;
 
 export const insertLink = (editor: Editor, url: string) => {
   if (editor.selection) {
@@ -163,14 +163,14 @@ function LinkPopup(props: { onClose: () => void }) {
         <ToolbarBtn
           rounded
           disabled={url.length === 0}
-          onClick={handleInsertLink}
+          onMouseDown={handleInsertLink}
         >
           Link
         </ToolbarBtn>
         <ToolbarBtn
           rounded
           disabled={!isLinkActive(editor)}
-          onClick={handleUnlink}
+          onMouseDown={handleUnlink}
         >
           Unlink
         </ToolbarBtn>
@@ -182,10 +182,8 @@ function LinkPopup(props: { onClose: () => void }) {
 export function LinkBtn() {
   const editor = useSlate();
   const isActive = isLinkActive(editor);
-  const { useToolWindow } = useHoverTool();
-  const Toolwindow = useToolWindow();
   return (
-    <Toolwindow
+    <ToolBtnPopup
       renderContent={setShow => (
         <StyledToolBox>
           <LinkPopup onClose={() => setShow(false)}></LinkPopup>

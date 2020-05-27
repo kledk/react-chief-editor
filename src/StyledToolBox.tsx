@@ -1,7 +1,8 @@
 import styled from "styled-components";
 import { OverrideTheme } from "./override-theme";
+import { UiWrap } from "./ui/ui-wrap";
 
-export const StyledToolBase = styled.div`
+export const StyledToolBase = styled(UiWrap)`
   overflow: hidden;
   border-radius: 3px;
   box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px,
@@ -10,11 +11,5 @@ export const StyledToolBase = styled.div`
 
 export const StyledToolBox = styled(StyledToolBase)`
   background-color: white;
-  ${props =>
-    props.theme.preferDarkOption &&
-    `
-@media (prefers-color-scheme: dark) {
-    background-color: ${props.theme.darkTheme.background};
-  }`}
   ${props => OverrideTheme("StyledToolBox", props)}
 `;

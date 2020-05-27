@@ -1,7 +1,7 @@
-import { Addon } from "../../addon";
-import { useOnKeyDown } from "../../chief/chief";
+import { AddonProps } from "../../addon";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 
-export function BlockTabAddon(props: Addon) {
+export function BlockTabAddon(props: AddonProps) {
   useOnKeyDown({
     pattern: "tab",
     priority: "low",

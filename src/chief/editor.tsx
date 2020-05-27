@@ -17,27 +17,23 @@ import {
   useSlate
 } from "slate-react";
 import styled from "styled-components";
-import { isDefined } from "ts-is-present";
-import { Addon } from "../addon";
-import { HoverToolProvider } from "../HoveringTool";
-import { StyledToolbarBtn } from "../StyledToolbarBtn";
+import { StyledToolbarBtn } from "../ui/styled-toolbar-btn";
 import { StyledToolBox } from "../StyledToolBox";
 import { ToolDivider } from "../ToolDivider";
 import { ToolsWrapper } from "../ToolsWrapper";
-import { isNodeActive } from "../utils";
+import { isNodeActive, useHover } from "../utils";
 import { OverrideTheme } from "../override-theme";
-
 import {
   InjectedRenderElement,
   InjectedRenderLeaf,
-  useChief,
-  KeyHandler,
   ChiefRenderElementProps,
-  ElementTypeMatch,
   ChiefElement
 } from "./chief";
+import { useChief } from "./hooks/use-chief";
+import { KeyHandler } from "./key-handler";
 import isHotkey from "is-hotkey";
 import { Control } from "../control";
+import { matchesType } from "./utils/matches-type";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = () => {
@@ -63,7 +59,6 @@ export const RichEditor = {
 
 const EditorThemeWrapper = styled.div`
   font-size: 14px;
-  ${props => props.theme.overrides.editor}
   ${props => OverrideTheme("Editor", props)}
 `;
 
@@ -99,6 +94,9 @@ export function HoverToolControls(props: { controls: Control[] }) {
             {Object.entries(groupedControls).map(([, groupedControls]) => (
               <React.Fragment>
                 {groupedControls.map(control => {
+                  if (control.Component) {
+                    return <control.Component />;
+                  }
                   const renderControl = control.render;
                   return typeof renderControl === "function"
                     ? renderControl(editor)
@@ -123,16 +121,16 @@ export function BlockInsertControls(props: { controls: Control[] }) {
     return (
       <StyledToolBox>
         <ToolsWrapper>
-          {Object.entries(grouped).map(([, control]) => (
+          {Object.entries(grouped).map(([k, groupedControls]) => (
             <React.Fragment>
-              {control.map(it => {
-                if (it) {
-                  const renderButton = it.render;
-                  return typeof renderButton === "function"
-                    ? renderButton(editor)
-                    : renderButton;
+              {groupedControls.map((control, i) => {
+                if (control.Component) {
+                  return <control.Component key={i} />;
                 }
-                return null;
+                const renderButton = control.render;
+                return typeof renderButton === "function"
+                  ? renderButton(editor)
+                  : renderButton;
               })}
               <ToolDivider />
             </React.Fragment>
@@ -153,17 +151,6 @@ export function BlockInsertControls(props: { controls: Control[] }) {
   return null;
 }
 
-export function matchesType(
-  element: ChiefElement,
-  typeMatch?: ElementTypeMatch
-): element is ChiefElement {
-  return (
-    (Array.isArray(typeMatch) && typeMatch.includes(element.type)) ||
-    (typeof typeMatch === "string" && typeMatch === element.type) ||
-    Boolean(typeMatch instanceof RegExp && element.type.match(typeMatch))
-  );
-}
-
 const handleRenderElement = (
   props: ChiefRenderElementProps,
   editor: ReactEditor,
@@ -175,10 +162,14 @@ const handleRenderElement = (
       renderElement.typeMatch === undefined ||
       matchesType(props.element, renderElement.typeMatch)
     ) {
-      element =
-        typeof renderElement.renderElement === "function"
-          ? renderElement.renderElement(props, editor)
-          : React.cloneElement(renderElement.renderElement, props) || element;
+      if (renderElement.Component) {
+        element = <renderElement.Component {...props} />;
+      } else if (renderElement.renderElement) {
+        element =
+          typeof renderElement.renderElement === "function"
+            ? renderElement.renderElement(props, editor)
+            : React.cloneElement(renderElement.renderElement, props) || element;
+      }
     }
   }
 
@@ -253,29 +244,28 @@ const handleKeyUp = (
 const handleClick = (
   event: React.MouseEvent<HTMLElement>,
   editor: ReactEditor,
-  addons: Addon[]
+  clickLick: []
 ) => {
-  addons.forEach(addon => {
-    if (addon.onClick) {
-      addon.onClick(event, editor);
-    }
-  });
+  // addons.forEach(addon => {
+  //   if (addon.onClick) {
+  //     addon.onClick(event, editor);
+  //   }
+  // });
 };
 
+// TODO
 const handleDecorate = (
   entry: NodeEntry,
   editor: ReactEditor,
-  addons: Addon[]
+  decorateList: Array<() => []>
 ) => {
   let ranges: Range[] = [];
-  for (let addon of addons) {
-    if (addon.decorate) {
-      const result = addon.decorate(entry, editor);
-      if (result) {
-        return (ranges = ranges.concat(result));
-      }
-    }
-  }
+  // for (let decorate of decorateList) {
+  //   const result = decorate(entry, editor);
+  //   if (result) {
+  //     return (ranges = ranges.concat(result));
+  //   }
+  // }
   return ranges;
 };
 
@@ -286,7 +276,6 @@ export const Editor = React.memo(
     } & React.ComponentProps<typeof Editable>
   ) => {
     const {
-      addons,
       editor,
       readOnly,
       id,
@@ -315,8 +304,8 @@ export const Editor = React.memo(
     );
 
     const decorate = useCallback(
-      (entry: NodeEntry) => handleDecorate(entry, editor, addons),
-      [addons]
+      (entry: NodeEntry) => handleDecorate(entry, editor, []),
+      []
     );
 
     const keyDown = useCallback(
@@ -326,14 +315,14 @@ export const Editor = React.memo(
       [onKeyHandlers]
     );
 
+    // TODO
     const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
       handleKeyUp(event, editor);
     }, []);
 
     const click = useCallback(
-      (event: React.MouseEvent<HTMLElement>) =>
-        handleClick(event, editor, addons),
-      [addons]
+      (event: React.MouseEvent<HTMLElement>) => handleClick(event, editor, []),
+      []
     );
 
     const paste = useCallback((event: React.ClipboardEvent<HTMLDivElement>) => {
@@ -345,11 +334,15 @@ export const Editor = React.memo(
       editor.insertText(pastedData);
     }, []);
 
+    // TODO
+    const onDOMBeforeInput = useCallback(e => {}, []);
+
     return (
       <React.Fragment>
         <EditorThemeWrapper>
           {children}
           <Editable
+            onDOMBeforeInput={onDOMBeforeInput}
             renderLeaf={renderLeaf}
             renderElement={renderElement}
             decorate={decorate}

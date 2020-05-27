@@ -1,7 +1,7 @@
 import styled from "styled-components";
-import { CleanButton } from "./clean-button";
+import { ButtonBase } from "./button-base";
 
-export const Button = styled(CleanButton)`
+export const Button = styled(ButtonBase)`
   background-color: ${props => props.theme.colors.primary};
   :hover  {
     filter: brightness(85%);

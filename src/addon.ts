@@ -4,9 +4,9 @@ import { NodeEntry, Range } from "slate";
 import {
   InjectedRenderLeaf,
   InjectedRenderElement,
-  KeyHandler,
   InjectedLabels
 } from "./chief/chief";
+import { KeyHandler } from "./chief/key-handler";
 
 type OnPluginMap = {
   [key in keyof ReactEditor]?: (
@@ -23,10 +23,7 @@ type KnownKeys<T> = {
 
 export type OnPlugin = Pick<OnPluginMap, KnownKeys<OnPluginMap>>;
 
-export interface Addon<
-  TLabels extends Object = { [key: string]: string },
-  TData extends Object = {}
-> {
+export interface AddonProps {
   name?: string;
   onKey?: KeyHandler;
   renderLeaf?: InjectedRenderLeaf;
@@ -40,7 +37,7 @@ export interface Addon<
     category?: string;
     renderButton: (
       editor: ReactEditor,
-      addon: Addon
+      addon: AddonProps
     ) => React.ReactNode | React.ReactNode;
   };
   blockInsertMenu?: {
@@ -48,7 +45,5 @@ export interface Addon<
     category?: string;
     renderButton: (editor: ReactEditor) => React.ReactNode | React.ReactNode;
   };
-  data?: TData;
   labels?: InjectedLabels;
-  [key: string]: any;
 }

@@ -5,16 +5,11 @@ import React, {
   useContext,
   useCallback
 } from "react";
-import { ReactEditor, useSlate, useFocused, useSelected } from "slate-react";
+import { ReactEditor, useSlate } from "slate-react";
 import { Editor, Range, Node, Transforms, RangeRef } from "slate";
-import { Popper, Manager, Reference } from "react-popper";
+import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
-import {
-  useOnClickOutside,
-  getActiveNode,
-  getNodeFromSelection
-} from "./utils";
-import { EditableProps } from "slate-react/dist/components/editable";
+import { useOnClickOutside, getNodeFromSelection } from "./utils";
 
 type HoverToolContext = {
   activeNode?: Node;
@@ -22,72 +17,11 @@ type HoverToolContext = {
   selection: RangeRef | null;
   saveSelection: (selection: Range | null) => () => void;
   perform: (fn: (selection: Range) => void) => void;
-  useToolWindow: () => typeof ToolWindow;
 };
 
 const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
 );
-
-function ToolWindow(props: {
-  renderContent: (setShow: (show: boolean) => void) => React.ReactNode;
-  renderToolBtn: (
-    props: {
-      ref: React.Ref<any>;
-      onClick: () => void;
-    },
-    show: boolean
-  ) => React.ReactNode;
-}) {
-  const [show, setShow] = useState(false);
-  const toolWindow = useRef(null);
-  useOnClickOutside(toolWindow, e => {
-    e.preventDefault();
-    setShow(false);
-  });
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.keyCode === 27) {
-      setShow(false);
-    }
-  };
-  return (
-    <Manager>
-      <Reference>
-        {({ ref }) =>
-          props.renderToolBtn({ ref, onClick: () => setShow(!show) }, show)
-        }
-      </Reference>
-      <Popper
-        placement="bottom-start"
-        modifiers={[
-          {
-            name: "offset",
-            options: {
-              offset: [-100, 10]
-            }
-          }
-        ]}
-      >
-        {({ ref, style, placement, arrowProps }) => (
-          <div ref={ref} style={style} data-placement={placement}>
-            {show && (
-              <div onKeyDown={handleKeyDown} ref={toolWindow}>
-                {props.renderContent(setShow)}
-              </div>
-            )}
-            <div ref={arrowProps.ref} style={arrowProps.style} />
-          </div>
-        )}
-      </Popper>
-    </Manager>
-  );
-}
-
-function getUseToolWindow() {
-  return function useToolWindow() {
-    return ToolWindow;
-  };
-}
 
 function useProvideContext() {
   const editor = useSlate();
@@ -96,8 +30,7 @@ function useProvideContext() {
     enabled: false,
     saveSelection: () => () => null,
     perform: () => () => null,
-    selection: null,
-    useToolWindow: getUseToolWindow()
+    selection: null
   });
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
@@ -125,6 +58,7 @@ function useProvideContext() {
   useEffect(() => {
     if (ctx.enabled) {
       if (!savedSelection?.current && isCollapsed && !isVoid) {
+        console.log("close")
         setEnabled(false);
       }
     } else {

@@ -1,16 +1,17 @@
 import { toggleList } from "./transforms";
 import {
-  useRenderElement,
-  ChiefElement,
-  usePlugin,
-  useOnKeyDown
-} from "../../chief/chief";
+  ChiefElement} from "../../chief/chief";
+import { useRenderElement } from "../../chief/hooks/use-render-element";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
+import { usePlugin } from "../../chief/hooks/use-plugin";
 import { renderElement } from "../../element-renderer";
 import { Editor, Transforms, Element } from "slate";
 import { ReactEditor } from "slate-react";
 import { isElementEmpty } from "../../element-utils";
 import { getState } from "../../chief/chief-state";
 import { getAncestor, getActiveNode } from "../../utils";
+import { AddonProps } from "../../addon";
+import { listControl } from "./controls";
 
 export const TYPE_LIST_ITEM = "list-item";
 export const TYPE_UNORDERED_LIST = "unordered-list";
@@ -23,7 +24,7 @@ export const LIST_TYPES = [
 
 type ListElement = {} & ChiefElement;
 
-export function ListsAddon() {
+export function ListsAddon(props: AddonProps) {
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
       if (node.type === TYPE_LIST_ITEM) {
@@ -186,3 +187,5 @@ export function ListsAddon() {
   });
   return null;
 }
+
+ListsAddon.Control = listControl;

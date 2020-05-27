@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState, useRef } from "react";
-import { Editor, Point, Node, Transforms } from "slate";
+import { Editor, Point, Node, Transforms, Location } from "slate";
 import { ReactEditor } from "slate-react";
 import { Range } from "slate";
 
@@ -119,9 +119,11 @@ export const useLastFocused = (editor: ReactEditor) => {
   return state;
 };
 
-export const isBlockEmpty = (editor: Editor) => {
-  const { selection } = editor;
-
+export const isBlockEmpty = (editor: Editor, location?: Location) => {
+  let selection: Location | null = editor.selection;
+  if (location) {
+    selection = location;
+  }
   if (selection) {
     const [node] = Editor.node(editor, selection);
     return Node.string(node).length === 0;

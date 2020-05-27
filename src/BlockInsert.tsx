@@ -6,13 +6,12 @@ import {
 } from "./utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
-import { Node, Editor, Range, Element } from "slate";
+import { Node, Editor, Range, Element, Path, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
-import { CleanButton } from "./ui/clean-button";
-import { getState } from "./chief/chief-state";
+import { ButtonBase } from "./ui/button-base";
 
-export const BlockInsertBtn = styled(CleanButton)`
+export const BlockInsertBtn = styled(ButtonBase)`
   user-select: none;
   border: none;
   background: transparent;
@@ -25,7 +24,7 @@ export const BlockInsertBtn = styled(CleanButton)`
     font-size: 28px;
     color: #ccc;
     position: absolute;
-    top: -6px;
+    top: -3px;
     left: 4px;
     padding: 0;
     margin: 0;
@@ -38,37 +37,65 @@ export const BlockInsertBtn = styled(CleanButton)`
   }
 `;
 
+function useHoveredNode(editor: ReactEditor) {
+  const [node, setNode] = useState<{ node: Node; path: Path } | null>(null);
+  useEffect(() => {
+    const [rootNode] = Editor.node(editor, {
+      anchor: Editor.start(editor, []),
+      focus: Editor.end(editor, [])
+    });
+    if (rootNode && Node.isNode(rootNode)) {
+      const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode);
+      firstDOMPoint.addEventListener("mousemove", e => {
+        if (ReactEditor.hasDOMNode(editor, e.target as globalThis.Node)) {
+          const node = ReactEditor.toSlateNode(
+            editor,
+            e.target as globalThis.Node
+          );
+          const path = ReactEditor.findPath(editor, node);
+          setNode({ node, path });
+        } else {
+          setNode(null);
+        }
+      });
+    }
+  }, [editor]);
+  return node;
+}
+
 export function BlockInsert(props: { children?: React.ReactNode }) {
   const editor = useSlate();
   const { selection } = editor;
-  const activenode = getActiveNode(editor);
   const [coords, setCoords] = useState([-1000, -1000]);
   const [showMenu, setShowMenu] = useState(false);
   const toolboxRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(toolboxRef, () => {
     setShowMenu(false);
   });
+
+  const hoveredNode = useHoveredNode(editor);
+
   const handleBlockInsert = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event.preventDefault();
       event.stopPropagation();
+      if (!showMenu && hoveredNode) {
+        Transforms.select(editor, hoveredNode.path);
+      }
       setShowMenu(!showMenu);
       ReactEditor.focus(editor);
     },
-    [showMenu]
+    [showMenu, hoveredNode]
   );
+
   useEffect(() => {
-    setShowMenu(false);
-    if (!ReactEditor.isFocused(editor)) {
-      return;
-    }
-    if (activenode) {
+    if (hoveredNode?.node) {
       const [rootNode] = Editor.nodes(editor, {
         at: Editor.start(editor, [0, 0])
       });
       if (rootNode && rootNode.length > 0 && Node.isNode(rootNode[0])) {
         const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode[0]);
-        const activeDOMNode = ReactEditor.toDOMNode(editor, activenode);
+        const activeDOMNode = ReactEditor.toDOMNode(editor, hoveredNode.node);
         const rect = activeDOMNode.getBoundingClientRect();
         const top = rect.top + window.pageYOffset + rect.height / 2 - 25 / 2;
         const left =
@@ -76,17 +103,9 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
         setCoords([top, left]);
       }
     }
-  }, [selection, activenode, editor]);
+  }, [hoveredNode?.node, editor]);
 
-  if (
-    !selection ||
-    selection.anchor.path.length !== 2 ||
-    Range.isExpanded(selection) ||
-    Range.start(selection).offset !== 0 ||
-    !isBlockEmpty(editor) ||
-    Editor.isVoid(editor, activenode) ||
-    !ReactEditor.isFocused(editor)
-  ) {
+  if (!hoveredNode || Node.string(hoveredNode.node).length !== 0) {
     if (!showMenu) {
       return null;
     }
@@ -122,6 +141,13 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
               ref={ref}
               style={{ ...style, zIndex: 20 }}
               data-placement={placement}
+              onMouseDown={e => {
+                if (!e.isDefaultPrevented()) {
+                  setShowMenu(false);
+                  editor.selection && Transforms.select(editor, editor.selection.focus);
+                  ReactEditor.focus(editor);
+                }
+              }}
             >
               <div ref={toolboxRef}>{props.children}</div>
               <div ref={arrowProps.ref} style={arrowProps.style} />

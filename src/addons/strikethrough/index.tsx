@@ -1,13 +1,10 @@
 import React from "react";
-import { Addon } from "../../addon";
+import { AddonProps } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
 import { MarkBtn, toggleFormat } from "../../mark-button";
-import {
-  useCreateAddon,
-  useRenderLeaf,
-  useOnKeyDown,
-  useLabels
-} from "../../chief/chief";
+import { useRenderLeaf } from "../../chief/hooks/use-render-leaf";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
+import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 
@@ -33,7 +30,7 @@ export const strikethroughControl: Control = {
   }
 };
 
-export function StrikethroughAddon(props: Addon) {
+export function StrikethroughAddon(props: AddonProps) {
   useLabels(props.labels);
   useRenderLeaf({
     renderLeaf: props => {

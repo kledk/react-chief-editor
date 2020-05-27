@@ -2,7 +2,7 @@ import React from "react";
 import { useSlate } from "slate-react";
 import { ToolbarBtn } from "./ToolbarBtn";
 import { Editor, Transforms, Text } from "slate";
-import { useLabels } from "./chief/chief";
+import { useLabels } from "./chief/hooks/use-labels";
 
 export function toggleFormat(editor: Editor, format: string) {
   let isFormatted = isTextFormat(editor, format);
@@ -31,7 +31,10 @@ export function MarkBtn(
   return (
     <ToolbarBtn
       isActive={isActive}
-      onClick={() => toggleFormat(editor, props.formatType)}
+      onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        toggleFormat(editor, props.formatType);
+      }}
       {...otherProps}
     />
   );

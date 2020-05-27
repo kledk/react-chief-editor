@@ -1,17 +1,21 @@
-import React, { useRef, useState } from "react";
-import { StyledToolbarBtn } from "./StyledToolbarBtn";
-import usePopper from "react-overlays/usePopper";
+import React, { useRef } from "react";
+import { StyledToolbarBtn } from "./ui/styled-toolbar-btn";
 import Overlay from "react-overlays/Overlay";
 import { useHover } from "./utils";
 import styled, { css } from "styled-components";
-import { useLabels, Label } from "./chief/chief";
+import { Label } from "./chief/chief";
+import { useLabels } from "./chief/hooks/use-labels";
 
 export type Ref = HTMLElement;
 
 type Props = {
-  tooltip?: { label: Label; shortcut?: string };
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  tooltip?: {
+    label: Label;
+    shortcut?: string;
+    placement?: React.ComponentProps<typeof Overlay>["placement"];
+  };
   onMouseDown?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 } & React.ComponentProps<typeof StyledToolbarBtn>;
 
 export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
@@ -26,19 +30,18 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
         <StyledToolbarBtn
           ref={ref}
           onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            e.preventDefault();
+            if (onClick) {
+              onClick(e);
+              return;
+            }
             onMouseDown && onMouseDown(e);
-          }}
-          onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            e.preventDefault();
-            onClick && onClick(e);
           }}
           {...otherProps}
         />
       </div>
       <Overlay
         show={tooltip && show}
-        placement={"top"}
+        placement={tooltip?.placement || "top"}
         container={containerRef}
         target={triggerRef}
       >

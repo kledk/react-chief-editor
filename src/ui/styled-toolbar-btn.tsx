@@ -1,14 +1,14 @@
 import styled from "styled-components";
-import { CleanButton } from "./ui/clean-button";
-import { OverrideTheme } from "./override-theme";
+import { ButtonBase } from "./button-base";
+import { OverrideTheme } from "../override-theme";
 
-export const StyledToolbarBtn = styled(CleanButton)<{
+export const StyledToolbarBtn = styled(ButtonBase)<{
   isActive?: boolean;
   rounded?: boolean;
 }>`
+  width: 100%;
   transition: all 250ms;
   background-color: white;
-  font-size: 0.9em;
   &:hover {
     background-color: ${props =>
       props.disabled ? undefined : props.theme.colors.gray[200]};

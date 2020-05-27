@@ -4,9 +4,7 @@ import {
   Chief,
   BoldAddon,
   ImageAddon,
-  useCreateAddon,
-  ToolbarBtn,
-  Addon,
+  AddonProps,
   ItalicAddon,
   UnderlineAddon,
   StrikethroughAddon,
@@ -32,31 +30,13 @@ import {
   strikethroughControl,
   underlineControl,
   headingContextControls,
-  linkControl
+  linkControl,
+  LabelsAddon
 } from "chief-editor";
 import { Node, Element } from "slate";
 import { css } from "styled-components";
 
-function ExampleVideoAddon(props: Addon) {
-  // const editor = useSlate();
-  const { addon } = useCreateAddon(
-    {
-      name: "custom_void_element",
-      labels: {
-        name: "Custom void element"
-      },
-      hoverMenu: {
-        order: 0,
-        category: "video",
-        typeMatch: /custom_void_element/,
-        renderButton: (editor, addon) => (
-          <ToolbarBtn>{addon?.labels?.name}</ToolbarBtn>
-        )
-      }
-    },
-    props
-  );
-
+function ExampleVideoAddon(props: AddonProps) {
   usePlugin({
     isVoid: isVoid => element =>
       Element.isElement(element) && element.type === "custom_void_element"
@@ -67,7 +47,6 @@ function ExampleVideoAddon(props: Addon) {
   useRenderElement({
     typeMatch: /custom_void_element/,
     renderElement: (props, editor) => {
-      console.log(props);
       return (
         <div {...props.attributes}>
           <InputWrapper>
@@ -141,6 +120,15 @@ function App() {
 
   const addons = (
     <>
+      <LabelsAddon
+        labels={{
+          "marks.bold": "Fed",
+          "marks.italic": "Kursiv",
+          "marks.strikethrough": "Gennemstreg",
+          "marks.underline": "Understreg",
+          "elements.link": "Link"
+        }}
+      ></LabelsAddon>
       <ParagraphAddon></ParagraphAddon>
       <BoldAddon></BoldAddon>
       <ItalicAddon></ItalicAddon>
@@ -223,7 +211,11 @@ function App() {
         >
           <BlockInsert>
             <BlockInsertControls
-              controls={[...headingBlockControls, ...imageBlockControls]}
+              controls={[
+                ...headingBlockControls,
+                ...imageBlockControls,
+                ListsAddon.Control
+              ]}
             />
           </BlockInsert>
           <HoverToolProvider

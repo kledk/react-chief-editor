@@ -7,16 +7,22 @@ import {
   ReactEditor,
   useSlate
 } from "slate-react";
-import { CleanButton } from "../../ui/clean-button";
-import { WithAttentionToolbar } from "./StyledFocusToolbar";
+import { ButtonBase } from "../../ui/button-base";
+import { WithAttentionToolbar } from "../../ui/WithAttentionToolbar";
 import { Input, InputWrapper } from "../../InputWrapper";
 import isUrl from "is-url";
-import { isImageElement } from "./index";
+import { isImageElement, ImageElement } from "./index";
 import { Button } from "../../ui/button";
 import styled from "styled-components";
+import { ToolBtnPopup } from "../../ToolBtnPopup";
+import { StyledToolBox } from "../../StyledToolBox";
+import { ToolbarBtn } from "../../ToolbarBtn";
+import { StyledFocusToolBtn } from "../../ui/StyledFocusToolbar";
+import { ChiefRenderElementProps } from "../../chief/chief";
+import { UiWrap } from "../../ui/ui-wrap";
 
-export const ImageElement = (
-  props: RenderElementProps & {
+export const ImageBlock = (
+  props: ChiefRenderElementProps<ImageElement> & {
     onOpenFileRequest?: () => void;
     onRemoved?: (url: string | null) => void;
   }
@@ -26,9 +32,6 @@ export const ImageElement = (
   const editor = useSlate();
   const { onOpenFileRequest, onRemoved, ...renderElementProps } = props;
   const { element, children, attributes } = renderElementProps;
-  if (!isImageElement(element)) {
-    return null;
-  }
 
   const [embedUrl, setEmbedUrl] = useState(element.url || "");
   const [isReplacing, setIsReplacing] = useState(false);
@@ -86,8 +89,21 @@ export const ImageElement = (
         {...renderElementProps}
         btns={
           <React.Fragment>
-            <CleanButton onMouseDown={handleDelete}>Delete</CleanButton>
-            <CleanButton onMouseDown={toggleReplace}>Replace</CleanButton>
+            <StyledFocusToolBtn onMouseDown={handleDelete}>
+              Delete
+            </StyledFocusToolBtn>
+            <ToolBtnPopup
+              renderContent={() => (
+                <StyledToolBox>
+                  <ToolbarBtn>Copy address</ToolbarBtn>
+                  <ToolbarBtn>Resize</ToolbarBtn>
+                  <ToolbarBtn onMouseDown={toggleReplace}>Replace</ToolbarBtn>
+                </StyledToolBox>
+              )}
+              renderToolBtn={tprops => (
+                <StyledFocusToolBtn {...tprops}>...</StyledFocusToolBtn>
+              )}
+            ></ToolBtnPopup>
           </React.Fragment>
         }
       >
@@ -113,9 +129,13 @@ export const ImageElement = (
         {...renderElementProps}
         btns={
           <React.Fragment>
-            <CleanButton onMouseDown={handleDelete}>Delete</CleanButton>
+            <StyledFocusToolBtn onMouseDown={handleDelete}>
+              Delete
+            </StyledFocusToolBtn>
             {isReplacing && (
-              <CleanButton onMouseDown={toggleReplace}>Cancel</CleanButton>
+              <StyledFocusToolBtn onMouseDown={toggleReplace}>
+                Cancel
+              </StyledFocusToolBtn>
             )}
           </React.Fragment>
         }
@@ -158,7 +178,7 @@ export const ImageElement = (
   );
 };
 
-export const StyledImageEmptyContainer = styled.div`
+export const StyledImageEmptyContainer = styled(UiWrap)`
   background-color: ${props => props.theme.colors.gray[300]};
   padding: 8px;
   display: flex;

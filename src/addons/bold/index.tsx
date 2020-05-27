@@ -1,13 +1,9 @@
 import React from "react";
-import { Addon } from "../../addon";
+import { AddonProps } from "../../addon";
 import { renderLeaf } from "../../leaf-renderer";
-import {
-  useCreateAddon,
-  useRenderLeaf,
-  useOnKeyDown,
-  useLabels,
-  InjectedLabels
-} from "../../chief/chief";
+import { useRenderLeaf } from "../../chief/hooks/use-render-leaf";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
+import { useLabels } from "../../chief/hooks/use-labels";
 import { MarkBtn, toggleFormat } from "../../mark-button";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
@@ -16,7 +12,7 @@ const shortcut = "mod+b";
 
 export const boldControl: Control = {
   category: "marks",
-  render: () => {
+  Component: () => {
     return (
       <MarkBtn
         tooltip={{
@@ -34,7 +30,7 @@ export const boldControl: Control = {
   }
 };
 
-export function BoldAddon(props: Addon) {
+export function BoldAddon(props: AddonProps) {
   useLabels(props.labels);
   useRenderLeaf({
     renderLeaf: props => renderLeaf(props, "bold", "strong")

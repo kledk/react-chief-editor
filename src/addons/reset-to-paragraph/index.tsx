@@ -1,5 +1,5 @@
 import { Editor, Transforms, Range } from "slate";
-import { usePlugin } from "../../chief/chief";
+import { usePlugin } from "../../chief/hooks/use-plugin";
 
 export function ResetToParagraphAddon() {
   usePlugin({

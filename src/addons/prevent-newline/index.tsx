@@ -1,8 +1,8 @@
-import { Addon } from "../../addon";
-import { useOnKeyDown } from "../../chief/chief";
+import { AddonProps } from "../../addon";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { Range } from "slate";
 
-export function PreventNewlineAddon(props: Addon) {
+export function PreventNewlineAddon(props: AddonProps) {
   useOnKeyDown({
     pattern: "enter+shift",
     handler: (event, editor) => {

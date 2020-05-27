@@ -1,16 +1,13 @@
 import React from "react";
-import { Addon } from "../../addon";
+import { AddonProps } from "../../addon";
 import { Heading } from "./Heading";
 import { Transforms, Editor, Range, Element } from "slate";
 import { useSlate, ReactEditor } from "slate-react";
-import { StyledToolbarBtn } from "../../StyledToolbarBtn";
+import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import {
-  useCreateAddon,
-  useRenderElement,
-  useOnKeyDown
-} from "../../chief/chief";
+import { useRenderElement } from "../../chief/hooks/use-render-element";
+import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { RichEditor } from "../../chief/editor";
 import { Control } from "../../control";
 
@@ -31,7 +28,10 @@ export const headingBlockControls: Control[] = [
         {headingTypes.map((it, i) => (
           <ToolbarBtn
             isActive={isNodeActive(editor, it)}
-            onClick={() => {
+            onMouseDown={(
+              e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+            ) => {
+              e.preventDefault();
               RichEditor.insertBlock(editor, it);
               ReactEditor.focus(editor);
             }}
@@ -57,7 +57,7 @@ export const headingContextControls: Control[] = [
   }
 ];
 
-export function HeadingsAddon(props: Addon) {
+export function HeadingsAddon(props: AddonProps) {
   useRenderElement({
     typeMatch: /heading-[1-6]/,
     renderElement: props => <Heading {...props} />
@@ -125,7 +125,10 @@ function HeadingBtn(props: { headingType: string; children: React.ReactNode }) {
   return (
     <ToolbarBtn
       isActive={isActive}
-      onClick={() => toggleHeading(editor, props.headingType)}
+      onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        toggleHeading(editor, props.headingType);
+      }}
     >
       {props.children}
     </ToolbarBtn>

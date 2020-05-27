@@ -1,31 +1,29 @@
 import {} from "./image-element";
 import React, { useRef, useEffect } from "react";
-import { Addon } from "../../addon";
+import { AddonProps } from "../../addon";
 import { Element, Editor, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
 import { isNodeActive, getNodeFromSelection, findNodes } from "../../utils";
 import { RichEditor } from "../../chief/editor";
 import { FileUpload } from "../../FileUpload";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import styled from "styled-components";
 import {
-  useRenderElement,
-  usePlugin,
-  useCreateAddon,
   ChiefElement,
   isChiefElement
 } from "../../chief/chief";
+import { useRenderElement } from "../../chief/hooks/use-render-element";
+import { usePlugin } from "../../chief/hooks/use-plugin";
 import { isDefined, isFilled } from "ts-is-present";
 import { HistoryEditor } from "slate-history";
 import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
-import { ImageElement } from "./image-element";
+import { ImageBlock } from "./image-element";
 import { Control } from "../../control";
 
 export interface ImageElement extends ChiefElement {
   type: "image";
   url: string | null;
-  caption: string;
+  caption?: string;
   previewId?: number;
 }
 
@@ -68,7 +66,7 @@ function getAllImageNodes(editor: Editor) {
 }
 
 export function ImageAddon(
-  props: Addon & {
+  props: AddonProps & {
     onUploadRequest?: (files: globalThis.FileList | null) => Promise<string>;
     onRemoved?: (url: string | null) => void;
     onChange?: (images: ImageElement[]) => void;
@@ -182,7 +180,7 @@ export function ImageAddon(
   useRenderElement<ImageElement>({
     typeMatch: "image",
     renderElement: renderElementProps => (
-      <ImageElement
+      <ImageBlock
         onOpenFileRequest={() => fileRef.current && fileRef.current.click()}
         onRemoved={props.onRemoved}
         {...renderElementProps}
@@ -190,5 +188,5 @@ export function ImageAddon(
     )
   });
 
-  return <FileUpload ref={fileRef} onChange={handleFile} multiple={false} />;
+  return <FileUpload accept={"image/*"} ref={fileRef} onChange={handleFile} multiple={false} />;
 }
