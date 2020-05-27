@@ -9,7 +9,12 @@ import { ReactEditor, useSlate } from "slate-react";
 import { Editor, Range, Node, Transforms, RangeRef } from "slate";
 import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
-import { useOnClickOutside, getNodeFromSelection } from "./utils";
+import { useOnClickOutside, getNodeFromSelection } from "../../utils";
+
+export const deselect = Transforms.deselect;
+Transforms.deselect = () => {
+  // We disable the default deselect.
+};
 
 type HoverToolContext = {
   activeNode?: Node;

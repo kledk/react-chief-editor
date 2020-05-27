@@ -3,13 +3,13 @@ import {
   getActiveNode,
   useOnClickOutside,
   getAncestor
-} from "./utils";
+} from "../../utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
 import { Node, Editor, Range, Element, Path, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
-import { ButtonBase } from "./ui/button-base";
+import { ButtonBase } from "../../ui/button-base";
 
 export const BlockInsertBtn = styled(ButtonBase)`
   user-select: none;
