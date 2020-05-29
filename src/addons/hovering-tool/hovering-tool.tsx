@@ -12,14 +12,13 @@ import { VirtualElement } from "@popperjs/core";
 import { useOnClickOutside, getNodeFromSelection } from "../../utils";
 
 export const deselect = Transforms.deselect;
-Transforms.deselect = () => {
+Transforms.deselect = (...args) => {
   // We disable the default deselect.
 };
 
 type HoverToolContext = {
   activeNode?: Node;
   enabled: boolean;
-  selection: RangeRef | null;
   saveSelection: (selection: Range | null) => () => void;
   perform: (fn: (selection: Range) => void) => void;
 };
@@ -34,8 +33,7 @@ function useProvideContext() {
   const [ctx, setCtx] = useState<HoverToolContext>({
     enabled: false,
     saveSelection: () => () => null,
-    perform: () => () => null,
-    selection: null
+    perform: () => () => null
   });
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
@@ -63,7 +61,6 @@ function useProvideContext() {
   useEffect(() => {
     if (ctx.enabled) {
       if (!savedSelection?.current && isCollapsed && !isVoid) {
-        console.log("close")
         setEnabled(false);
       }
     } else {
@@ -84,13 +81,15 @@ function useProvideContext() {
     if (selection) {
       const sRef = Editor.rangeRef(editor, selection);
       setSaveSelection(sRef);
-      setCtx(ctx => ({ ...ctx, selection: sRef }));
       return () => {
         if (sRef.current) {
-          Transforms.select(editorRef.current, sRef.current);
           ReactEditor.focus(editorRef.current);
-          setSaveSelection(null);
-          sRef.current = null;
+          setTimeout(() => {
+            Transforms.select(editorRef.current, sRef.current!);
+            Transforms.setSelection(editorRef.current, sRef.current!);
+            setSaveSelection(null);
+            sRef.unref();
+          }, 0);
         }
       };
     }

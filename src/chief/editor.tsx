@@ -75,7 +75,7 @@ export const Editor = React.memo(
       },
       [renderLeafs]
     );
-
+      //TODO
     const decorate = useCallback(
       (entry: NodeEntry) => handleDecorate(entry, editor, []),
       []
@@ -92,7 +92,7 @@ export const Editor = React.memo(
     const keyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
       handleKeyUp(event, editor);
     }, []);
-
+    //TODO
     const click = useCallback(
       (event: React.MouseEvent<HTMLElement>) => handleClick(event, editor, []),
       []
