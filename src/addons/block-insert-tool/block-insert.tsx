@@ -65,7 +65,6 @@ function useHoveredNode(editor: ReactEditor) {
 
 export function BlockInsert(props: { children?: React.ReactNode }) {
   const editor = useSlate();
-  const { selection } = editor;
   const [coords, setCoords] = useState([-1000, -1000]);
   const [showMenu, setShowMenu] = useState(false);
   const toolboxRef = useRef<HTMLDivElement>(null);
@@ -89,7 +88,7 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
   );
 
   useEffect(() => {
-    if (hoveredNode?.node) {
+    if (hoveredNode?.node && !showMenu) {
       const [rootNode] = Editor.nodes(editor, {
         at: Editor.start(editor, [0, 0])
       });
@@ -105,7 +104,12 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
     }
   }, [hoveredNode?.node, editor]);
 
-  if (!hoveredNode || Node.string(hoveredNode.node).length !== 0) {
+  if (
+    !hoveredNode ||
+    hoveredNode.path.length === 0 ||
+    Node.string(hoveredNode.node).length !== 0 ||
+    Editor.isVoid(editor, hoveredNode.node)
+  ) {
     if (!showMenu) {
       return null;
     }
@@ -144,7 +148,8 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
               onMouseDown={e => {
                 if (!e.isDefaultPrevented()) {
                   setShowMenu(false);
-                  editor.selection && Transforms.select(editor, editor.selection.focus);
+                  editor.selection &&
+                    Transforms.select(editor, editor.selection.focus);
                   ReactEditor.focus(editor);
                 }
               }}
