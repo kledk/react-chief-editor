@@ -1,7 +1,6 @@
 import React from "react";
 import {
   ReactEditor,
-
   RenderLeafProps
 } from "slate-react";
 import { InjectedRenderLeaf } from "../chief";

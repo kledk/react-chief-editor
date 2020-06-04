@@ -1,11 +1,6 @@
 import React from "react";
 import groupBy from "lodash/groupBy";
-import {
-  ReactEditor,
-
-
-  useSlate
-} from "slate-react";
+import { ReactEditor, useSlate } from "slate-react";
 import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { ToolDivider } from "../../ToolDivider";
@@ -13,8 +8,9 @@ import { ToolsWrapper } from "../../ToolsWrapper";
 import { isNodeActive } from "../../utils";
 import { Control } from "../../control";
 import { RichEditor } from "../../chief/editor";
+import { ToolbarBtn } from "../../ToolbarBtn";
 
-export function BlockInsertControls(props: { controls: Control[]; }) {
+export function BlockInsertControls(props: { controls: Control[] }) {
   const editor = useSlate();
   const controls = props.controls;
   if (controls.length > 0) {
@@ -36,15 +32,16 @@ export function BlockInsertControls(props: { controls: Control[]; }) {
               <ToolDivider />
             </React.Fragment>
           ))}
-          <StyledToolbarBtn
+          <ToolDivider />
+          <ToolbarBtn
             isActive={isNodeActive(editor, "paragraph")}
-            onClick={() => {
+            onMouseDown={() => {
               RichEditor.insertBlock(editor, "paragraph");
               ReactEditor.focus(editor);
             }}
           >
             Text
-          </StyledToolbarBtn>
+          </ToolbarBtn>
         </ToolsWrapper>
       </StyledToolBox>
     );

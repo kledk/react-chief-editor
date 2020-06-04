@@ -138,6 +138,7 @@ function App() {
       <ImageAddon></ImageAddon>
       <ResetToParagraphAddon></ResetToParagraphAddon>
       <PreventNewlineAddon></PreventNewlineAddon>
+      <PreventNewlineAddon></PreventNewlineAddon>
       <LinkAddon></LinkAddon>
       <ListsAddon></ListsAddon>
       <BlockTabAddon></BlockTabAddon>
@@ -168,37 +169,6 @@ function App() {
               a {
                 color: rgba(153, 109, 33);
               }
-              ol,
-              ul {
-                margin: 0;
-                padding-inline-start: 25px;
-              }
-              ol ol ol ol,
-              ol {
-                list-style: decimal outside none;
-              }
-              ol ol ol ol ol,
-              ol ol {
-                list-style: lower-latin outside none;
-              }
-              ol ol ol ol ol ol,
-              ol ol ol {
-                list-style: lower-roman outside none;
-              }
-              ul ul ul ul,
-              ul {
-                list-style: square outside none;
-              }
-
-              ul ul ul ul ul,
-              ul ul {
-                list-style: circle outside none;
-              }
-
-              ul ul ul ul ul ul,
-              ul ul ul {
-                list-style: disc outside none;
-              }
             `
           }
         }}
@@ -214,7 +184,7 @@ function App() {
               controls={[
                 ...headingBlockControls,
                 ...imageBlockControls,
-                ListsAddon.Control
+                ListsAddon.Control,
               ]}
             />
           </BlockInsert>

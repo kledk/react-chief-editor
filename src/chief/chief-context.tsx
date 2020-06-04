@@ -1,13 +1,15 @@
 import React, { useState, useRef } from "react";
-import { ReactEditor } from "slate-react";
+import { ReactEditor, Editable } from "slate-react";
 import { OnPlugin } from "../addon";
 import { KeyHandler } from "./key-handler";
 import { createEditor } from "./utils/create-editor";
 import {
   InjectedRenderLeaf,
   InjectedRenderElement,
-  InjectedLabels
+  InjectedLabels,
+  InjectedDecorator
 } from "./chief";
+import { NodeEntry, Node } from "slate";
 
 export interface ChiefContextValue {
   editor: ReactEditor;
@@ -22,12 +24,15 @@ export interface ChiefContextValue {
   renderElements: InjectedRenderElement[];
   injectOnKeyHandler: (keyHandler: KeyHandler) => void;
   removeOnKeyHandler: (keyHandler: KeyHandler) => void;
-  onKeyHandlers: KeyHandler[];
+  onKeyDownHandlers: KeyHandler[];
   injectPlugin: (plugin: OnPlugin) => void;
   removePlugin: (plugin: OnPlugin) => void;
-  injectedPlugins: OnPlugin[];
-  injectedLabels: InjectedLabels;
+  OnPlugins: OnPlugin[];
+  labels: InjectedLabels;
   injectLabels: (labels: InjectedLabels) => void;
+  decorations: InjectedDecorator[];
+  injectDecoration: (decoration: InjectedDecorator) => void;
+  removeDecoration: (decoration: InjectedDecorator) => void;
 }
 export const ChiefContext = React.createContext<ChiefContextValue | null>(null);
 let count = 1;
@@ -42,6 +47,7 @@ export function useProvideChiefContext(props: {
   );
   const [injectedLabels, setInjectedLabels] = useState<InjectedLabels>({});
   const [onKeyHandlers, setOnKeyHandlers] = useState<KeyHandler[]>([]);
+  const [decorations, setDecorations] = useState<InjectedDecorator[]>([]);
   const editor = createEditor(injectedPlugins);
   const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
   const { current: id } = useRef(props.id || `chiefeditor${count++}`);
@@ -98,6 +104,22 @@ export function useProvideChiefContext(props: {
     });
   }
 
+  function injectDecoration(decorator: InjectedDecorator) {
+    setDecorations(it =>
+      [...it, decorator].sort((a, b) =>
+        a.priority === b.priority ? 0 : a.priority === "low" ? 1 : -1
+      )
+    );
+  }
+
+  function removeDecoration(decorator: InjectedDecorator) {
+    setDecorations(it => {
+      const toSlicer = [...it];
+      toSlicer.splice(it.indexOf(decorator), 1);
+      return toSlicer;
+    });
+  }
+
   function injectLabels(labels: InjectedLabels) {
     setInjectedLabels(it => ({ ...it, ...labels }));
   }
@@ -115,12 +137,15 @@ export function useProvideChiefContext(props: {
     removeRenderElement,
     injectOnKeyHandler,
     removeOnKeyHandler,
-    onKeyHandlers,
+    onKeyDownHandlers: onKeyHandlers,
     injectPlugin,
     removePlugin,
-    injectedPlugins,
-    injectedLabels,
-    injectLabels
+    OnPlugins: injectedPlugins,
+    labels: injectedLabels,
+    injectLabels,
+    decorations,
+    injectDecoration,
+    removeDecoration
   };
 
   return value;

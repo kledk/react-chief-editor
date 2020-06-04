@@ -6,23 +6,22 @@ export function renderLeaf(
   leafType: string,
   rectType: string
 ) {
-  const { attributes, children, leaf } = props;
+  const { children, leaf } = props;
   if (leaf[leafType]) {
     return (
-      <Leaf attributes={attributes}>
-        {React.createElement(rectType, null, children)}
-      </Leaf>
+      <Leaf {...props}>{React.createElement(rectType, null, children)}</Leaf>
     );
   }
   return undefined;
 }
 
-const Leaf = memo(
-  (props: {
-    attributes: RenderLeafProps["attributes"];
-    children: ReactNode;
-  }) => {
-    const { attributes, ...rest } = props;
-    return <span {...attributes} {...rest} />;
-  }
-);
+const Leaf = memo((props: RenderLeafProps) => {
+  const { attributes, ...rest } = props;
+  console.log(rest);
+  return (
+    <span
+      style={{ backgroundColor: rest.leaf.highlight ? "yellow" : undefined }}
+      {...attributes}
+    />
+  );
+});

@@ -54,7 +54,8 @@ export const Editor = React.memo(
       id,
       renderLeafs,
       renderElements,
-      onKeyHandlers
+      onKeyDownHandlers,
+      decorations
     } = useChief();
     const { children, ...otherProps } = props;
 
@@ -75,17 +76,17 @@ export const Editor = React.memo(
       },
       [renderLeafs]
     );
-      //TODO
+    
     const decorate = useCallback(
-      (entry: NodeEntry) => handleDecorate(entry, editor, []),
-      []
+      (entry: NodeEntry) => handleDecorate(entry, editor, decorations),
+      [decorations]
     );
 
     const keyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
-        return handleKeyDown(event, editor, onKeyHandlers);
+        return handleKeyDown(event, editor, onKeyDownHandlers);
       },
-      [onKeyHandlers]
+      [onKeyDownHandlers]
     );
 
     // TODO

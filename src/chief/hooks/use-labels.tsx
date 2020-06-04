@@ -3,7 +3,7 @@ import { InjectedLabels, Label } from "../chief";
 import { useChief } from "./use-chief";
 
 export function useLabels(labels?: InjectedLabels) {
-  const { injectedLabels, injectLabels } = useChief();
+  const { labels: injectedLabels, injectLabels } = useChief();
   const getLabel = useCallback(
     (label: Label) => {
       if (typeof injectedLabels[label.key] === "string") {

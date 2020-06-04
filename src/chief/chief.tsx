@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   RenderLeafProps,
   ReactEditor,
   RenderElementProps,
-  Slate
+  Slate,
+  Editable
 } from "slate-react";
-import { Node, Element } from "slate";
+import { Node, Element, NodeEntry, Range } from "slate";
 import merge from "lodash/merge";
 import { ChiefEditorTheme } from "../chief-editor-theme";
 import { ThemeProvider } from "styled-components";
@@ -49,6 +50,14 @@ export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
 export type InjectedLabels = { [key: string]: string | undefined };
 export type Label = { key: string; defaultLabel: string };
 
+export type InjectedDecorator = {
+  decorator: (
+    entry: NodeEntry<Node>,
+    editor: ReactEditor
+  ) => Range[] | undefined;
+  priority?: "high" | "low";
+};
+
 export const Chief = React.memo(function(props: {
   value: Node[];
   onChange: (value: Node[]) => void;
@@ -60,7 +69,7 @@ export const Chief = React.memo(function(props: {
   const { children, onChange, value, readOnly, id, theme } = props;
   const _theme = merge({}, defaultTheme, theme);
   const chiefValue = useProvideChiefContext({ readOnly, id });
-  
+
   return (
     <Slate editor={chiefValue.editor} value={value} onChange={onChange}>
       <ChiefContext.Provider value={chiefValue}>

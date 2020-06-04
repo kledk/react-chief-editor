@@ -1,17 +1,18 @@
 import { toggleList } from "./transforms";
-import {
-  ChiefElement} from "../../chief/chief";
+import { ChiefElement } from "../../chief/chief";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 import { renderElement } from "../../element-renderer";
-import { Editor, Transforms, Element } from "slate";
+import { Editor, Transforms, Element, Range } from "slate";
 import { ReactEditor } from "slate-react";
 import { isElementEmpty } from "../../element-utils";
 import { getState } from "../../chief/chief-state";
 import { getAncestor, getActiveNode } from "../../utils";
 import { AddonProps } from "../../addon";
 import { listControl } from "./controls";
+import styled, { css } from "styled-components";
+import { useDecoration } from "../../chief/hooks/use-decoration";
 
 export const TYPE_LIST_ITEM = "list-item";
 export const TYPE_UNORDERED_LIST = "unordered-list";
@@ -24,7 +25,59 @@ export const LIST_TYPES = [
 
 type ListElement = {} & ChiefElement;
 
+const Ul = styled.ul`
+  margin: 0;
+  padding-inline-start: 25px;
+  ul ul ul ul,
+  ul {
+    list-style: square outside none;
+  }
+
+  ul ul ul ul ul,
+  ul ul {
+    list-style: circle outside none;
+  }
+
+  ul ul ul ul ul ul,
+  ul ul ul {
+    list-style: disc outside none;
+  }
+`;
+const Ol = styled.ol`
+  margin: 0;
+  padding-inline-start: 25px;
+  ol ol ol ol,
+  ol {
+    list-style: decimal outside none;
+  }
+  ol ol ol ol ol,
+  ol ol {
+    list-style: lower-latin outside none;
+  }
+  ol ol ol ol ol ol,
+  ol ol ol {
+    list-style: lower-roman outside none;
+  }
+`;
+
+const Li = styled.li``;
+
 export function ListsAddon(props: AddonProps) {
+  useDecoration({
+    decorator: ([node, path], editor) => {
+      const { selection } = editor;
+      const ranges: Range[] = [];
+      if (selection && path.length) {
+        const [parent] = Editor.parent(editor, path);
+        if (parent && parent.type === "paragraph") {
+          const text = node.text as string;
+          text.split;
+          ranges.push({ ...selection, highlight: true });
+        }
+      }
+      return ranges;
+    }
+  });
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
       if (node.type === TYPE_LIST_ITEM) {
@@ -47,11 +100,11 @@ export function ListsAddon(props: AddonProps) {
     renderElement: props => {
       switch (props.element.type) {
         case TYPE_UNORDERED_LIST:
-          return renderElement(props, props.element.type, "ul");
+          return renderElement(props, props.element.type, Ul);
         case TYPE_ORDERED_LIST:
-          return renderElement(props, props.element.type, "ol");
+          return renderElement(props, props.element.type, Ol);
         default:
-          return renderElement(props, TYPE_LIST_ITEM, "li");
+          return renderElement(props, TYPE_LIST_ITEM, Li);
       }
     }
   });

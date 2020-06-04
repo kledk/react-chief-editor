@@ -33,7 +33,7 @@ export function isImageElement(element: unknown): element is ImageElement {
 
 export const imageBlockControls: Control[] = [
   {
-    category: "headings",
+    category: "image",
     render: editor => (
       <ToolbarBtn
         isActive={isNodeActive(editor, "image")}
