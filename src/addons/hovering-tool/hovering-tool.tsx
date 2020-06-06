@@ -5,11 +5,13 @@ import React, {
   useContext,
   useCallback
 } from "react";
-import { ReactEditor, useSlate } from "slate-react";
+import { ReactEditor, useSlate, useEditor } from "slate-react";
 import { Editor, Range, Node, Transforms, RangeRef } from "slate";
 import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
 import { useOnClickOutside, getNodeFromSelection } from "../../utils";
+import { useDecoration } from "../../chief/hooks/use-decoration";
+import { useRenderLeaf } from "../../chief";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = (...args) => {
@@ -108,6 +110,38 @@ function useProvideContext() {
     [savedSelection]
   );
   useEffect(() => setCtx(ctx => ({ ...ctx, perform })), [perform]);
+
+  useRenderLeaf(
+    {
+      renderLeaf: props => {
+        return (
+          <span
+            style={{
+              backgroundColor: props.leaf.highlight ? "#969696" : undefined
+            }}
+            {...props.attributes}
+          >
+            {props.children}
+          </span>
+        );
+      }
+    },
+    [savedSelection?.current]
+  );
+
+  useDecoration(
+    {
+      decorator: ([node]) => {
+        const selection = savedSelection?.current;
+        const ranges: Range[] = [];
+        if (selection && Node.has(node, selection.anchor.path)) {
+          ranges.push({ ...selection, highlight: true });
+        }
+        return ranges;
+      }
+    },
+    [savedSelection?.current]
+  );
 
   return { ctx, setEnabled };
 }

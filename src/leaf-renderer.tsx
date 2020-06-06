@@ -15,13 +15,7 @@ export function renderLeaf(
   return undefined;
 }
 
-const Leaf = memo((props: RenderLeafProps) => {
-  const { attributes, ...rest } = props;
-  console.log(rest);
-  return (
-    <span
-      style={{ backgroundColor: rest.leaf.highlight ? "yellow" : undefined }}
-      {...attributes}
-    />
-  );
-});
+const Leaf = (props: RenderLeafProps) => {
+  const { attributes, children } = props;
+  return <span {...attributes} children={children} />;
+};

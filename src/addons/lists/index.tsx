@@ -63,21 +63,6 @@ const Ol = styled.ol`
 const Li = styled.li``;
 
 export function ListsAddon(props: AddonProps) {
-  useDecoration({
-    decorator: ([node, path], editor) => {
-      const { selection } = editor;
-      const ranges: Range[] = [];
-      if (selection && path.length) {
-        const [parent] = Editor.parent(editor, path);
-        if (parent && parent.type === "paragraph") {
-          const text = node.text as string;
-          text.split;
-          ranges.push({ ...selection, highlight: true });
-        }
-      }
-      return ranges;
-    }
-  });
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
       if (node.type === TYPE_LIST_ITEM) {
