@@ -182,8 +182,8 @@ export const HoveringTool = (
   const { children, enabled, onChangeEnabled, ...otherProps } = props;
   const editor = useSlate();
   const { selection } = editor;
-
   const [deltaOffset, setDeltaOffset] = useState(-1);
+  const currentNode = getNodeFromSelection(editor, selection);
 
   useEffect(() => {
     const deltaoffset = selection
@@ -205,7 +205,6 @@ export const HoveringTool = (
   });
 
   useOnClickOutside(toolRef, e => {
-    const currentNode = getNodeFromSelection(editor, selection);
     if (currentNode) {
       const domNode = ReactEditor.toDOMNode(editor, currentNode);
       if (e.target && domNode.contains(e.target as globalThis.Node)) {
@@ -217,7 +216,6 @@ export const HoveringTool = (
 
   useEffect(() => {
     if (enabled) {
-      const currentNode = getNodeFromSelection(editor, selection);
       const isVoid = Editor.isVoid(editor, currentNode);
       if (isVoid && currentNode) {
         const domNode = ReactEditor.toDOMNode(editor, currentNode);
@@ -236,7 +234,7 @@ export const HoveringTool = (
         }
       }
     }
-  }, [enabled, deltaOffset, selection]);
+  }, [enabled, deltaOffset, selection, currentNode]);
 
   if (!enabled || !children) {
     return null;
