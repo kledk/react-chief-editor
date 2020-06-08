@@ -29,6 +29,40 @@ const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
 );
 
+function useHighlighSelection(
+  selection: Range | null | undefined,
+  style: React.CSSProperties
+) {
+  useRenderLeaf(
+    {
+      renderLeaf: props => {
+        return (
+          <span
+            style={props.leaf.highlightSelection ? style : undefined}
+            {...props.attributes}
+          >
+            {props.children}
+          </span>
+        );
+      }
+    },
+    [selection]
+  );
+
+  useDecoration(
+    {
+      decorator: ([node]) => {
+        const ranges: Range[] = [];
+        if (selection && Node.has(node, selection.anchor.path)) {
+          ranges.push({ ...selection, highlightSelection: true });
+        }
+        return ranges;
+      }
+    },
+    [selection]
+  );
+}
+
 function useProvideContext() {
   const editor = useSlate();
   const { selection } = editor;
@@ -43,6 +77,9 @@ function useProvideContext() {
   const isEmpty = selection && Editor.string(editor, selection) === "";
   const currentNode = getNodeFromSelection(editor, selection);
   const isVoid = Editor.isVoid(editor, currentNode);
+  useHighlighSelection(savedSelection?.current, {
+    backgroundColor: "#969696"
+  });
 
   // console.log({
   //   isEditorFocused,
@@ -85,10 +122,9 @@ function useProvideContext() {
       setSaveSelection(sRef);
       return () => {
         if (sRef.current) {
-          ReactEditor.focus(editorRef.current);
           setTimeout(() => {
+            ReactEditor.focus(editorRef.current);
             Transforms.select(editorRef.current, sRef.current!);
-            Transforms.setSelection(editorRef.current, sRef.current!);
             setSaveSelection(null);
             sRef.unref();
           }, 0);
@@ -110,38 +146,6 @@ function useProvideContext() {
     [savedSelection]
   );
   useEffect(() => setCtx(ctx => ({ ...ctx, perform })), [perform]);
-
-  useRenderLeaf(
-    {
-      renderLeaf: props => {
-        return (
-          <span
-            style={{
-              backgroundColor: props.leaf.highlight ? "#969696" : undefined
-            }}
-            {...props.attributes}
-          >
-            {props.children}
-          </span>
-        );
-      }
-    },
-    [savedSelection?.current]
-  );
-
-  useDecoration(
-    {
-      decorator: ([node]) => {
-        const selection = savedSelection?.current;
-        const ranges: Range[] = [];
-        if (selection && Node.has(node, selection.anchor.path)) {
-          ranges.push({ ...selection, highlight: true });
-        }
-        return ranges;
-      }
-    },
-    [savedSelection?.current]
-  );
 
   return { ctx, setEnabled };
 }

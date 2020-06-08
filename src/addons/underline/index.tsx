@@ -22,7 +22,7 @@ export const underlineControl: Control = {
           },
           shortcut: shortcutText(shortcut)
         }}
-        formatType="underline"
+        markType="underline"
       >
         U
       </MarkBtn>

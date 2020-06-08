@@ -22,7 +22,7 @@ export const italicControl: Control = {
           },
           shortcut: shortcutText(shortcut)
         }}
-        formatType="italic"
+        markType="italic"
       >
         I
       </MarkBtn>

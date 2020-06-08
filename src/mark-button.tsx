@@ -22,18 +22,18 @@ const isTextFormat = (editor: Editor, formatType: string) => {
 
 export function MarkBtn(
   props: {
-    formatType: string;
+    markType: string;
   } & React.ComponentProps<typeof ToolbarBtn>
 ) {
-  const { formatType, ...otherProps } = props;
+  const { markType: formatType, ...otherProps } = props;
   const editor = useSlate();
-  const isActive = isTextFormat(editor, props.formatType);
+  const isActive = isTextFormat(editor, props.markType);
   return (
     <ToolbarBtn
       isActive={isActive}
       onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
-        toggleFormat(editor, props.formatType);
+        toggleFormat(editor, props.markType);
       }}
       {...otherProps}
     />

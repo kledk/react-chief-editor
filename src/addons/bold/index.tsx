@@ -7,8 +7,11 @@ import { useLabels } from "../../chief/hooks/use-labels";
 import { MarkBtn, toggleFormat } from "../../mark-button";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
+import { ReactEditor } from "slate-react";
 
 const shortcut = "mod+b";
+
+const action = (editor: ReactEditor) => toggleFormat(editor, "bold");
 
 export const boldControl: Control = {
   category: "marks",
@@ -22,7 +25,7 @@ export const boldControl: Control = {
           },
           shortcut: shortcutText(shortcut)
         }}
-        formatType="bold"
+        markType="bold"
       >
         B
       </MarkBtn>
@@ -31,6 +34,10 @@ export const boldControl: Control = {
 };
 
 export function BoldAddon(props: AddonProps) {
+  // useAddonAction("bold", action);
+
+  // const boldToggle = useAddonAction("bold");
+
   useLabels(props.labels);
   useRenderLeaf({
     renderLeaf: props => renderLeaf(props, "bold", "strong")
@@ -39,7 +46,7 @@ export function BoldAddon(props: AddonProps) {
     pattern: shortcut,
     handler: (event, editor) => {
       event.preventDefault();
-      toggleFormat(editor, "bold");
+      action(editor);
       return true;
     }
   });

@@ -22,7 +22,7 @@ export const strikethroughControl: Control = {
           },
           shortcut: shortcutText(shortcut)
         }}
-        formatType="strikethrough"
+        markType="strikethrough"
       >
         S
       </MarkBtn>

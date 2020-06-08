@@ -7,24 +7,25 @@ let originalEntries = {};
  * Allows for dynamically hook in and out of plugins.
  * Only overriding functions of the Editor is supported.
  * @param editor
- * @param addons
+ * @param plugins
  */
 export function withChiefOnPlugIn(editor: ReactEditor, plugins: OnPlugin[]) {
   // We basically take control over each funtion in the editor and route them
   // to the appropriate addon that has requested overriding it.
+  // This allows for us to use hooks that can mount and unmount.
   for (const [prop, value] of Object.entries(editor)) {
     if (typeof value === "function") {
       if (!(prop in originalEntries)) {
         originalEntries[prop] = value;
       }
       editor[prop] = (...args: any[]) => {
-        let fn = originalEntries[prop];
+        let editorFn = originalEntries[prop];
         for (const plugin of plugins) {
           if (plugin && prop in plugin) {
-            fn = plugin && plugin[prop](fn, editor);
+            editorFn = plugin && plugin[prop](editorFn, editor);
           }
         }
-        return fn(...args);
+        return editorFn(...args);
       };
     }
   }

@@ -36,6 +36,19 @@ import {
 import { Node, Element } from "slate";
 import { css } from "styled-components";
 
+const editorLabels = {
+  "marks.bold": "Fed",
+  "marks.italic": "Kursiv",
+  "marks.strikethrough": "Gennemstreg",
+  "marks.underline": "Understreg",
+  "elements.link": "Link",
+  "elements.link.placeholder": "Indsæt eller skriv link",
+  "elements.link.btn.link": "Tilføj",
+  "elements.link.btn.unlink": "Fjern",
+  "elements.paragraph.hint": "Klik for at redigere",
+  "elements.paragraph.placeholder": "Tekst"
+};
+
 function ExampleVideoAddon(props: AddonProps) {
   usePlugin({
     isVoid: isVoid => element =>
@@ -120,15 +133,7 @@ function App() {
 
   const addons = (
     <>
-      <LabelsAddon
-        labels={{
-          "marks.bold": "Fed",
-          "marks.italic": "Kursiv",
-          "marks.strikethrough": "Gennemstreg",
-          "marks.underline": "Understreg",
-          "elements.link": "Link"
-        }}
-      ></LabelsAddon>
+      <LabelsAddon labels={editorLabels}></LabelsAddon>
       <ParagraphAddon></ParagraphAddon>
       <BoldAddon></BoldAddon>
       <ItalicAddon></ItalicAddon>
@@ -184,7 +189,7 @@ function App() {
               controls={[
                 ...headingBlockControls,
                 ...imageBlockControls,
-                ListsAddon.Control,
+                ListsAddon.Control
               ]}
             />
           </BlockInsert>

@@ -147,10 +147,11 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
               data-placement={placement}
               onMouseDown={e => {
                 if (!e.isDefaultPrevented()) {
+                  e.preventDefault();
                   setShowMenu(false);
+                  ReactEditor.focus(editor);
                   editor.selection &&
                     Transforms.select(editor, editor.selection.focus);
-                  ReactEditor.focus(editor);
                 }
               }}
             >

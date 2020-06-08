@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { RenderElementProps, ReactEditor, useSlate } from "slate-react";
+import { RenderElementProps, ReactEditor, useSlate, useEditor } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
 import { useHoverTool } from "../hovering-tool/hovering-tool";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
-import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
@@ -110,7 +109,6 @@ function LinkPopup(props: { onClose: () => void }) {
   }, []);
   const linkWrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(linkWrapperRef, e => {
-    e.preventDefault();
     props.onClose();
   });
   let linkNode: Node | null = null;
@@ -139,6 +137,8 @@ function LinkPopup(props: { onClose: () => void }) {
     props.onClose();
   }, [url]);
 
+  const [getLabel] = useLabels();
+
   return (
     <form onSubmit={handleInsertLink}>
       <div
@@ -156,7 +156,10 @@ function LinkPopup(props: { onClose: () => void }) {
             onChange={(e: React.FormEvent<HTMLInputElement>) =>
               setUrl(e.currentTarget.value)
             }
-            placeholder="Paste or type your link here"
+            placeholder={getLabel({
+              key: "elements.link.placeholder",
+              defaultLabel: "Paste or type your link here"
+            })}
             autoFocus
           />
         </InputWrapper>
@@ -165,14 +168,20 @@ function LinkPopup(props: { onClose: () => void }) {
           disabled={url.length === 0}
           onMouseDown={handleInsertLink}
         >
-          Link
+          {getLabel({
+            key: "elements.link.btn.link",
+            defaultLabel: "Link"
+          })}
         </ToolbarBtn>
         <ToolbarBtn
           rounded
           disabled={!isLinkActive(editor)}
           onMouseDown={handleUnlink}
         >
-          Unlink
+          {getLabel({
+            key: "elements.link.btn.unlink",
+            defaultLabel: "Unlink"
+          })}
         </ToolbarBtn>
       </div>
     </form>
@@ -180,7 +189,7 @@ function LinkPopup(props: { onClose: () => void }) {
 }
 
 export function LinkBtn() {
-  const editor = useSlate();
+  const editor = useEditor();
   const isActive = isLinkActive(editor);
   return (
     <ToolBtnPopup

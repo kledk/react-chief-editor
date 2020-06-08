@@ -3,7 +3,6 @@ import { AddonProps } from "../../addon";
 import { Heading } from "./Heading";
 import { Transforms, Editor, Range, Element } from "slate";
 import { useSlate, ReactEditor } from "slate-react";
-import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
@@ -31,9 +30,8 @@ export const headingBlockControls: Control[] = [
             onMouseDown={(
               e: React.MouseEvent<HTMLButtonElement, MouseEvent>
             ) => {
-              e.preventDefault();
-              RichEditor.insertBlock(editor, it);
               ReactEditor.focus(editor);
+              RichEditor.insertBlock(editor, it);
             }}
           >
             {`H${i + 1}`}

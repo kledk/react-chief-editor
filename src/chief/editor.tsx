@@ -105,7 +105,7 @@ export const Editor = React.memo(
       if (!pastedData) {
         return;
       }
-      editor.insertText(pastedData);
+      // editor.insertText(pastedData);
     }, []);
 
     // TODO

@@ -2,26 +2,44 @@ import React from "react";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { Element } from "slate";
 import { ParagraphElement } from "./paragraph-element";
+import { useLabels, ChiefElement } from "../../chief";
+import { AddonProps } from "../../addon";
 
 export function ParagraphAddon({
-  type = "paragraph",
-  hint = "Click to start typing",
-  placeholder = "Text"
+  showHint = true,
+  showPlaceholder = true,
+  labels
 }: {
-  /**Override the internal type for the paragraph*/
-  type?: string;
-  hint?: string;
-  placeholder?: string;
-}) {
-  useRenderElement<{ type: typeof type } & Element>({
-    typeMatch: type,
-    renderElement: props => (
-      <ParagraphElement
-        hint={hint}
-        placeholder={placeholder}
-        {...props}
-      ></ParagraphElement>
-    )
-  });
+  showHint?: boolean;
+  showPlaceholder?: boolean;
+} & AddonProps) {
+  const [getLabel] = useLabels(labels);
+  useRenderElement(
+    {
+      typeMatch: "paragraph",
+      renderElement: props => (
+        <ParagraphElement
+          hint={
+            showHint
+              ? getLabel({
+                  key: "elements.paragraph.hint",
+                  defaultLabel: "Click to start typing"
+                })
+              : undefined
+          }
+          placeholder={
+            showPlaceholder
+              ? getLabel({
+                  key: "elements.paragraph.placeholder",
+                  defaultLabel: "Text"
+                })
+              : undefined
+          }
+          {...props}
+        ></ParagraphElement>
+      )
+    },
+    [getLabel]
+  );
   return null;
 }
