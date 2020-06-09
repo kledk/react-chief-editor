@@ -1,43 +1,45 @@
 import React from "react";
-import {
-  RenderElementProps,
-  useSlate,
-  useFocused,
-  useSelected
-} from "slate-react";
+import { useFocused, useSelected, useEditor } from "slate-react";
 import { PlaceholderHint } from "../../placeholder-hint";
 import { Editor } from "slate";
+import { useLabels, ChiefRenderElementProps } from "../../chief";
 
-export const Heading = (props: RenderElementProps) => {
-  const editor = useSlate();
+export const Heading = (props: ChiefRenderElementProps) => {
+  const editor = useEditor();
   const isFocused = useFocused();
   const isSelected = useSelected();
+  const placeholderTexts = {
+    "heading-1": "Heading 1",
+    "heading-2": "Heading 2",
+    "heading-3": "Heading 3",
+    "heading-4": "Heading 4",
+    "heading-5": "Heading 5",
+    "heading-6": "Heading 6"
+  };
   let heading = null;
-  let placeholder = "";
+  const [getLabel] = useLabels();
+  let placeholder = getLabel({
+    key: `elements.heading.${props.element.type}.placeholder`,
+    defaultLabel: placeholderTexts[props.element.type]
+  });
   switch (props.element.type) {
     case "heading-1":
       heading = "h1";
-      placeholder = "Heading 1";
       break;
     case "heading-2":
       heading = "h2";
-      placeholder = "Heading 2";
       break;
     case "heading-3":
       heading = "h3";
-      placeholder = "Heading 3";
       break;
     case "heading-4":
       heading = "h4";
-      placeholder = "Heading 4";
       break;
     case "heading-5":
       heading = "h5";
-      placeholder = "Heading 5";
       break;
     case "heading-6":
       heading = "h6";
-      placeholder = "Heading 6";
       break;
     default:
       return null;

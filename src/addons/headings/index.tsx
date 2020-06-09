@@ -45,7 +45,7 @@ export const headingBlockControls: Control[] = [
 export const headingContextControls: Control[] = [
   {
     category: "headings",
-    render: editor => (
+    render: () => (
       <React.Fragment>
         {headingTypes.map((it, i) => (
           <HeadingBtn headingType={it}>{`H${i + 1}`}</HeadingBtn>

@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { RenderElementProps, ReactEditor, useSlate, useEditor } from "slate-react";
+import {
+  RenderElementProps,
+  ReactEditor,
+  useSlate,
+  useEditor
+} from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
@@ -13,17 +18,11 @@ import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 import { useLabels } from "../../chief/hooks/use-labels";
 import { Control } from "../../control";
+import { ChiefElement } from "../../chief";
+import { shortcutText } from "../../shortcut";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
-};
-
-export const Link = (props: RenderElementProps) => {
-  return (
-    <a {...props.attributes} href={props.element.url as string}>
-      {props.children}
-    </a>
-  );
 };
 
 export const linkControl: Control = {
@@ -55,9 +54,13 @@ export function LinkAddon(props: AddonProps) {
     }
   });
 
-  useRenderElement({
+  useRenderElement<{ url: string } & ChiefElement>({
     typeMatch: "link",
-    renderElement: props => <Link {...props} />
+    renderElement: props => (
+      <a {...props.attributes} href={props.element.url}>
+        {props.children}
+      </a>
+    )
   });
   return null;
 }
@@ -72,7 +75,7 @@ export const insertLink = (editor: Editor, url: string) => {
 
 export const isLinkActive = (editor: Editor) => {
   const [link] = Editor.nodes(editor, { match: n => n.type === "link" });
-  return !!link;
+  return Boolean(link);
 };
 
 const unwrapLink = (editor: Editor) => {
@@ -129,6 +132,13 @@ function LinkPopup(props: { onClose: () => void }) {
     if (url.length > 0) {
       insertLink(editor, url);
       props.onClose();
+    } else if (
+      linkNode &&
+      typeof linkNode.url === "string" &&
+      linkNode.url.length > 0
+    ) {
+      unwrapLink(editor);
+      props.onClose();
     }
   }, [url]);
 
@@ -175,7 +185,12 @@ function LinkPopup(props: { onClose: () => void }) {
         </ToolbarBtn>
         <ToolbarBtn
           rounded
-          disabled={!isLinkActive(editor)}
+          disabled={
+            !isLinkActive(editor) ||
+            (linkNode &&
+              typeof linkNode.url === "string" &&
+              linkNode.url.length > 0)
+          }
           onMouseDown={handleUnlink}
         >
           {getLabel({
@@ -193,6 +208,7 @@ export function LinkBtn() {
   const isActive = isLinkActive(editor);
   return (
     <ToolBtnPopup
+      shortcut={"mod+k"}
       renderContent={setShow => (
         <StyledToolBox>
           <LinkPopup onClose={() => setShow(false)}></LinkPopup>
@@ -205,7 +221,7 @@ export function LinkBtn() {
               key: "elements.link",
               defaultLabel: "Add link"
             },
-            shortcut: "⌘+K"
+            shortcut: shortcutText("mod+k")
           }}
           {...tprops}
           isActive={isActive || show}

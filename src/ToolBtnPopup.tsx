@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
 import { Popper, Manager, Reference } from "react-popper";
 import { useOnClickOutside } from "./utils";
+import { useOnKeyDown } from "./chief";
 
 export function ToolBtnPopup(props: {
+  shortcut?: string;
   renderContent: (setShow: (show: boolean) => void) => React.ReactNode;
   renderToolBtn: (
     props: {
@@ -25,6 +27,10 @@ export function ToolBtnPopup(props: {
       setShow(false);
     }
   };
+  useOnKeyDown({
+    pattern: props.shortcut,
+    handler: () => setShow(!show)
+  });
   return (
     <Manager>
       <Reference>

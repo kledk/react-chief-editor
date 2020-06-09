@@ -7,10 +7,7 @@ import { isNodeActive, getNodeFromSelection, findNodes } from "../../utils";
 import { RichEditor } from "../../chief/editor";
 import { FileUpload } from "../../FileUpload";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import {
-  ChiefElement,
-  isChiefElement
-} from "../../chief/chief";
+import { ChiefElement, isChiefElement } from "../../chief/chief";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 import { isDefined, isFilled } from "ts-is-present";
@@ -177,16 +174,26 @@ export function ImageAddon(
     props.onChange && props.onChange(imageUrls);
   }, [JSON.stringify(imageUrls), props.onChange]);
 
-  useRenderElement<ImageElement>({
-    typeMatch: "image",
-    renderElement: renderElementProps => (
-      <ImageBlock
-        onOpenFileRequest={() => fileRef.current && fileRef.current.click()}
-        onRemoved={props.onRemoved}
-        {...renderElementProps}
-      />
-    )
-  });
+  useRenderElement<ImageElement>(
+    {
+      typeMatch: "image",
+      renderElement: renderElementProps => (
+        <ImageBlock
+          onOpenFileRequest={() => fileRef.current && fileRef.current.click()}
+          onRemoved={props.onRemoved}
+          {...renderElementProps}
+        />
+      )
+    },
+    [props.onRemoved]
+  );
 
-  return <FileUpload accept={"image/*"} ref={fileRef} onChange={handleFile} multiple={false} />;
+  return (
+    <FileUpload
+      accept={"image/*"}
+      ref={fileRef}
+      onChange={handleFile}
+      multiple={false}
+    />
+  );
 }
