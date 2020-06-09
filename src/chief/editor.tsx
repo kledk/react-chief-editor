@@ -63,8 +63,8 @@ export const Editor = React.memo(
       (props: RenderElementProps) => {
         return handleRenderElement(
           props as ChiefRenderElementProps,
-          editor,
-          renderElements
+          renderElements,
+          editor
         );
       },
       [renderElements]
@@ -72,11 +72,11 @@ export const Editor = React.memo(
 
     const renderLeaf = useCallback(
       (props: RenderLeafProps) => {
-        return handleRenderLeaf(props, editor, renderLeafs);
+        return handleRenderLeaf(props, renderLeafs, editor);
       },
       [renderLeafs]
     );
-    
+
     const decorate = useCallback(
       (entry: NodeEntry) => handleDecorate(entry, editor, decorations),
       [decorations]

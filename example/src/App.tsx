@@ -26,12 +26,14 @@ import {
   imageBlockControls,
   HoverToolControls,
   boldControl,
+  AddonBold,
   italicControl,
   strikethroughControl,
   underlineControl,
   headingContextControls,
   linkControl,
-  LabelsAddon
+  LabelsAddon,
+  ChiefPresentation
 } from "chief-editor";
 import { Node, Element } from "slate";
 import { css } from "styled-components";
@@ -46,7 +48,13 @@ const editorLabels = {
   "elements.link.btn.link": "Tilføj",
   "elements.link.btn.unlink": "Fjern",
   "elements.paragraph.hint": "Klik for at redigere",
-  "elements.paragraph.placeholder": "Tekst"
+  "elements.paragraph.placeholder": "Tekst",
+  "elements.heading.heading-1.placeholder": "Overskrift 1",
+  "elements.heading.heading-2.placeholder": "Overskrift 2",
+  "elements.heading.heading-3.placeholder": "Overskrift 3",
+  "elements.heading.heading-4.placeholder": "Overskrift 4",
+  "elements.heading.heading-5.placeholder": "Overskrift 5",
+  "elements.heading.heading-6.placeholder": "Overskrift 6"
 };
 
 function ExampleVideoAddon(props: AddonProps) {
@@ -220,6 +228,7 @@ function App() {
         value={JSON.stringify(value, null, 2)}
         readOnly
       ></textarea> */}
+      <ChiefPresentation value={value} addons={[AddonBold]}></ChiefPresentation>
     </div>
   );
 }

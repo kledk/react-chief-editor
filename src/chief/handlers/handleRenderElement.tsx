@@ -7,8 +7,8 @@ import {
 import { matchesType } from "../utils/matches-type";
 export const handleRenderElement = (
   props: ChiefRenderElementProps,
-  editor: ReactEditor,
-  renderElements: InjectedRenderElement[]
+  renderElements: InjectedRenderElement[],
+  editor?: ReactEditor,
 ) => {
   let element: JSX.Element | undefined;
   for (let renderElement of renderElements) {

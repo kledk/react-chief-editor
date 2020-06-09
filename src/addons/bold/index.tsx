@@ -8,6 +8,7 @@ import { MarkBtn, toggleFormat } from "../../mark-button";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 import { ReactEditor } from "slate-react";
+import { InjectedRenderLeaf } from "../../chief";
 
 const shortcut = "mod+b";
 
@@ -33,15 +34,17 @@ export const boldControl: Control = {
   }
 };
 
+const _renderLeaf: InjectedRenderLeaf = {
+  renderLeaf: props => renderLeaf(props, "bold", "strong")
+};
+
 export function BoldAddon(props: AddonProps) {
   // useAddonAction("bold", action);
 
   // const boldToggle = useAddonAction("bold");
 
   useLabels(props.labels);
-  useRenderLeaf({
-    renderLeaf: props => renderLeaf(props, "bold", "strong")
-  });
+  useRenderLeaf(_renderLeaf);
   useOnKeyDown({
     pattern: shortcut,
     handler: (event, editor) => {
@@ -53,4 +56,13 @@ export function BoldAddon(props: AddonProps) {
   return null;
 }
 
+
+
 BoldAddon.Control = boldControl;
+
+export const AddonBold = {
+  Addon: BoldAddon,
+  Render: {
+    renderLeaf: _renderLeaf
+  }
+};

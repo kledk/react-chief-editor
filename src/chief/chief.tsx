@@ -32,7 +32,7 @@ export type ElementTypeMatch = RegExp | string | string[];
 export type InjectedRenderLeaf = {
   renderLeaf: (
     props: RenderLeafProps,
-    editor: ReactEditor
+    editor?: ReactEditor
   ) => JSX.Element | undefined;
 };
 
@@ -43,7 +43,7 @@ export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
     | JSX.Element
     | ((
         props: ChiefRenderElementProps<T>,
-        editor: ReactEditor
+        editor?: ReactEditor
       ) => JSX.Element | undefined);
 };
 
