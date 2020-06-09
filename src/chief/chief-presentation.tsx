@@ -2,7 +2,8 @@ import React, {
   useContext,
   ReactNode,
   useCallback,
-  createContext
+  createContext,
+  useEffect
 } from "react";
 import { RenderElementProps, RenderLeafProps, Slate } from "slate-react";
 import { Node } from "slate";
@@ -87,7 +88,7 @@ function Children({ children = [] }: { children: Node[] }) {
 }
 
 interface RenderAddon {
-  Addon: React.FunctionComponent | React.Component;
+  Addon: Function;
   Render: {
     renderLeaf?: InjectedRenderLeaf;
     renderElement?: InjectedRenderElement;
@@ -96,7 +97,7 @@ interface RenderAddon {
 
 export function ChiefPresentation({
   value = [],
-  addons: [],
+  addons = [],
   renderElement = (props: RenderElementProps) => <DefaultElement {...props} />,
   renderLeaf = (props: RenderLeafProps) => <DefaultLeaf {...props} />
 }: {
@@ -105,7 +106,22 @@ export function ChiefPresentation({
   renderElement?: any;
   renderLeaf?: any;
 }) {
-  const { renderLeafs, renderElements } = useChiefRenderCore();
+  const {
+    renderLeafs,
+    renderElements,
+    injectRenderElement,
+    injectRenderLeaf
+  } = useChiefRenderCore();
+  useEffect(() => {
+    for (const addon of addons) {
+      if (addon.Render.renderElement) {
+        injectRenderElement(addon.Render.renderElement);
+      }
+      if (addon.Render.renderLeaf) {
+        injectRenderLeaf(addon.Render.renderLeaf);
+      }
+    }
+  }, []);
   const _renderElement = useCallback(
     (props: ChiefRenderElementProps) => {
       return handleRenderElement(props, renderElements);
@@ -118,6 +134,7 @@ export function ChiefPresentation({
     },
     [renderLeafs]
   );
+  console.log(renderLeafs)
   return (
     <SlatePresentationContext.Provider
       value={{ renderElement: _renderElement, renderLeaf: _renderLeaf }}

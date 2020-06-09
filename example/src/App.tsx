@@ -161,7 +161,7 @@ function App() {
 
   return (
     <div style={{ padding: "1em" }}>
-      <Chief
+      {/* <Chief
         value={value}
         onChange={value => setValue(value)}
         theme={{
@@ -221,7 +221,7 @@ function App() {
             ></Editor>
           </HoverToolProvider>
         </div>
-      </Chief>
+      </Chief> */}
 
       {/* <textarea
         style={{ width: "100%", height: 400 }}

@@ -56,8 +56,6 @@ export function BoldAddon(props: AddonProps) {
   return null;
 }
 
-
-
 BoldAddon.Control = boldControl;
 
 export const AddonBold = {
