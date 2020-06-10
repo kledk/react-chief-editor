@@ -35,7 +35,7 @@ import {
   ChiefPresentation
 } from "chief-editor";
 import { Node, Element } from "slate";
-import { css } from "styled-components";
+import styled, { css } from "styled-components";
 
 const editorLabels = {
   "marks.bold": "Fed",
@@ -80,6 +80,24 @@ function ExampleVideoAddon(props: AddonProps) {
 
   return null;
 }
+
+const StyledPresentation = styled.div`
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #151515;
+  color: rgba(28, 98, 116);
+  font-size: 18px;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: rgba(153, 109, 33);
+  }
+  a {
+    color: rgba(153, 109, 33);
+  }
+`;
 
 function App() {
   const [value, setValue] = useState<Node[]>([
@@ -221,7 +239,7 @@ function App() {
           </HoverToolProvider>
         </div>
       </Chief>
-      <div style={{ backgroundColor: "white" }}>
+      <StyledPresentation>
         <ChiefPresentation
           value={value}
           presenters={[
@@ -236,7 +254,7 @@ function App() {
             ImageAddon.Presenter
           ]}
         ></ChiefPresentation>
-      </div>
+      </StyledPresentation>
     </div>
   );
 }
