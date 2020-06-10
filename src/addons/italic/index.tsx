@@ -7,6 +7,8 @@ import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
+import { InjectedRenderLeaf } from "../../chief";
+import { iPresenter } from "../../chief/chief-presentation";
 
 const shortcut = "mod+i";
 
@@ -30,13 +32,17 @@ export const italicControl: Control = {
   }
 };
 
+const _renderLeaf: InjectedRenderLeaf = {
+  renderLeaf: props => renderLeaf(props, "italic", "em")
+};
+
+const Presenter: iPresenter = {
+  leaf: _renderLeaf
+};
+
 export function ItalicAddon(props: AddonProps) {
   useLabels(props.labels);
-  useRenderLeaf({
-    renderLeaf: props => {
-      return renderLeaf(props, "italic", "em");
-    }
-  });
+  useRenderLeaf(_renderLeaf);
   useOnKeyDown({
     pattern: shortcut,
     handler: (event, editor) => {
@@ -47,3 +53,5 @@ export function ItalicAddon(props: AddonProps) {
   });
   return null;
 }
+
+ItalicAddon.Presenter = Presenter;

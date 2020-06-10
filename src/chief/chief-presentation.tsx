@@ -1,25 +1,28 @@
-import React, {
-  useContext,
-  ReactNode,
-  useCallback,
-  createContext,
-  useEffect
-} from "react";
-import { RenderElementProps, RenderLeafProps, Slate } from "slate-react";
+import React, { ReactNode, useCallback, useEffect } from "react";
+import { RenderLeafProps } from "slate-react";
 import { Node } from "slate";
-import { useChief } from "./hooks/use-chief";
 import { handleRenderElement } from "./handlers/handleRenderElement";
 import {
   ChiefRenderElementProps,
   InjectedRenderLeaf,
-  InjectedRenderElement
+  InjectedRenderElement,
+  ChiefElement
 } from "./chief";
 import { handleRenderLeaf } from "./handlers/handleRenderLeaf";
-import { useChiefRenderCore, ChiefContextValue } from "./chief-context";
+import { useChiefRenderCore } from "./chief-context";
+
+export type iPresenter<T extends ChiefElement = any> = {
+  element?: InjectedRenderElement<T>;
+  leaf?: InjectedRenderLeaf;
+};
+
+type PresenterElementProps = Omit<ChiefRenderElementProps, "attributes">;
+type PresenterLeafProps = Omit<RenderLeafProps, "attributes">;
+type PresenterElement = PresenterElementProps["element"];
 
 interface SlatePresentationContextValue {
-  renderElement: (props: ChiefRenderElementProps) => ReactNode;
-  renderLeaf: (props: RenderLeafProps) => ReactNode;
+  renderElement: (props: PresenterElementProps) => ReactNode;
+  renderLeaf: (props: PresenterLeafProps) => ReactNode;
 }
 
 const SlatePresentationContext = React.createContext<SlatePresentationContextValue | null>(
@@ -34,21 +37,15 @@ function useSlatePresentation() {
   return ctx;
 }
 
-function isText(value: any) {
-  // TODO: maybe use 'is-plain-object' instead of instanceof Object
-  return value instanceof Object && typeof value.text === "string";
-}
 function isElement(value: any) {
-  // TODO: maybe use 'is-plain-object' instead of instanceof Object
   return value instanceof Object && Array.isArray(value.children);
 }
 
-function Element({ element = { children: [] } }: any) {
+function Element(props: { element: PresenterElement }) {
   const { renderElement } = useSlatePresentation();
-
+  const { element } = props;
   return (
     <React.Fragment>
-      {/* @ts-ignore */}
       {renderElement({
         children: <Children children={element.children} />,
         element
@@ -63,8 +60,6 @@ function Leaf({ leaf = { text: "" } }: any) {
   return (
     <React.Fragment>
       {renderLeaf({
-        // @ts-ignore
-        attributes: {},
         children: <span>{leaf.text}</span>,
         leaf,
         text: leaf.text
@@ -73,10 +68,11 @@ function Leaf({ leaf = { text: "" } }: any) {
   );
 }
 
-function Children({ children = [] }: { children: Node[] }) {
+function Children(props: { children: Node[] }) {
+  const { children } = props;
   return (
     <React.Fragment>
-      {children.map((child, i) => {
+      {children.map((child: any, i: number) => {
         if (isElement(child)) {
           return <Element key={i} element={child} />;
         } else {
@@ -87,24 +83,18 @@ function Children({ children = [] }: { children: Node[] }) {
   );
 }
 
-interface RenderAddon {
-  Addon: Function;
-  Render: {
-    renderLeaf?: InjectedRenderLeaf;
-    renderElement?: InjectedRenderElement;
-  };
-}
-
 export function ChiefPresentation({
   value = [],
-  addons = [],
-  renderElement = (props: RenderElementProps) => <DefaultElement {...props} />,
-  renderLeaf = (props: RenderLeafProps) => <DefaultLeaf {...props} />
+  presenters = [],
+  overrideRenderElement,
+  overrideRenderLeaf
 }: {
   value: Node[];
-  addons: RenderAddon[];
-  renderElement?: any;
-  renderLeaf?: any;
+  presenters: iPresenter[];
+  overrideRenderElement?: (
+    props: PresenterElementProps
+  ) => JSX.Element | undefined;
+  overrideRenderLeaf?: (props: PresenterLeafProps) => JSX.Element | undefined;
 }) {
   const {
     renderLeafs,
@@ -112,41 +102,46 @@ export function ChiefPresentation({
     injectRenderElement,
     injectRenderLeaf
   } = useChiefRenderCore();
+
   useEffect(() => {
-    for (const addon of addons) {
-      if (addon.Render.renderElement) {
-        injectRenderElement(addon.Render.renderElement);
+    for (const presenter of presenters) {
+      if (presenter.element) {
+        injectRenderElement(presenter.element);
       }
-      if (addon.Render.renderLeaf) {
-        injectRenderLeaf(addon.Render.renderLeaf);
+      if (presenter.leaf) {
+        injectRenderLeaf(presenter.leaf);
       }
     }
   }, []);
-  const _renderElement = useCallback(
-    (props: ChiefRenderElementProps) => {
-      return handleRenderElement(props, renderElements);
-    },
-    [renderLeafs]
-  );
-  const _renderLeaf = useCallback(
-    (props: RenderLeafProps) => {
-      return handleRenderLeaf(props, renderLeafs);
-    },
-    [renderLeafs]
-  );
-  console.log(renderLeafs)
+
   return (
     <SlatePresentationContext.Provider
-      value={{ renderElement: _renderElement, renderLeaf: _renderLeaf }}
+      value={{
+        renderElement: useCallback(
+          (props: PresenterElementProps) => {
+            const overridedElement =
+              overrideRenderElement && overrideRenderElement(props);
+            if (overridedElement) {
+              return overridedElement;
+            }
+            return handleRenderElement(props as any, renderElements);
+          },
+          [renderElements]
+        ),
+        renderLeaf: useCallback(
+          (props: PresenterLeafProps) => {
+            const overridedLeaf =
+              overrideRenderLeaf && overrideRenderLeaf(props);
+            if (overridedLeaf) {
+              return overridedLeaf;
+            }
+            return handleRenderLeaf(props as any, renderLeafs);
+          },
+          [renderLeafs]
+        )
+      }}
     >
       <Children children={value} />
     </SlatePresentationContext.Provider>
   );
-}
-
-function DefaultElement({ children }: RenderElementProps) {
-  return <div>{children}</div>;
-}
-function DefaultLeaf({ children }: RenderLeafProps) {
-  return <span>{children}</span>;
 }

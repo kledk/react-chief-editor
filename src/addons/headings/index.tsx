@@ -9,15 +9,9 @@ import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { RichEditor } from "../../chief/editor";
 import { Control } from "../../control";
+import { iPresenter } from "../../chief/chief-presentation";
 
-export const headingTypes = [
-  "heading-1",
-  "heading-2",
-  "heading-3",
-  "heading-4",
-  "heading-5",
-  "heading-6"
-];
+export const headingTypes = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 export const headingBlockControls: Control[] = [
   {
@@ -55,9 +49,17 @@ export const headingContextControls: Control[] = [
   }
 ];
 
+const Presenter: iPresenter = {
+  element: {
+    typeMatch: headingTypes,
+    renderElement: props =>
+      React.createElement(props.element.type, null, props.children)
+  }
+};
+
 export function HeadingsAddon(props: AddonProps) {
   useRenderElement({
-    typeMatch: /heading-[1-6]/,
+    typeMatch: headingTypes,
     renderElement: props => <Heading {...props} />
   });
   useOnKeyDown({
@@ -132,3 +134,5 @@ function HeadingBtn(props: { headingType: string; children: React.ReactNode }) {
     </ToolbarBtn>
   );
 }
+
+HeadingsAddon.Presenter = Presenter;

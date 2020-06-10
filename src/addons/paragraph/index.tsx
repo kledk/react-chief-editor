@@ -2,8 +2,11 @@ import React from "react";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { Element } from "slate";
 import { ParagraphElement } from "./paragraph-element";
-import { useLabels, ChiefElement } from "../../chief";
+import { useLabels, ElementTypeMatch } from "../../chief";
 import { AddonProps } from "../../addon";
+import { iPresenter } from "../../chief/chief-presentation";
+
+const TYPE: ElementTypeMatch = "paragraph";
 
 export function ParagraphAddon({
   showHint = true,
@@ -16,7 +19,7 @@ export function ParagraphAddon({
   const [getLabel] = useLabels(labels);
   useRenderElement(
     {
-      typeMatch: "paragraph",
+      typeMatch: TYPE,
       renderElement: props => (
         <ParagraphElement
           hint={
@@ -43,3 +46,12 @@ export function ParagraphAddon({
   );
   return null;
 }
+
+const ParagraphPresenter: iPresenter = {
+  element: {
+    typeMatch: TYPE,
+    renderElement: props => <p>{props.children}</p>
+  }
+};
+
+ParagraphAddon.Presenter = ParagraphPresenter;

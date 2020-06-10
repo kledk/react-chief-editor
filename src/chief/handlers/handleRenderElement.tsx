@@ -1,23 +1,22 @@
 import React from "react";
 import { ReactEditor } from "slate-react";
-import {
-  InjectedRenderElement,
-  ChiefRenderElementProps
-} from "../chief";
+import { InjectedRenderElement, ChiefRenderElementProps } from "../chief";
 import { matchesType } from "../utils/matches-type";
-export const handleRenderElement = (
+
+export function handleRenderElement(
   props: ChiefRenderElementProps,
   renderElements: InjectedRenderElement[],
-  editor?: ReactEditor,
-) => {
+  editor?: ReactEditor
+) {
   let element: JSX.Element | undefined;
   for (let renderElement of renderElements) {
-    if (renderElement.typeMatch === undefined ||
-      matchesType(props.element, renderElement.typeMatch)) {
+    if (
+      renderElement.typeMatch === undefined ||
+      matchesType(props.element, renderElement.typeMatch)
+    ) {
       if (renderElement.Component) {
         element = <renderElement.Component {...props} />;
-      }
-      else if (renderElement.renderElement) {
+      } else if (renderElement.renderElement) {
         element =
           typeof renderElement.renderElement === "function"
             ? renderElement.renderElement(props, editor)
@@ -27,4 +26,4 @@ export const handleRenderElement = (
   }
 
   return (element = element || <React.Fragment>{null}</React.Fragment>);
-};
+}

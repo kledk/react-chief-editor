@@ -9,6 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
+import { iPresenter } from "../../chief/chief-presentation";
 
 const shortcut = "mod+b";
 
@@ -56,11 +57,10 @@ export function BoldAddon(props: AddonProps) {
   return null;
 }
 
+const Presenter: iPresenter = {
+  leaf: _renderLeaf
+};
+
 BoldAddon.Control = boldControl;
 
-export const AddonBold = {
-  Addon: BoldAddon,
-  Render: {
-    renderLeaf: _renderLeaf
-  }
-};
+BoldAddon.Presenter = Presenter;

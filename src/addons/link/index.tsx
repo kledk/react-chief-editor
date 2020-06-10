@@ -20,6 +20,7 @@ import { useLabels } from "../../chief/hooks/use-labels";
 import { Control } from "../../control";
 import { ChiefElement } from "../../chief";
 import { shortcutText } from "../../shortcut";
+import { iPresenter } from "../../chief/chief-presentation";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -64,6 +65,15 @@ export function LinkAddon(props: AddonProps) {
   });
   return null;
 }
+
+const Presenter: iPresenter<{ url: string } & ChiefElement> = {
+  element: {
+    typeMatch: "link",
+    renderElement: props => <a href={props.element.url}>{props.children}</a>
+  }
+};
+
+LinkAddon.Presenter = Presenter;
 
 LinkAddon.Control = linkControl;
 

@@ -7,6 +7,8 @@ import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
+import { InjectedRenderLeaf } from "../../chief";
+import { iPresenter } from "../../chief/chief-presentation";
 
 const shortcut = "mod+u";
 
@@ -30,13 +32,17 @@ export const underlineControl: Control = {
   }
 };
 
+const _renderLeaf: InjectedRenderLeaf = {
+  renderLeaf: props => renderLeaf(props, "underline", "u")
+};
+
+const Presenter: iPresenter = {
+  leaf: _renderLeaf
+};
+
 export function UnderlineAddon(props: AddonProps) {
   useLabels(props.labels);
-  useRenderLeaf({
-    renderLeaf: props => {
-      return renderLeaf(props, "underline", "u");
-    }
-  });
+  useRenderLeaf(_renderLeaf);
   useOnKeyDown({
     pattern: shortcut,
     handler: (event, editor) => {
@@ -47,3 +53,5 @@ export function UnderlineAddon(props: AddonProps) {
   });
   return null;
 }
+
+UnderlineAddon.Presenter = Presenter;

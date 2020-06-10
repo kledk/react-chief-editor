@@ -16,6 +16,7 @@ import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
 import { Control } from "../../control";
+import { iPresenter } from "../../chief";
 
 export interface ImageElement extends ChiefElement {
   type: "image";
@@ -61,6 +62,25 @@ function getAllImageNodes(editor: Editor) {
   const [...images] = findNodes(editor, n => n.type === "image");
   return images.map(([node]) => node) as ImageElement[];
 }
+
+const Presenter: iPresenter<ImageElement> = {
+  element: {
+    typeMatch: "image",
+    renderElement: props => (
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <img
+          style={{
+            objectFit: "contain",
+            width: "50%",
+            display: "block"
+          }}
+          alt={props.element.caption}
+          src={props.element?.url ? props.element.url : ""}
+        />
+      </div>
+    )
+  }
+};
 
 export function ImageAddon(
   props: AddonProps & {
@@ -197,3 +217,5 @@ export function ImageAddon(
     />
   );
 }
+
+ImageAddon.Presenter = Presenter;

@@ -26,7 +26,6 @@ import {
   imageBlockControls,
   HoverToolControls,
   boldControl,
-  AddonBold,
   italicControl,
   strikethroughControl,
   underlineControl,
@@ -85,7 +84,7 @@ function ExampleVideoAddon(props: AddonProps) {
 function App() {
   const [value, setValue] = useState<Node[]>([
     {
-      type: "heading-1",
+      type: "h1",
       children: [{ text: "Dark" }]
     },
     {
@@ -112,11 +111,11 @@ function App() {
       ]
     },
     {
-      type: "heading-1",
+      type: "h1",
       children: [{ text: "Lists" }]
     },
     {
-      type: "heading-2",
+      type: "h2",
       children: [{ text: "Ordered" }]
     },
     {
@@ -127,7 +126,7 @@ function App() {
       ]
     },
     {
-      type: "heading-2",
+      type: "h2",
       children: [{ text: "Unordered" }]
     },
     {
@@ -161,7 +160,7 @@ function App() {
 
   return (
     <div style={{ padding: "1em" }}>
-      {/* <Chief
+      <Chief
         value={value}
         onChange={value => setValue(value)}
         theme={{
@@ -221,14 +220,23 @@ function App() {
             ></Editor>
           </HoverToolProvider>
         </div>
-      </Chief> */}
-
-      {/* <textarea
-        style={{ width: "100%", height: 400 }}
-        value={JSON.stringify(value, null, 2)}
-        readOnly
-      ></textarea> */}
-      <ChiefPresentation value={value} addons={[AddonBold]}></ChiefPresentation>
+      </Chief>
+      <div style={{ backgroundColor: "white" }}>
+        <ChiefPresentation
+          value={value}
+          presenters={[
+            ParagraphAddon.Presenter,
+            BoldAddon.Presenter,
+            ItalicAddon.Presenter,
+            StrikethroughAddon.Presenter,
+            UnderlineAddon.Presenter,
+            HeadingsAddon.Presenter,
+            LinkAddon.Presenter,
+            ListsAddon.Presenter,
+            ImageAddon.Presenter
+          ]}
+        ></ChiefPresentation>
+      </div>
     </div>
   );
 }

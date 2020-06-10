@@ -1,5 +1,5 @@
 import { toggleList } from "./transforms";
-import { ChiefElement } from "../../chief/chief";
+import { ChiefElement, InjectedRenderElement } from "../../chief/chief";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { usePlugin } from "../../chief/hooks/use-plugin";
@@ -13,6 +13,7 @@ import { AddonProps } from "../../addon";
 import { listControl } from "./controls";
 import styled, { css } from "styled-components";
 import { useDecoration } from "../../chief/hooks/use-decoration";
+import { iPresenter } from "../../chief";
 
 export const TYPE_LIST_ITEM = "list-item";
 export const TYPE_UNORDERED_LIST = "unordered-list";
@@ -62,6 +63,24 @@ const Ol = styled.ol`
 
 const Li = styled.li``;
 
+const _renderElement: InjectedRenderElement = {
+  typeMatch: LIST_TYPES,
+  renderElement: props => {
+    switch (props.element.type) {
+      case TYPE_UNORDERED_LIST:
+        return renderElement(props, props.element.type, Ul);
+      case TYPE_ORDERED_LIST:
+        return renderElement(props, props.element.type, Ol);
+      default:
+        return renderElement(props, TYPE_LIST_ITEM, Li);
+    }
+  }
+};
+
+const Presenter: iPresenter = {
+  element: _renderElement
+};
+
 export function ListsAddon(props: AddonProps) {
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
@@ -80,19 +99,7 @@ export function ListsAddon(props: AddonProps) {
     }
   });
 
-  useRenderElement<ListElement>({
-    typeMatch: LIST_TYPES,
-    renderElement: props => {
-      switch (props.element.type) {
-        case TYPE_UNORDERED_LIST:
-          return renderElement(props, props.element.type, Ul);
-        case TYPE_ORDERED_LIST:
-          return renderElement(props, props.element.type, Ol);
-        default:
-          return renderElement(props, TYPE_LIST_ITEM, Li);
-      }
-    }
-  });
+  useRenderElement<ListElement>(_renderElement);
 
   useOnKeyDown({
     pattern: "enter",
@@ -227,3 +234,5 @@ export function ListsAddon(props: AddonProps) {
 }
 
 ListsAddon.Control = listControl;
+ListsAddon.Presenter = Presenter;
+
