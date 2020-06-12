@@ -1,10 +1,13 @@
 {
   "name": "chief-editor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Redia WYSIWYG editor.",
   "author": "kledk",
   "license": "MIT",
-  "repository": "&quot;&quot;",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kledk/chief-editor"
+  },
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",
