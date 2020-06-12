@@ -32,7 +32,8 @@ import {
   headingContextControls,
   linkControl,
   LabelsAddon,
-  ChiefPresentation
+  ChiefPresentation,
+  TextColorAddon
 } from "chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -172,6 +173,7 @@ function App() {
       <LinkAddon></LinkAddon>
       <ListsAddon></ListsAddon>
       <BlockTabAddon></BlockTabAddon>
+      <TextColorAddon></TextColorAddon>
       {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
     </>
   );

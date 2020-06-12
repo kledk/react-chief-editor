@@ -17,6 +17,7 @@ export * from "./addons/lists";
 export * from "./addons/block-tab";
 export * from "./addons/block-insert-tool";
 export * from "./addons/hovering-tool";
+export * from "./addons/text-color";
 export * from "./chief-editor-theme";
 export * from "./defaultTheme";
 export * from "./ToolbarBtn";

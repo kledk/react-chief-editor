@@ -4,12 +4,15 @@ import { RenderLeafProps } from "slate-react";
 export function renderLeaf(
   props: RenderLeafProps,
   leafType: string,
-  rectType: string
+  rectType: Parameters<typeof React.createElement>["0"],
+  elementProps?: Parameters<typeof React.createElement>["1"]
 ) {
   const { children, leaf } = props;
   if (leaf[leafType]) {
     return (
-      <Leaf {...props}>{React.createElement(rectType, null, children)}</Leaf>
+      <Leaf {...props}>
+        {React.createElement(rectType, elementProps, children)}
+      </Leaf>
     );
   }
   return undefined;
