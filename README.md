@@ -1,14 +1,12 @@
-# chief-editor
 
-> Redia WYSIWYG
+# 👔Chief🎩Editor🖊
+Editor-In-(rich text editing)-Chief!
 
-## Install
+A rich-text editor built ontop of Slate.js with an hooks-based addon architecture.
 
 ```bash
 npm install --save chief-editor
 ```
-
-© [Redia](https://redia.dk)
-
-# Tips
-https://github.com/objectlegal/slate-snippets
+```bash
+yarn add chief-editor
+```
