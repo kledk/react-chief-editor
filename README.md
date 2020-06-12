@@ -4,7 +4,6 @@ Editor-In-(rich text editing)-Chief!
 
 A rich-text editor for React, built ontop of Slate.js with an hooks-based addon architecture.
 
-npm:
 ```bash
 #npm:
 npm install --save chief-editor
