@@ -2,38 +2,40 @@ import React, { useState } from "react";
 import {
   Editor,
   Chief,
+  // Addons
+  HeadingsAddon,
   BoldAddon,
-  ImageAddon,
-  AddonProps,
   ItalicAddon,
   UnderlineAddon,
   StrikethroughAddon,
-  HeadingsAddon,
+  ImageAddon,
   ResetToParagraphAddon,
   PreventNewlineAddon,
   LinkAddon,
-  useRenderElement,
-  InputWrapper,
-  Input,
-  usePlugin,
   ListsAddon,
   BlockTabAddon,
   ParagraphAddon,
-  headingBlockControls,
+  TextColorAddon,
+  LabelsAddon,
+  // Block toolbar addon
   BlockInsert,
+  headingBlockControls,
   BlockInsertControls,
+  // Custom addon creation
+  AddonProps,
+  useRenderElement,
+  InputWrapper,
+  usePlugin,
   HoverToolProvider,
   imageBlockControls,
   HoverToolControls,
-  boldControl,
   italicControl,
   strikethroughControl,
   underlineControl,
   headingContextControls,
   linkControl,
-  LabelsAddon,
-  ChiefPresentation,
-  TextColorAddon
+  // Presentation
+  ChiefPresentation
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -57,7 +59,7 @@ const editorLabels = {
   "elements.heading.heading-6.placeholder": "Overskrift 6"
 };
 
-function ExampleVideoAddon(props: AddonProps) {
+function ExampleCustomAddon(props: AddonProps) {
   usePlugin({
     isVoid: isVoid => element =>
       Element.isElement(element) && element.type === "custom_void_element"
@@ -71,7 +73,7 @@ function ExampleVideoAddon(props: AddonProps) {
       return (
         <div {...props.attributes}>
           <InputWrapper>
-            <Input />
+            <input type="text" />
           </InputWrapper>
           {props.children}
         </div>
