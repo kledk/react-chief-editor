@@ -34,7 +34,7 @@ import {
   LabelsAddon,
   ChiefPresentation,
   TextColorAddon
-} from "chief-editor";
+} from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
 

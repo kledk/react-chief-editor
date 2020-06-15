@@ -1,4 +1,6 @@
 
+## ALPHA release
+
 # 👔Chief🎩Editor🖊
 Editor-In-(rich text editing)-Chief!
 
@@ -7,17 +9,20 @@ A rich-text editor for React, built ontop of Slate.js with an hooks-based addon 
 ## Installation
 ```bash
 #npm:
-npm install --save chiefeditor
+npm install --save react-editor-chief
 
 #yarn:
-yarn add chiefeditor
+yarn add react-editor-chief
 ```
 
-## Gettings started
+## Getting started
 ...
 ## Example
 ```tsx
-import ChiefEditor
+import {
+  Editor,
+  Chief,
+} from "react-chief-editor";
 
 ```
 ...
@@ -27,6 +32,5 @@ import ChiefEditor
 ...
 ### Controls
 ...
-
-## Thanks
-Huge props to @mpkelly, for a ton of inspiration for this, from his awesome react-editor-kit (https://github.com/mpkelly/react-editor-kit)
+### Prensentation
+...

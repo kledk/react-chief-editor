@@ -1,13 +1,13 @@
 {
-  "name": "chief-editor-example",
-  "homepage": "https://kledk.github.io/chief-editor",
+  "name": "react-chief-editor-example",
+  "homepage": "https://kledk.github.io/react-chief-editor",
   "version": "0.0.0",
   "private": true,
   "dependencies": {
     "react": "link:../node_modules/react",
     "react-dom": "link:../node_modules/react-dom",
     "react-scripts": "link:../node_modules/react-scripts",
-    "chief-editor": "link:.."
+    "react-chief-editor": "link:.."
   },
   "scripts": {
     "start": "node ../node_modules/react-scripts/bin/react-scripts.js start",

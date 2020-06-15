@@ -3,8 +3,7 @@ import {
   RenderLeafProps,
   ReactEditor,
   RenderElementProps,
-  Slate,
-  Editable
+  Slate
 } from "slate-react";
 import { Node, Element, NodeEntry, Range } from "slate";
 import merge from "lodash/merge";

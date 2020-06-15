@@ -1,6 +1,6 @@
 {
-  "short_name": "chief-editor",
-  "name": "chief-editor",
+  "short_name": "react-chief-editor",
+  "name": "react-chief-editor",
   "icons": [
     {
       "src": "favicon.ico",
