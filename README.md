@@ -7,10 +7,10 @@ A rich-text editor for React, built ontop of Slate.js with an hooks-based addon 
 ## Installation
 ```bash
 #npm:
-npm install --save chief-editor
+npm install --save chiefeditor
 
 #yarn:
-yarn add chief-editor
+yarn add chiefeditor
 ```
 
 ## Gettings started

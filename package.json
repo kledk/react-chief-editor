@@ -1,7 +1,7 @@
 {
   "name": "chief-editor",
   "version": "1.0.0",
-  "description": "Redia WYSIWYG editor.",
+  "description": "Extendable rich-text editor.",
   "author": "kledk",
   "license": "MIT",
   "repository": {
