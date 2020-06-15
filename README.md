@@ -18,7 +18,7 @@ yarn add react-editor-chief
 # Getting started
 
 
-## Minimum working example
+## Wworking example
 ```tsx
 import {
   Editor,
@@ -36,6 +36,25 @@ import {
   BlockTabAddon,
   ParagraphAddon,
 } from "react-chief-editor";
+
+const editorLabels = {
+  "marks.bold": "Fed",
+  "marks.italic": "Kursiv",
+  "marks.strikethrough": "Gennemstreg",
+  "marks.underline": "Understreg",
+  "elements.link": "Link",
+  "elements.link.placeholder": "Indsæt eller skriv link",
+  "elements.link.btn.link": "Tilføj",
+  "elements.link.btn.unlink": "Fjern",
+  "elements.paragraph.hint": "Klik for at redigere",
+  "elements.paragraph.placeholder": "Tekst",
+  "elements.heading.heading-1.placeholder": "Overskrift 1",
+  "elements.heading.heading-2.placeholder": "Overskrift 2",
+  "elements.heading.heading-3.placeholder": "Overskrift 3",
+  "elements.heading.heading-4.placeholder": "Overskrift 4",
+  "elements.heading.heading-5.placeholder": "Overskrift 5",
+  "elements.heading.heading-6.placeholder": "Overskrift 6"
+};
 
 function App() {
     const [value, setValue] = useState<Node[]>([
@@ -65,6 +84,13 @@ function App() {
         <ItalicAddon/>
         <UnderlineAddon/>
         <StrikethroughAddon/>
+        <ImageAddon/>
+        <LinkAddon/>
+        <ListsAddon/>
+        <BlockTabAddon/>
+        <ResetToParagraphAddon/>
+        <PreventNewlineAddon/>
+        <LabelsAddon labels={editorLabels}></LabelsAddon>
         <div
           style={{
             marginLeft: 20
@@ -73,7 +99,9 @@ function App() {
         <BlockInsert>
             <BlockInsertControls
               controls={[
-                ...headingBlockControls
+                ...headingBlockControls,
+                ...imageBlockControls,
+                ListsAddon.Control
               ]}
             />
           </BlockInsert>
@@ -85,6 +113,8 @@ function App() {
                   italicControl,
                   strikethroughControl,
                   underlineControl,
+                  ...headingContextControls,
+                  linkControl
                 ]}
               />
             }
