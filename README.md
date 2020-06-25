@@ -1,5 +1,5 @@
 
-## ALPHA release
+## Currently in ALPHA!
 
 # 👔Chief🎩Editor🖊
 Editor-In-(rich text editing)-Chief!
