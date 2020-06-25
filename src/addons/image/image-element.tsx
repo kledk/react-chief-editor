@@ -20,6 +20,7 @@ import { ToolbarBtn } from "../../ToolbarBtn";
 import { StyledFocusToolBtn } from "../../ui/StyledFocusToolbar";
 import { ChiefRenderElementProps } from "../../chief/chief";
 import { UiWrap } from "../../ui/ui-wrap";
+import ReactResizeDetector from "react-resize-detector/lib/";
 
 export const ImageBlock = (
   props: ChiefRenderElementProps<ImageElement> & {
@@ -43,7 +44,8 @@ export const ImageBlock = (
         Transforms.setNodes(
           editor,
           {
-            url: embedUrl
+            url: embedUrl,
+            align: "center"
           },
           {
             at: ReactEditor.findPath(editor, element)
@@ -72,6 +74,31 @@ export const ImageBlock = (
     onOpenFileRequest && onOpenFileRequest();
   }, [onOpenFileRequest]);
 
+  const handleResize = useCallback((w, h) => {
+    Transforms.setNodes(
+      editor,
+      {
+        width: w,
+        height: h
+      },
+      {
+        at: ReactEditor.findPath(editor, element)
+      }
+    );
+  }, []);
+
+  const align = useCallback((align: ImageElement["align"]) => {
+    Transforms.setNodes(
+      editor,
+      {
+        align
+      },
+      {
+        at: ReactEditor.findPath(editor, element)
+      }
+    );
+  }, []);
+
   const toggleReplace = useCallback(() => {
     setIsReplacing(!isReplacing);
   }, [isReplacing]);
@@ -95,9 +122,18 @@ export const ImageBlock = (
             <ToolBtnPopup
               renderContent={() => (
                 <StyledToolBox>
-                  <ToolbarBtn>Copy address</ToolbarBtn>
-                  <ToolbarBtn>Resize</ToolbarBtn>
+                  {/* <ToolbarBtn>Copy address</ToolbarBtn> */}
+                  {/* <ToolbarBtn>Resize</ToolbarBtn> */}
                   <ToolbarBtn onMouseDown={toggleReplace}>Replace</ToolbarBtn>
+                  <ToolbarBtn onMouseDown={() => align("left")}>
+                    Align left
+                  </ToolbarBtn>
+                  <ToolbarBtn onMouseDown={() => align("center")}>
+                    Align center
+                  </ToolbarBtn>
+                  <ToolbarBtn onMouseDown={() => align("right")}>
+                    Align right
+                  </ToolbarBtn>
                 </StyledToolBox>
               )}
               renderToolBtn={tprops => (
@@ -107,18 +143,42 @@ export const ImageBlock = (
           </React.Fragment>
         }
       >
-        <div>
-          <div contentEditable={false} onClick={handleClick}>
-            <img
+        <div
+          style={{
+            display: "flex",
+            justifyContent:
+              props.element.align === "center"
+                ? "center"
+                : props.element.align === "left"
+                ? "flex-start"
+                : "flex-end"
+          }}
+          contentEditable={false}
+          onClick={handleClick}
+        >
+          <ReactResizeDetector
+            onResize={(w: number, h: number) => handleResize(w, h)}
+          >
+            <div
               style={{
-                objectFit: "contain",
-                width: "100%",
-                display: "block"
+                resize: "both",
+                overflow: "auto",
+                width: element.width,
+                height: element.height
               }}
-              alt={element.caption}
-              src={src}
-            />
-          </div>
+            >
+              <img
+                style={{
+                  objectFit: "fill",
+                  width: "100%",
+                  height: "100%",
+                  display: "block"
+                }}
+                alt={element.caption}
+                src={src}
+              />
+            </div>
+          </ReactResizeDetector>
         </div>
         {children}
       </WithAttentionToolbar>

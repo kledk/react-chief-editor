@@ -51,12 +51,12 @@ const editorLabels = {
   "elements.link.btn.unlink": "Fjern",
   "elements.paragraph.hint": "Klik for at redigere",
   "elements.paragraph.placeholder": "Tekst",
-  "elements.heading.heading-1.placeholder": "Overskrift 1",
-  "elements.heading.heading-2.placeholder": "Overskrift 2",
-  "elements.heading.heading-3.placeholder": "Overskrift 3",
-  "elements.heading.heading-4.placeholder": "Overskrift 4",
-  "elements.heading.heading-5.placeholder": "Overskrift 5",
-  "elements.heading.heading-6.placeholder": "Overskrift 6"
+  "elements.heading.h1.placeholder": "Overskrift 1",
+  "elements.heading.h2.placeholder": "Overskrift 2",
+  "elements.heading.h3.placeholder": "Overskrift 3",
+  "elements.heading.h4.placeholder": "Overskrift 4",
+  "elements.heading.h5.placeholder": "Overskrift 5",
+  "elements.heading.h6.placeholder": "Overskrift 6"
 };
 
 function ExampleCustomAddon(props: AddonProps) {
@@ -118,11 +118,14 @@ function App() {
       ]
     },
     {
-      type: "heading-1",
+      type: "h1",
       children: [{ text: "Images" }]
     },
     {
       type: "image",
+      width: 700,
+      height: 420,
+      align: "left",
       url:
         "https://occ-0-1068-1723.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABSJBCX9UxJkkZH_NLhm0nynLxHTqy99ETHJuidWOohECj4qKD3kqC8kr4gk2anceRXPMLULS3hruYHK56hpZCSsWD1GqNO4GaWrot7bwzPHJqxfT.jpg?r=2af",
       children: [
@@ -179,6 +182,8 @@ function App() {
       {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
     </>
   );
+
+  console.log(value);
 
   return (
     <div style={{ padding: "1em" }}>

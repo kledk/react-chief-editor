@@ -23,6 +23,9 @@ export interface ImageElement extends ChiefElement {
   url: string | null;
   caption?: string;
   previewId?: number;
+  width: number;
+  height: number;
+  align: "left" | "center" | "right";
 }
 
 export function isImageElement(element: unknown): element is ImageElement {
@@ -67,11 +70,22 @@ const Presenter: iPresenter<ImageElement> = {
   element: {
     typeMatch: "image",
     renderElement: props => (
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            props.element.align === "center"
+              ? "center"
+              : props.element.align === "left"
+              ? "flex-start"
+              : "flex-end"
+        }}
+      >
         <img
           style={{
-            objectFit: "contain",
-            width: "50%",
+            objectFit: "fill",
+            width: props.element.width,
+            height: props.element.height,
             display: "block"
           }}
           alt={props.element.caption}
@@ -141,7 +155,8 @@ export function ImageAddon(
         Transforms.setNodes(
           editor,
           {
-            url
+            url,
+            align: "center"
           },
           { at: imageRef.current! }
         );

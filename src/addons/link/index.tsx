@@ -139,6 +139,7 @@ function LinkPopup(props: { onClose: () => void }) {
     }
   }, [linkNode]);
   const handleInsertLink = useCallback(() => {
+    debugger
     if (url.length > 0) {
       insertLink(editor, url);
       props.onClose();
@@ -196,10 +197,10 @@ function LinkPopup(props: { onClose: () => void }) {
         <ToolbarBtn
           rounded
           disabled={
-            !isLinkActive(editor) ||
-            (linkNode &&
-              typeof linkNode.url === "string" &&
-              linkNode.url.length > 0)
+            !isLinkActive(editor)
+            // || (linkNode &&
+            //   typeof linkNode.url === "string" &&
+            //   linkNode.url.length > 0)
           }
           onMouseDown={handleUnlink}
         >

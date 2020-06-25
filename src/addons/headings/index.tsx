@@ -70,7 +70,7 @@ export function HeadingsAddon(props: AddonProps) {
         const [match] = Editor.nodes(editor, {
           match: n =>
             typeof n.type === "string" &&
-            Boolean(n.type?.match(/(heading-[1-6])/))
+            Boolean(n.type?.match(/(h[1-6])/))
         });
         if (match) {
           event.preventDefault();

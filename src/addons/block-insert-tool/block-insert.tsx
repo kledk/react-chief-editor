@@ -40,24 +40,28 @@ export const BlockInsertBtn = styled(ButtonBase)`
 function useHoveredNode(editor: ReactEditor) {
   const [node, setNode] = useState<{ node: Node; path: Path } | null>(null);
   useEffect(() => {
-    const [rootNode] = Editor.node(editor, {
-      anchor: Editor.start(editor, []),
-      focus: Editor.end(editor, [])
-    });
-    if (rootNode && Node.isNode(rootNode)) {
-      const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode);
-      firstDOMPoint.addEventListener("mousemove", e => {
-        if (ReactEditor.hasDOMNode(editor, e.target as globalThis.Node)) {
-          const node = ReactEditor.toSlateNode(
-            editor,
-            e.target as globalThis.Node
-          );
-          const path = ReactEditor.findPath(editor, node);
-          setNode({ node, path });
-        } else {
-          setNode(null);
-        }
+    try {
+      const [rootNode] = Editor.node(editor, {
+        anchor: Editor.start(editor, []),
+        focus: Editor.end(editor, [])
       });
+      if (rootNode && Node.isNode(rootNode)) {
+        const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode);
+        firstDOMPoint.addEventListener("mousemove", e => {
+          if (ReactEditor.hasDOMNode(editor, e.target as globalThis.Node)) {
+            const node = ReactEditor.toSlateNode(
+              editor,
+              e.target as globalThis.Node
+            );
+            const path = ReactEditor.findPath(editor, node);
+            setNode({ node, path });
+          } else {
+            setNode(null);
+          }
+        });
+      }
+    } catch (err) {
+      setNode(null);
     }
   }, [editor]);
   return node;
@@ -89,20 +93,25 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
 
   useEffect(() => {
     if (hoveredNode?.node && !showMenu) {
-      const [rootNode] = Editor.nodes(editor, {
-        at: Editor.start(editor, [0, 0])
-      });
-      if (rootNode && rootNode.length > 0 && Node.isNode(rootNode[0])) {
-        const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode[0]);
-        const activeDOMNode = ReactEditor.toDOMNode(editor, hoveredNode.node);
-        const rect = activeDOMNode.getBoundingClientRect();
-        const top = rect.top + window.pageYOffset + rect.height / 2 - 25 / 2;
-        const left =
-          firstDOMPoint.getBoundingClientRect().left + window.pageXOffset - 30;
-        setCoords([top, left]);
-      }
+      try {
+        const [rootNode] = Editor.node(editor, {
+          anchor: Editor.start(editor, []),
+          focus: Editor.end(editor, [])
+        });
+        if (rootNode && Node.isNode(rootNode)) {
+          const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode);
+          const activeDOMNode = ReactEditor.toDOMNode(editor, hoveredNode.node);
+          const rect = activeDOMNode.getBoundingClientRect();
+          const top = rect.top + window.pageYOffset + rect.height / 2 - 25 / 2;
+          const left =
+            firstDOMPoint.getBoundingClientRect().left +
+            window.pageXOffset -
+            30;
+          setCoords([top, left]);
+        }
+      } catch (err) {}
     }
-  }, [hoveredNode?.node, editor]);
+  }, [hoveredNode]);
 
   if (
     !hoveredNode ||

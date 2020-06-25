@@ -222,19 +222,27 @@ export const HoveringTool = (
     if (enabled) {
       const isVoid = Editor.isVoid(editor, currentNode);
       if (isVoid && currentNode) {
-        const domNode = ReactEditor.toDOMNode(editor, currentNode);
-        _setV({
-          getBoundingClientRect: () => domNode.getBoundingClientRect()
-        });
+        try {
+          const domNode = ReactEditor.toDOMNode(editor, currentNode);
+          _setV({
+            getBoundingClientRect: () => domNode.getBoundingClientRect()
+          });
+        } catch (err) {
+          console.log(err);
+        }
       } else {
-        const domSelection = window.getSelection();
-        if (domSelection && domSelection.rangeCount > 0) {
-          const domRange = domSelection.getRangeAt(0);
-          if (domRange && deltaOffset !== -1) {
-            _setV({
-              getBoundingClientRect: () => domRange.getBoundingClientRect()
-            });
+        try {
+          const domSelection = window.getSelection();
+          if (domSelection && domSelection.rangeCount > 0) {
+            const domRange = domSelection.getRangeAt(0);
+            if (domRange && deltaOffset !== -1) {
+              _setV({
+                getBoundingClientRect: () => domRange.getBoundingClientRect()
+              });
+            }
           }
+        } catch (err) {
+          console.log(err);
         }
       }
     }
