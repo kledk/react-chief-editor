@@ -32,7 +32,7 @@
     "is-url": "^1.2.4",
     "lodash": "^4.17.15",
     "react-dom": "^16.13.1",
-    "react-overlays": "^3.2.0",
+    "react-overlays": "^4.1.0",
     "react-popper": "^2.2.3",
     "react-resize-detector": "^5.0.6",
     "slate": "^0.58.3",
