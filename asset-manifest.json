@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/react-chief-editor/static/css/main.6ff5b65c.chunk.css",
+    "main.js": "/react-chief-editor/static/js/main.2ce8bec4.chunk.js",
+    "main.js.map": "/react-chief-editor/static/js/main.2ce8bec4.chunk.js.map",
+    "runtime-main.js": "/react-chief-editor/static/js/runtime-main.0838db46.js",
+    "runtime-main.js.map": "/react-chief-editor/static/js/runtime-main.0838db46.js.map",
+    "static/js/2.71cff098.chunk.js": "/react-chief-editor/static/js/2.71cff098.chunk.js",
+    "static/js/2.71cff098.chunk.js.map": "/react-chief-editor/static/js/2.71cff098.chunk.js.map",
+    "index.html": "/react-chief-editor/index.html",
+    "precache-manifest.1a45a25dc0ae365cff6a22bfb7115f89.js": "/react-chief-editor/precache-manifest.1a45a25dc0ae365cff6a22bfb7115f89.js",
+    "service-worker.js": "/react-chief-editor/service-worker.js",
+    "static/css/main.6ff5b65c.chunk.css.map": "/react-chief-editor/static/css/main.6ff5b65c.chunk.css.map",
+    "static/js/2.71cff098.chunk.js.LICENSE.txt": "/react-chief-editor/static/js/2.71cff098.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.0838db46.js",
+    "static/js/2.71cff098.chunk.js",
+    "static/css/main.6ff5b65c.chunk.css",
+    "static/js/main.2ce8bec4.chunk.js"
+  ]
+}
