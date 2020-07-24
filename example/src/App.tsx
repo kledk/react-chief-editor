@@ -86,7 +86,6 @@ function ExampleCustomAddon(props: AddonProps) {
 
 const ContentStyle = styled.div`
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #151515;
   color: rgba(28, 98, 116);
   font-size: 18px;
   h1,
@@ -116,7 +115,8 @@ function App() {
             "Dark er en tysksproget web-tv-serie skabt af Baran bo Odar og Jantje Friese for Netflix. Serien havde premiere på Netflix 1. december 2017. Den første sæson – på ti afsnit – blev hovedsagelig godt modtaget, med positive og negative sammenligninger med Stranger Things, en anden overnaturlig thrillerserie fra Netflix"
         },
         {
-          text: "\n"
+          text: "red",
+          color: "red"
         }
       ]
     },

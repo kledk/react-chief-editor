@@ -1,17 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Transforms } from "slate";
-import {
-  useFocused,
-  useSelected,
-  RenderElementProps,
-  ReactEditor,
-  useSlate
-} from "slate-react";
-import { ButtonBase } from "../../ui/button-base";
+import { useFocused, useSelected, ReactEditor, useSlate } from "slate-react";
 import { WithAttentionToolbar } from "../../ui/WithAttentionToolbar";
 import { Input, InputWrapper } from "../../InputWrapper";
 import isUrl from "is-url";
-import { isImageElement, ImageElement } from "./index";
+import { ImageElement } from "./index";
 import { Button } from "../../ui/button";
 import styled from "styled-components";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
