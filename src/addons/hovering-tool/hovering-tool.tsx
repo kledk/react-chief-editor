@@ -12,6 +12,7 @@ import { VirtualElement } from "@popperjs/core";
 import { useOnClickOutside, getNodeFromSelection } from "../../utils";
 import { useDecoration } from "../../chief/hooks/use-decoration";
 import { useRenderLeaf } from "../../chief";
+import { useChief } from "../../chief/hooks/use-chief";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = (...args) => {
@@ -77,6 +78,7 @@ function useProvideContext() {
   const isEmpty = selection && Editor.string(editor, selection) === "";
   const currentNode = getNodeFromSelection(editor, selection);
   const isVoid = Editor.isVoid(editor, currentNode);
+  const isReadOnly = useChief().readOnly;
   useHighlightSelection(savedSelection?.current, {
     backgroundColor: "#969696"
   });
@@ -98,7 +100,9 @@ function useProvideContext() {
   }, []);
 
   useEffect(() => {
-    if (ctx.enabled) {
+    if (isReadOnly) {
+      setEnabled(false);
+    } else if (ctx.enabled) {
       if (!savedSelection?.current && isCollapsed && !isVoid) {
         setEnabled(false);
       }

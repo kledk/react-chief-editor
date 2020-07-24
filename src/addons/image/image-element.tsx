@@ -21,6 +21,7 @@ import { StyledFocusToolBtn } from "../../ui/StyledFocusToolbar";
 import { ChiefRenderElementProps } from "../../chief/chief";
 import { UiWrap } from "../../ui/ui-wrap";
 import ReactResizeDetector from "react-resize-detector/lib/";
+import { useChief } from "../../chief/hooks/use-chief";
 
 export const ImageBlock = (
   props: ChiefRenderElementProps<ImageElement> & {
@@ -31,6 +32,7 @@ export const ImageBlock = (
   const focused = useFocused();
   const selected = useSelected();
   const editor = useSlate();
+  const { readOnly } = useChief();
   const { onOpenFileRequest, onRemoved, ...renderElementProps } = props;
   const { element, children, attributes } = renderElementProps;
 
@@ -163,7 +165,7 @@ export const ImageBlock = (
           >
             <div
               style={{
-                resize: "both",
+                resize: readOnly ? "none" : "both",
                 overflow: "auto",
                 width: element.width,
                 height: element.height

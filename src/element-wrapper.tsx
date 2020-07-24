@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { RenderElementProps } from "slate-react";
 import { useFocused } from "./Focused";
 import { Show } from "./show";
+import { useChief } from "./chief/hooks/use-chief";
 
 export function ElementWrapper(
   props: RenderElementProps & {
@@ -19,8 +20,9 @@ export function ElementWrapper(
   } = props;
   const { isFocusedWithin } = useFocused(element);
   const [inside, setInside] = useState(false);
+  const { readOnly } = useChief();
   const handleEnter = () => {
-    setInside(true);
+    !readOnly && setInside(true);
   };
   const handleLeave = () => {
     setInside(false);
@@ -33,7 +35,7 @@ export function ElementWrapper(
       style={{ position: "relative" }}
       {...otherProps}
     >
-      <Show when={isFocusedWithin || inside}>
+      <Show when={!readOnly && (isFocusedWithin || inside)}>
         <div style={{ position: "absolute", zIndex: 2, ...style }}>
           {attentionChildren}
         </div>
