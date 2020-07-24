@@ -30,7 +30,7 @@
     "@popperjs/core": "^2.2.1",
     "is-hotkey": "^0.1.6",
     "is-url": "^1.2.4",
-    "lodash": "^4.17.15",
+    "lodash": "4.17.19",
     "react-dom": "^16.13.1",
     "react-overlays": "^4.1.0",
     "react-popper": "^2.2.3",
