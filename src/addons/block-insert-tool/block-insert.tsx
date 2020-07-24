@@ -6,7 +6,7 @@ import {
 } from "../../utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
-import { Node, Editor, Range, Element, Path, Transforms } from "slate";
+import { Node, Editor, Path, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
@@ -20,7 +20,10 @@ export const BlockInsertBtn = styled(ButtonBase)`
   height: 25px;
   border: 1px solid #ccc;
   border-radius: ${25 / 2}px;
-  span {
+  &:before {
+    content: "+";
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
     font-size: 28px;
     color: #ccc;
     position: absolute;
@@ -28,10 +31,14 @@ export const BlockInsertBtn = styled(ButtonBase)`
     left: 4px;
     padding: 0;
     margin: 0;
-    &:hover {
+  }
+  &:hover {
+    &:before {
       color: #ddd;
     }
-    &:active {
+  }
+  &:active {
+    &:before {
       color: #eee;
     }
   }
@@ -131,9 +138,7 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
             ref={ref}
             style={{ position: "absolute", top: coords[0], left: coords[1] }}
           >
-            <BlockInsertBtn onClick={handleBlockInsert}>
-              <span>+</span>
-            </BlockInsertBtn>
+            <BlockInsertBtn onClick={handleBlockInsert} />
           </div>
         )}
       </Reference>

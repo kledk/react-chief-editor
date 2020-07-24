@@ -29,7 +29,7 @@ const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
 );
 
-function useHighlighSelection(
+function useHighlightSelection(
   selection: Range | null | undefined,
   style: React.CSSProperties
 ) {
@@ -77,7 +77,7 @@ function useProvideContext() {
   const isEmpty = selection && Editor.string(editor, selection) === "";
   const currentNode = getNodeFromSelection(editor, selection);
   const isVoid = Editor.isVoid(editor, currentNode);
-  useHighlighSelection(savedSelection?.current, {
+  useHighlightSelection(savedSelection?.current, {
     backgroundColor: "#969696"
   });
 

@@ -38,7 +38,6 @@ export const RichEditor = {
 };
 
 const EditorThemeWrapper = styled.div`
-  font-size: 14px;
   ${props => OverrideTheme("Editor", props)}
 `;
 

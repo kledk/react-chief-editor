@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Transforms } from "slate";
 import {
   useFocused,
@@ -145,6 +145,8 @@ export const ImageBlock = (
       >
         <div
           style={{
+            position: "relative",
+            height: element.height,
             display: "flex",
             justifyContent:
               props.element.align === "center"
@@ -168,6 +170,7 @@ export const ImageBlock = (
               }}
             >
               <img
+                draggable={false}
                 style={{
                   objectFit: "fill",
                   width: "100%",

@@ -84,7 +84,7 @@ function ExampleCustomAddon(props: AddonProps) {
   return null;
 }
 
-const StyledPresentation = styled.div`
+const ContentStyle = styled.div`
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #151515;
   color: rgba(28, 98, 116);
@@ -187,68 +187,56 @@ function App() {
 
   return (
     <div style={{ padding: "1em" }}>
-      <Chief
-        value={value}
-        onChange={value => setValue(value)}
-        theme={{
-          overrides: {
-            Editor: css`
-              font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-              background-color: #151515;
-              color: rgba(28, 98, 116);
-              font-size: 18px;
-              h1,
-              h2,
-              h3,
-              h4,
-              h5,
-              h6 {
-                color: rgba(153, 109, 33);
-              }
-              a {
-                color: rgba(153, 109, 33);
-              }
-            `
-          }
-        }}
-      >
-        {addons}
-        <div
-          style={{
-            marginLeft: 20
+      <ContentStyle>
+        <Chief
+          value={value}
+          onChange={value => setValue(value)}
+          theme={{
+            overrides: {
+              ui: css`
+                /* font-family: monospace; */
+              `
+            }
           }}
         >
-          <BlockInsert>
-            <BlockInsertControls
-              controls={[
-                ...headingBlockControls,
-                ...imageBlockControls,
-                ListsAddon.Control
-              ]}
-            />
-          </BlockInsert>
-          <HoverToolProvider
-            hoverTool={
-              <HoverToolControls
+          {addons}
+          <div
+            style={{
+              marginLeft: 20
+            }}
+          >
+            <BlockInsert>
+              <BlockInsertControls
                 controls={[
-                  BoldAddon.Control,
-                  italicControl,
-                  strikethroughControl,
-                  underlineControl,
-                  ...headingContextControls,
-                  linkControl
+                  ...headingBlockControls,
+                  ...imageBlockControls,
+                  ListsAddon.Control
                 ]}
               />
-            }
-          >
-            <Editor
-              spellCheck={false}
-              style={{ margin: 10, overflow: "auto", minHeight: 500 }}
-            ></Editor>
-          </HoverToolProvider>
-        </div>
-      </Chief>
-      <StyledPresentation>
+            </BlockInsert>
+            <HoverToolProvider
+              hoverTool={
+                <HoverToolControls
+                  controls={[
+                    BoldAddon.Control,
+                    italicControl,
+                    strikethroughControl,
+                    underlineControl,
+                    ...headingContextControls,
+                    linkControl
+                  ]}
+                />
+              }
+            >
+              <Editor
+                spellCheck={false}
+                style={{ margin: 10, overflow: "auto", minHeight: 500 }}
+              ></Editor>
+            </HoverToolProvider>
+          </div>
+        </Chief>
+      </ContentStyle>
+      <ContentStyle>
         <ChiefPresentation
           value={value}
           presenters={[
@@ -263,7 +251,7 @@ function App() {
             ImageAddon.Presenter
           ]}
         ></ChiefPresentation>
-      </StyledPresentation>
+      </ContentStyle>
     </div>
   );
 }
