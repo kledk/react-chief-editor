@@ -13,18 +13,14 @@ import { useOnClickOutside, getNodeFromSelection } from "../../utils";
 import { useDecoration } from "../../chief/hooks/use-decoration";
 import { useRenderLeaf } from "../../chief";
 import { useChief } from "../../chief/hooks/use-chief";
+import { Control } from "../../control";
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = (...args) => {
   // We disable the default deselect.
 };
 
-type HoverToolContext = {
-  activeNode?: Node;
-  enabled: boolean;
-  saveSelection: (selection: Range | null) => () => void;
-  perform: (fn: (selection: Range) => void) => void;
-};
+type HoverToolContext = ReturnType<typeof useProvideContext>["ctx"];
 
 const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
@@ -67,11 +63,19 @@ function useHighlightSelection(
 function useProvideContext() {
   const editor = useSlate();
   const { selection } = editor;
-  const [ctx, setCtx] = useState<HoverToolContext>({
-    enabled: false,
-    saveSelection: () => () => null,
-    perform: () => () => null
-  });
+
+  const [injectedControls, setInjectedControls] = useState<Control[]>([]);
+  function injectControl(control: Control) {
+    setInjectedControls(controls => [...controls, control]);
+  }
+
+  function removeControl(control: Control) {
+    setInjectedControls(it => {
+      const toSlicer = [...it];
+      toSlicer.splice(toSlicer.indexOf(control), 1);
+      return toSlicer;
+    });
+  }
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
   const isCollapsed = selection && Range.isCollapsed(selection);
@@ -92,12 +96,7 @@ function useProvideContext() {
   //   ...ctx
   // });
 
-  const setEnabled = useCallback((enabled: boolean) => {
-    setCtx(ctx => ({
-      ...ctx,
-      enabled
-    }));
-  }, []);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
     if (isReadOnly) {
@@ -138,8 +137,6 @@ function useProvideContext() {
     return () => null;
   }, []);
 
-  useEffect(() => setCtx(ctx => ({ ...ctx, saveSelection })), []);
-
   const perform = useCallback(
     (fn: (selection: Range) => void) => {
       if (savedSelection && savedSelection.current) {
@@ -149,7 +146,15 @@ function useProvideContext() {
     },
     [savedSelection]
   );
-  useEffect(() => setCtx(ctx => ({ ...ctx, perform })), [perform]);
+
+  const ctx = {
+    enabled,
+    saveSelection,
+    perform,
+    injectedControls,
+    injectControl,
+    removeControl
+  };
 
   return { ctx, setEnabled };
 }
@@ -160,6 +165,14 @@ export function useHoverTool() {
     throw new Error("useHoverTool must be within a <HoverToolProvider/>");
   }
   return ctx;
+}
+
+export function useControl(control: Control) {
+  const hoverTool = useHoverTool();
+  useEffect(() => {
+    hoverTool.injectControl(control);
+    return () => hoverTool.removeControl(control);
+  }, []);
 }
 
 export function HoverToolProvider(props: {

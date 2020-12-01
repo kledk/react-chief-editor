@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import groupBy from "lodash/groupBy";
 import { Editor as SlateEditor } from "slate";
 import { useSlate } from "slate-react";
@@ -8,9 +8,11 @@ import { ToolsWrapper } from "../../ToolsWrapper";
 import { ChiefElement } from "../../chief/chief";
 import { Control } from "../../control";
 import { matchesType } from "../../chief/utils/matches-type";
+import { useHoverTool } from "./hovering-tool";
 
-export function HoverToolControls(props: { controls: Control[]; }) {
-  const { controls } = props;
+export function HoverToolControls(props: { children?: ReactNode }) {
+  const controls = useHoverTool().injectedControls;
+  console.log(controls);
   const editor = useSlate();
   const { selection } = editor;
   if (selection) {
@@ -21,10 +23,11 @@ export function HoverToolControls(props: { controls: Control[]; }) {
             if (matchesType(n as ChiefElement, control.typeMatch)) {
               return true;
             }
-          }
-          else if (!control.typeMatch &&
+          } else if (
+            !control.typeMatch &&
             !SlateEditor.isVoid(editor, n) &&
-            typeof n.type === "string") {
+            typeof n.type === "string"
+          ) {
             return true;
           }
           return false;

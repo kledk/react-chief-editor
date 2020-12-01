@@ -2,10 +2,9 @@ import React from "react";
 import { useSlate } from "slate-react";
 import { ToolbarBtn } from "./ToolbarBtn";
 import { Editor, Transforms, Text } from "slate";
-import { useLabels } from "./chief/hooks/use-labels";
 
 export function toggleFormat(editor: Editor, format: string) {
-  let isFormatted = isTextFormat(editor, format);
+  let isFormatted = isMark(editor, format);
   Transforms.setNodes(
     editor,
     { [format]: !isFormatted },
@@ -13,7 +12,7 @@ export function toggleFormat(editor: Editor, format: string) {
   );
 }
 
-const isTextFormat = (editor: Editor, formatType: string) => {
+const isMark = (editor: Editor, formatType: string) => {
   const [match] = Editor.nodes(editor, {
     match: n => Boolean(n[formatType])
   });
@@ -27,7 +26,7 @@ export function MarkBtn(
 ) {
   const { markType: formatType, ...otherProps } = props;
   const editor = useSlate();
-  const isActive = isTextFormat(editor, props.markType);
+  const isActive = isMark(editor, props.markType);
   return (
     <ToolbarBtn
       isActive={isActive}

@@ -10,6 +10,7 @@ import { Control } from "../../control";
 import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../hovering-tool";
 
 const shortcut = "mod+b";
 
@@ -61,6 +62,9 @@ const Presenter: iPresenter = {
   leaf: _renderLeaf
 };
 
-BoldAddon.Control = boldControl;
+export function BoldControl() {
+  useControl(boldControl);
+  return null;
+}
 
 BoldAddon.Presenter = Presenter;

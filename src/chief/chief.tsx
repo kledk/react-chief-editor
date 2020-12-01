@@ -26,7 +26,7 @@ export type ChiefRenderElementProps<
   element: T;
 };
 
-export type ElementTypeMatch = RegExp | string | string[];
+export type ElementTypeMatch = RegExp | string | readonly string[];
 
 export type InjectedRenderLeaf = {
   renderLeaf: (

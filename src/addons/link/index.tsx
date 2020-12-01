@@ -8,7 +8,7 @@ import {
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
-import { useHoverTool } from "../hovering-tool/hovering-tool";
+import { useControl, useHoverTool } from "../hovering-tool/hovering-tool";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolBox } from "../../StyledToolBox";
@@ -21,49 +21,71 @@ import { Control } from "../../control";
 import { ChiefElement } from "../../chief";
 import { shortcutText } from "../../shortcut";
 import { iPresenter } from "../../chief/chief-presentation";
+import { ElementHoverTip } from "../../element-hover-tip";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
 };
 
-export const linkControl: Control = {
-  category: "link",
-  Component: LinkBtn
-};
-
-export function LinkAddon(props: AddonProps) {
-  useLabels(props.labels);
-  usePlugin({
-    insertText: (insertText, editor) => text => {
-      if (text && isUrl(text)) {
-        wrapLink(editor, text);
-      } else {
-        insertText(text);
+export function useLinkAddon() {
+  function LinkAddon(props: AddonProps) {
+    useLabels(props.labels);
+    usePlugin({
+      insertText: (insertText, editor) => text => {
+        if (text && isUrl(text)) {
+          wrapLink(editor, text);
+        } else {
+          insertText(text);
+        }
+      },
+      insertData: (insertData, editor) => data => {
+        const text = data.getData("text/plain");
+        if (text && isUrl(text)) {
+          wrapLink(editor, text);
+        } else {
+          insertData(data);
+        }
+      },
+      isInline: isInline => element => {
+        // console.log("isInline, link");
+        return isLinkELement(element) ? true : isInline(element);
       }
-    },
-    insertData: (insertData, editor) => data => {
-      const text = data.getData("text/plain");
-      if (text && isUrl(text)) {
-        wrapLink(editor, text);
-      } else {
-        insertData(data);
-      }
-    },
-    isInline: isInline => element => {
-      // console.log("isInline, link");
-      return isLinkELement(element) ? true : isInline(element);
-    }
-  });
+    });
 
-  useRenderElement<{ url: string } & ChiefElement>({
-    typeMatch: "link",
-    renderElement: props => (
-      <a {...props.attributes} href={props.element.url}>
-        {props.children}
-      </a>
-    )
-  });
-  return null;
+    useRenderElement<{ url: string } & ChiefElement>({
+      typeMatch: "link",
+      renderElement: props => (
+        <ElementHoverTip
+          delayed
+          placement="bottom"
+          tip={
+            <span>
+              <a target="_blank" href={props.element.url}>
+                {props.element.url}
+              </a>
+            </span>
+          }
+        >
+          {triggerRef => (
+            <a {...props.attributes} href={props.element.url}>
+              <span ref={triggerRef}>{props.children}</span>
+            </a>
+          )}
+        </ElementHoverTip>
+      )
+    });
+    return null;
+  }
+
+  function LinkControl() {
+    useControl({
+      category: "link",
+      Component: LinkBtn
+    });
+    return null;
+  }
+
+  return [LinkAddon, LinkControl, Presenter] as const;
 }
 
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {
@@ -72,10 +94,6 @@ const Presenter: iPresenter<{ url: string } & ChiefElement> = {
     renderElement: props => <a href={props.element.url}>{props.children}</a>
   }
 };
-
-LinkAddon.Presenter = Presenter;
-
-LinkAddon.Control = linkControl;
 
 export const insertLink = (editor: Editor, url: string) => {
   if (editor.selection) {
@@ -120,8 +138,8 @@ function LinkPopup(props: { onClose: () => void }) {
   useEffect(() => {
     return saveSelection(selection);
   }, []);
-  const linkWrapperRef = useRef<HTMLDivElement>(null);
-  useOnClickOutside(linkWrapperRef, e => {
+  const linkWrapperRef = useRef<HTMLFormElement>(null);
+  useOnClickOutside(linkWrapperRef, () => {
     props.onClose();
   });
   let linkNode: Node | null = null;
@@ -139,7 +157,6 @@ function LinkPopup(props: { onClose: () => void }) {
     }
   }, [linkNode]);
   const handleInsertLink = useCallback(() => {
-    debugger
     if (url.length > 0) {
       insertLink(editor, url);
       props.onClose();
@@ -161,9 +178,8 @@ function LinkPopup(props: { onClose: () => void }) {
   const [getLabel] = useLabels();
 
   return (
-    <form onSubmit={handleInsertLink}>
+    <form ref={linkWrapperRef} onSubmit={handleInsertLink}>
       <div
-        ref={linkWrapperRef}
         style={{
           padding: 9,
           display: "flex",

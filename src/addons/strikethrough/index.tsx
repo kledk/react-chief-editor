@@ -9,6 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../hovering-tool";
 
 const shortcut = "mod+s";
 
@@ -31,6 +32,11 @@ export const strikethroughControl: Control = {
     );
   }
 };
+
+export function StrikethroughControl() {
+  useControl(strikethroughControl);
+  return null;
+}
 
 const _renderLeaf: InjectedRenderLeaf = {
   renderLeaf: props => renderLeaf(props, "strikethrough", "s")

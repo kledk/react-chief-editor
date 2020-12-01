@@ -35,9 +35,9 @@
     "react-overlays": "^4.1.0",
     "react-popper": "^2.2.3",
     "react-resize-detector": "^5.0.6",
-    "slate": "^0.58.3",
-    "slate-history": "^0.58.3",
-    "slate-react": "^0.58.3",
+    "slate": "^0.59.0",
+    "slate-history": "^0.59.0",
+    "slate-react": "^0.59.0",
     "styled-components": "^5.1.0"
   },
   "peerDependencies": {

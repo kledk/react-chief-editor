@@ -11,15 +11,12 @@ import {
   ImageAddon,
   ResetToParagraphAddon,
   PreventNewlineAddon,
-  LinkAddon,
   ListsAddon,
   BlockTabAddon,
   ParagraphAddon,
-  TextColorAddon,
   LabelsAddon,
   // Block toolbar addon
   BlockInsert,
-  headingBlockControls,
   BlockInsertControls,
   // Custom addon creation
   AddonProps,
@@ -27,15 +24,16 @@ import {
   InputWrapper,
   usePlugin,
   HoverToolProvider,
-  imageBlockControls,
   HoverToolControls,
-  italicControl,
-  strikethroughControl,
-  underlineControl,
-  headingContextControls,
-  linkControl,
   // Presentation
-  ChiefPresentation
+  ChiefPresentation,
+  useLinkAddon,
+  useTextColorAddon,
+  BoldControl,
+  HeadingControl,
+  ItalicControl,
+  StrikethroughControl,
+  UnderlineControl
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -45,6 +43,7 @@ const editorLabels = {
   "marks.italic": "Kursiv",
   "marks.strikethrough": "Gennemstreg",
   "marks.underline": "Understreg",
+  "marks.color": "Farve",
   "elements.link": "Link",
   "elements.link.placeholder": "Indsæt eller skriv link",
   "elements.link.btn.link": "Tilføj",
@@ -165,6 +164,13 @@ function App() {
     }
   ]);
 
+  const [LinkAddon, LinkControl, linkPresenter] = useLinkAddon();
+  const [
+    TextColorAddon,
+    TextColorControl,
+    textColorPresenter
+  ] = useTextColorAddon();
+
   const addons = (
     <>
       <LabelsAddon labels={editorLabels}></LabelsAddon>
@@ -190,71 +196,83 @@ function App() {
 
   return (
     <div style={{ padding: "1em" }}>
-      <ContentStyle>
-        <Chief
-          value={value}
-          onChange={value => setValue(value)}
-          theme={{
-            overrides: {
-              ui: css`
-                /* font-family: monospace; */
-              `
-            }
-          }}
-        >
-          {addons}
-          <div
-            style={{
-              marginLeft: 20
-            }}
-          >
-            <BlockInsert>
-              <BlockInsertControls
-                controls={[
-                  ...headingBlockControls,
-                  ...imageBlockControls,
-                  ListsAddon.Control
-                ]}
-              />
-            </BlockInsert>
-            <HoverToolProvider
-              hoverTool={
-                <HoverToolControls
-                  controls={[
-                    BoldAddon.Control,
-                    italicControl,
-                    strikethroughControl,
-                    underlineControl,
-                    ...headingContextControls,
-                    linkControl
-                  ]}
-                />
-              }
+      <div style={{ display: "flex", flexDirection: "row" }}>
+        <div style={{ flex: 1 }}>
+          <ContentStyle>
+            <Chief
+              value={value}
+              onChange={value => setValue(value)}
+              theme={{
+                overrides: {
+                  ui: css`
+                    /* font-family: monospace; */
+                  `
+                }
+              }}
             >
-              <Editor
-                spellCheck={false}
-                style={{ margin: 10, overflow: "auto", minHeight: 500 }}
-              ></Editor>
-            </HoverToolProvider>
-          </div>
-        </Chief>
-      </ContentStyle>
-      <ContentStyle>
-        <ChiefPresentation
-          value={value}
-          presenters={[
-            ParagraphAddon.Presenter,
-            BoldAddon.Presenter,
-            ItalicAddon.Presenter,
-            StrikethroughAddon.Presenter,
-            UnderlineAddon.Presenter,
-            HeadingsAddon.Presenter,
-            LinkAddon.Presenter,
-            ListsAddon.Presenter,
-            ImageAddon.Presenter
-          ]}
-        ></ChiefPresentation>
-      </ContentStyle>
+              {addons}
+              <div
+                style={{
+                  marginLeft: 20
+                }}
+              >
+                <BlockInsert>
+                  <BlockInsertControls controls={[]} />
+                </BlockInsert>
+                <HoverToolProvider hoverTool={<HoverToolControls />}>
+                  <BoldControl />
+                  <ItalicControl />
+                  <StrikethroughControl />
+                  <UnderlineControl />
+                  <HeadingControl heading="h1" />
+                  <HeadingControl heading="h2" />
+                  <HeadingControl heading="h3" />
+                  <HeadingControl heading="h4" />
+                  <HeadingControl heading="h5" />
+                  <HeadingControl heading="h6" />
+                  <LinkControl />
+                  <TextColorControl
+                    colors={[
+                      "red",
+                      "green",
+                      "yellow",
+                      "blue",
+                      "purple",
+                      "cyan",
+                      "white",
+                      "black",
+                      "orange"
+                    ]}
+                  />
+                  <Editor
+                    spellCheck={false}
+                    style={{ overflow: "auto", minHeight: 500 }}
+                  ></Editor>
+                </HoverToolProvider>
+              </div>
+            </Chief>
+          </ContentStyle>
+        </div>
+        <div style={{ flex: 1 }}>
+          <ContentStyle>
+            <ChiefPresentation
+              value={value}
+              presenters={[
+                ParagraphAddon.Presenter,
+                BoldAddon.Presenter,
+                ItalicAddon.Presenter,
+                StrikethroughAddon.Presenter,
+                UnderlineAddon.Presenter,
+                HeadingsAddon.Presenter,
+                linkPresenter,
+                ListsAddon.Presenter,
+                ImageAddon.Presenter,
+                textColorPresenter
+              ]}
+            ></ChiefPresentation>
+          </ContentStyle>
+        </div>
+      </div>
     </div>
   );
 }

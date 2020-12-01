@@ -5,6 +5,9 @@ export const uiStyle = css`
   font-size: 14px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: normal;
+  a {
+    color: white;
+  }
   ${props => OverrideTheme("ui", props)}
 `;
 

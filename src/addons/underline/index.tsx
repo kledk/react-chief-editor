@@ -9,6 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../hovering-tool";
 
 const shortcut = "mod+u";
 
@@ -31,6 +32,11 @@ export const underlineControl: Control = {
     );
   }
 };
+
+export function UnderlineControl() {
+  useControl(underlineControl);
+  return null;
+}
 
 const _renderLeaf: InjectedRenderLeaf = {
   renderLeaf: props => renderLeaf(props, "underline", "u")

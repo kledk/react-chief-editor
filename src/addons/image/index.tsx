@@ -17,6 +17,7 @@ import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
 import { Control } from "../../control";
 import { iPresenter } from "../../chief";
+import { useControl } from "../hovering-tool";
 
 export interface ImageElement extends ChiefElement {
   type: "image";
@@ -32,22 +33,25 @@ export function isImageElement(element: unknown): element is ImageElement {
   return isChiefElement(element) && element.type === "image";
 }
 
-export const imageBlockControls: Control[] = [
-  {
-    category: "image",
-    render: editor => (
-      <ToolbarBtn
-        isActive={isNodeActive(editor, "image")}
-        onClick={() => {
-          RichEditor.insertBlock(editor, "image");
-          ReactEditor.focus(editor);
-        }}
-      >
-        Image
-      </ToolbarBtn>
-    )
-  }
-];
+export const imageBlockControl: Control = {
+  category: "image",
+  render: editor => (
+    <ToolbarBtn
+      isActive={isNodeActive(editor, "image")}
+      onClick={() => {
+        RichEditor.insertBlock(editor, "image");
+        ReactEditor.focus(editor);
+      }}
+    >
+      Image
+    </ToolbarBtn>
+  )
+};
+
+export function ImageControl() {
+  useControl(imageBlockControl);
+  return null;
+}
 
 export const isImageUrl = (url: string, extensions = ImageExtensions) => {
   if (!url) return false;

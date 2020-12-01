@@ -9,6 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { Control } from "../../control";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../hovering-tool";
 
 const shortcut = "mod+i";
 
@@ -31,6 +32,11 @@ export const italicControl: Control = {
     );
   }
 };
+
+export function ItalicControl() {
+  useControl(italicControl);
+  return null;
+}
 
 const _renderLeaf: InjectedRenderLeaf = {
   renderLeaf: props => renderLeaf(props, "italic", "em")

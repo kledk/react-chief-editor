@@ -1,12 +1,7 @@
-import React from "react";
-import { ReactEditor, RenderElementProps } from "slate-react";
-import { NodeEntry, Range } from "slate";
+import { ReactEditor } from "slate-react";
 import {
-  InjectedRenderLeaf,
-  InjectedRenderElement,
   InjectedLabels
 } from "./chief/chief";
-import { KeyHandler } from "./chief/key-handler";
 
 type OnPluginMap = {
   [key in keyof ReactEditor]?: (

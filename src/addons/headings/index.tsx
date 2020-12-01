@@ -10,44 +10,35 @@ import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { RichEditor } from "../../chief/editor";
 import { Control } from "../../control";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../hovering-tool";
 
-export const headingTypes = ["h1", "h2", "h3", "h4", "h5", "h6"];
+export const headingTypes = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
-export const headingBlockControls: Control[] = [
-  {
+export function createHeadingBlockControl(
+  heading: typeof headingTypes[number]
+): Control {
+  return {
     category: "headings",
     render: editor => (
-      <React.Fragment>
-        {headingTypes.map((it, i) => (
-          <ToolbarBtn
-            isActive={isNodeActive(editor, it)}
-            onMouseDown={(
-              e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-            ) => {
-              ReactEditor.focus(editor);
-              RichEditor.insertBlock(editor, it);
-            }}
-          >
-            {`H${i + 1}`}
-          </ToolbarBtn>
-        ))}
-      </React.Fragment>
+      <ToolbarBtn
+        isActive={isNodeActive(editor, heading)}
+        onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          ReactEditor.focus(editor);
+          RichEditor.insertBlock(editor, heading);
+        }}
+      >
+        {heading.toUpperCase()}
+      </ToolbarBtn>
     )
-  }
-];
+  };
+}
 
-export const headingContextControls: Control[] = [
-  {
-    category: "headings",
-    render: () => (
-      <React.Fragment>
-        {headingTypes.map((it, i) => (
-          <HeadingBtn headingType={it}>{`H${i + 1}`}</HeadingBtn>
-        ))}
-      </React.Fragment>
-    )
-  }
-];
+export function HeadingControl(props: {
+  heading: typeof headingTypes[number];
+}) {
+  useControl(createHeadingBlockControl(props.heading));
+  return null;
+}
 
 const Presenter: iPresenter = {
   element: {
@@ -69,8 +60,7 @@ export function HeadingsAddon(props: AddonProps) {
       if (selection && Range.isCollapsed(selection)) {
         const [match] = Editor.nodes(editor, {
           match: n =>
-            typeof n.type === "string" &&
-            Boolean(n.type?.match(/(h[1-6])/))
+            typeof n.type === "string" && Boolean(n.type?.match(/(h[1-6])/))
         });
         if (match) {
           event.preventDefault();
