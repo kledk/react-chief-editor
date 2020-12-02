@@ -23,8 +23,6 @@ import {
   useRenderElement,
   InputWrapper,
   usePlugin,
-  HoverToolProvider,
-  HoverToolControls,
   // Presentation
   ChiefPresentation,
   useLinkAddon,
@@ -33,7 +31,10 @@ import {
   HeadingControl,
   ItalicControl,
   StrikethroughControl,
-  UnderlineControl
+  UnderlineControl,
+  HoverTools,
+  ImageControl,
+  ListControl
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -85,7 +86,7 @@ function ExampleCustomAddon(props: AddonProps) {
 
 const ContentStyle = styled.div`
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: rgba(28, 98, 116);
+  color: white;
   font-size: 18px;
   h1,
   h2,
@@ -93,10 +94,10 @@ const ContentStyle = styled.div`
   h4,
   h5,
   h6 {
-    color: rgba(153, 109, 33);
+    color: white;
   }
   a {
-    color: rgba(153, 109, 33);
+    color: rgb(234 66 205);:
   }
 `;
 
@@ -171,27 +172,6 @@ function App() {
     textColorPresenter
   ] = useTextColorAddon();
 
-  const addons = (
-    <>
-      <LabelsAddon labels={editorLabels}></LabelsAddon>
-      <ParagraphAddon></ParagraphAddon>
-      <BoldAddon></BoldAddon>
-      <ItalicAddon></ItalicAddon>
-      <UnderlineAddon></UnderlineAddon>
-      <StrikethroughAddon></StrikethroughAddon>
-      <HeadingsAddon></HeadingsAddon>
-      <ImageAddon></ImageAddon>
-      <ResetToParagraphAddon></ResetToParagraphAddon>
-      <PreventNewlineAddon></PreventNewlineAddon>
-      <PreventNewlineAddon></PreventNewlineAddon>
-      <LinkAddon></LinkAddon>
-      <ListsAddon></ListsAddon>
-      <BlockTabAddon></BlockTabAddon>
-      <TextColorAddon></TextColorAddon>
-      {/* <ExampleVideoAddon labels={{ name: "ExampleVideo" }}></ExampleVideoAddon> */}
-    </>
-  );
-
   console.log(value);
 
   return (
@@ -204,22 +184,58 @@ function App() {
               onChange={value => setValue(value)}
               theme={{
                 overrides: {
+                  StyledToolbarBtn: css`
+                    background-color: transparent;
+                    color: white;
+                    padding: 10px;
+                    &:hover {
+                      background-color: ${props =>
+                        // @ts-ignore
+                        props.disabled ? undefined : "#2d2d2d"};
+                    }
+                  `,
+                  StyledToolBox: css`
+                    border-radius: 20px;
+                    background-color: black;
+                  `,
                   ui: css`
                     /* font-family: monospace; */
                   `
                 }
               }}
             >
-              {addons}
+              <LabelsAddon labels={editorLabels} />
+              <ParagraphAddon />
+              <BoldAddon />
+              <ItalicAddon />
+              <UnderlineAddon />
+              <StrikethroughAddon />
+              <HeadingsAddon />
+              <ImageAddon />
+              <ResetToParagraphAddon />
+              <PreventNewlineAddon />
+              <PreventNewlineAddon />
+              <LinkAddon />
+              <ListsAddon />
+              <BlockTabAddon />
+              <TextColorAddon />
               <div
                 style={{
                   marginLeft: 20
                 }}
               >
                 <BlockInsert>
-                  <BlockInsertControls controls={[]} />
+                  <HeadingControl heading="h1" />
+                  <HeadingControl heading="h2" />
+                  <HeadingControl heading="h3" />
+                  <HeadingControl heading="h4" />
+                  <HeadingControl heading="h5" />
+                  <HeadingControl heading="h6" />
+                  <ListControl type="ordered-list">OL</ListControl>
+                  <ListControl type="unordered-list">UL</ListControl>
+                  <ImageControl />
                 </BlockInsert>
-                <HoverToolProvider hoverTool={<HoverToolControls />}>
+                <HoverTools>
                   <BoldControl />
                   <ItalicControl />
                   <StrikethroughControl />
@@ -244,16 +260,16 @@ function App() {
                       "orange"
                     ]}
                   />
-                  <Editor
-                    spellCheck={false}
-                    style={{ overflow: "auto", minHeight: 500 }}
-                  ></Editor>
-                </HoverToolProvider>
+                </HoverTools>
+                <Editor
+                  spellCheck={false}
+                  style={{ overflow: "auto", minHeight: 500 }}
+                ></Editor>
               </div>
             </Chief>
           </ContentStyle>
         </div>
-        <div style={{ flex: 1 }}>
+        {/* <div style={{ flex: 1 }}>
           <ContentStyle>
             <ChiefPresentation
               value={value}
@@ -271,7 +287,7 @@ function App() {
               ]}
             ></ChiefPresentation>
           </ContentStyle>
-        </div>
+        </div> */}
       </div>
     </div>
   );

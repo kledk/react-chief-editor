@@ -14,6 +14,48 @@ import { useDecoration } from "../../chief/hooks/use-decoration";
 import { useRenderLeaf } from "../../chief";
 import { useChief } from "../../chief/hooks/use-chief";
 import { Control } from "../../control";
+import { HoverToolControls } from "./hover-tool-controls";
+
+const ControlsContext = React.createContext<ReturnType<
+  typeof useProvideControlContext
+> | null>(null);
+
+export function useProvideControlContext() {
+  const [controls, setControls] = useState<Control[]>([]);
+  function injectControl(control: Control) {
+    setControls(controls => [...controls, control]);
+  }
+
+  function removeControl(control: Control) {
+    setControls(it => {
+      const toSlicer = [...it];
+      toSlicer.splice(toSlicer.indexOf(control), 1);
+      return toSlicer;
+    });
+  }
+  return { controls, injectControl, removeControl };
+}
+
+export function useControlsProvider() {
+  const value = useProvideControlContext();
+  return [ControlsContext, value] as const;
+}
+
+export function useProvidedControls() {
+  const ctx = useContext(ControlsContext);
+  if (!ctx) {
+    throw new Error("No ControlsContext.Provider in scope.");
+  }
+  return ctx;
+}
+
+export function useControl(control: Control) {
+  const { injectControl, removeControl } = useProvidedControls();
+  useEffect(() => {
+    injectControl(control);
+    return () => removeControl(control);
+  }, []);
+}
 
 export const deselect = Transforms.deselect;
 Transforms.deselect = (...args) => {
@@ -64,18 +106,6 @@ function useProvideContext() {
   const editor = useSlate();
   const { selection } = editor;
 
-  const [injectedControls, setInjectedControls] = useState<Control[]>([]);
-  function injectControl(control: Control) {
-    setInjectedControls(controls => [...controls, control]);
-  }
-
-  function removeControl(control: Control) {
-    setInjectedControls(it => {
-      const toSlicer = [...it];
-      toSlicer.splice(toSlicer.indexOf(control), 1);
-      return toSlicer;
-    });
-  }
   const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
   const isCollapsed = selection && Range.isCollapsed(selection);
@@ -150,10 +180,7 @@ function useProvideContext() {
   const ctx = {
     enabled,
     saveSelection,
-    perform,
-    injectedControls,
-    injectControl,
-    removeControl
+    perform
   };
 
   return { ctx, setEnabled };
@@ -167,28 +194,20 @@ export function useHoverTool() {
   return ctx;
 }
 
-export function useControl(control: Control) {
-  const hoverTool = useHoverTool();
-  useEffect(() => {
-    hoverTool.injectControl(control);
-    return () => hoverTool.removeControl(control);
-  }, []);
-}
-
-export function HoverToolProvider(props: {
-  children?: React.ReactNode;
-  hoverTool: React.ReactNode;
-}) {
+export function HoverTools(props: { children?: React.ReactNode }) {
   const { ctx, setEnabled } = useProvideContext();
+  const [ControlsContext, controls] = useControlsProvider();
   return (
     <hoverToolContext.Provider value={ctx}>
-      <HoveringTool
-        onChangeEnabled={enabled => setEnabled(enabled)}
-        enabled={ctx.enabled}
-      >
-        {props.hoverTool}
-      </HoveringTool>
-      {props.children}
+      <ControlsContext.Provider value={controls}>
+        <HoveringTool
+          onChangeEnabled={enabled => setEnabled(enabled)}
+          enabled={ctx.enabled}
+        >
+          <HoverToolControls />
+        </HoveringTool>
+        {props.children}
+      </ControlsContext.Provider>
     </hoverToolContext.Provider>
   );
 }

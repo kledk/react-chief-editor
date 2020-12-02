@@ -1,18 +1,17 @@
 import React from "react";
 import groupBy from "lodash/groupBy";
 import { ReactEditor, useSlate } from "slate-react";
-import { StyledToolbarBtn } from "../../ui/styled-toolbar-btn";
 import { StyledToolBox } from "../../StyledToolBox";
 import { ToolDivider } from "../../ToolDivider";
 import { ToolsWrapper } from "../../ToolsWrapper";
 import { isNodeActive } from "../../utils";
-import { Control } from "../../control";
 import { RichEditor } from "../../chief/editor";
 import { ToolbarBtn } from "../../ToolbarBtn";
+import { useProvidedControls } from "../hovering-tool";
 
-export function BlockInsertControls(props: { controls: Control[] }) {
+export function BlockInsertControls() {
   const editor = useSlate();
-  const controls = props.controls;
+  const { controls } = useProvidedControls();
   if (controls.length > 0) {
     const grouped = groupBy(controls, "category");
     return (

@@ -10,9 +10,7 @@ import { isElementEmpty } from "../../element-utils";
 import { getState } from "../../chief/chief-state";
 import { getAncestor, getActiveNode } from "../../utils";
 import { AddonProps } from "../../addon";
-import { listControl } from "./controls";
-import styled, { css } from "styled-components";
-import { useDecoration } from "../../chief/hooks/use-decoration";
+import styled from "styled-components";
 import { iPresenter } from "../../chief";
 
 export const TYPE_LIST_ITEM = "list-item";
@@ -233,6 +231,4 @@ export function ListsAddon(props: AddonProps) {
   return null;
 }
 
-ListsAddon.Control = listControl;
 ListsAddon.Presenter = Presenter;
-

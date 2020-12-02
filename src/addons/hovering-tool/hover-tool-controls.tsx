@@ -6,13 +6,11 @@ import { StyledToolBox } from "../../StyledToolBox";
 import { ToolDivider } from "../../ToolDivider";
 import { ToolsWrapper } from "../../ToolsWrapper";
 import { ChiefElement } from "../../chief/chief";
-import { Control } from "../../control";
 import { matchesType } from "../../chief/utils/matches-type";
-import { useHoverTool } from "./hovering-tool";
+import { useProvidedControls } from "./hovering-tool";
 
-export function HoverToolControls(props: { children?: ReactNode }) {
-  const controls = useHoverTool().injectedControls;
-  console.log(controls);
+export function HoverToolControls() {
+  const { controls } = useProvidedControls();
   const editor = useSlate();
   const { selection } = editor;
   if (selection) {

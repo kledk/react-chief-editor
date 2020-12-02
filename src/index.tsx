@@ -14,6 +14,7 @@ export * from "./addons/link";
 export * from "./addons/reset-to-paragraph";
 export * from "./addons/prevent-newline";
 export * from "./addons/lists";
+export * from "./addons/lists/controls";
 export * from "./addons/block-tab";
 export * from "./addons/block-insert-tool";
 export * from "./addons/hovering-tool";
