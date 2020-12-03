@@ -25,8 +25,6 @@ import {
   usePlugin,
   // Presentation
   ChiefPresentation,
-  useLinkAddon,
-  useTextColorAddon,
   BoldControl,
   HeadingControl,
   ItalicControl,
@@ -34,7 +32,11 @@ import {
   UnderlineControl,
   HoverTools,
   ImageControl,
-  ListControl
+  ListControl,
+  TextColorAddon,
+  TextColorControl,
+  LinkAddon,
+  LinkControl
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -97,7 +99,7 @@ const ContentStyle = styled.div`
     color: white;
   }
   a {
-    color: rgb(234 66 205);:
+    color: rgb(234 66 205);
   }
 `;
 
@@ -165,13 +167,6 @@ function App() {
     }
   ]);
 
-  const [LinkAddon, LinkControl, linkPresenter] = useLinkAddon();
-  const [
-    TextColorAddon,
-    TextColorControl,
-    textColorPresenter
-  ] = useTextColorAddon();
-
   console.log(value);
 
   return (
@@ -184,23 +179,23 @@ function App() {
               onChange={value => setValue(value)}
               theme={{
                 overrides: {
-                  StyledToolbarBtn: css`
-                    background-color: transparent;
-                    color: white;
-                    padding: 10px;
-                    &:hover {
-                      background-color: ${props =>
-                        // @ts-ignore
-                        props.disabled ? undefined : "#2d2d2d"};
-                    }
-                  `,
-                  StyledToolBox: css`
-                    border-radius: 20px;
-                    background-color: black;
-                  `,
-                  ui: css`
-                    /* font-family: monospace; */
-                  `
+                  // StyledToolbarBtn: css`
+                  //   background-color: transparent;
+                  //   color: white;
+                  //   padding: 10px;
+                  //   &:hover {
+                  //     background-color: ${props =>
+                  //       // @ts-ignore
+                  //       props.disabled ? undefined : "#2d2d2d"};
+                  //   }
+                  // `,
+                  // StyledToolBox: css`
+                  //   border-radius: 20px;
+                  //   background-color: black;
+                  // `,
+                  // ui: css`
+                  //   /* font-family: monospace; */
+                  // `
                 }
               }}
             >

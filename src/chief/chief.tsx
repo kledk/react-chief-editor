@@ -11,6 +11,7 @@ import { ChiefEditorTheme } from "../chief-editor-theme";
 import { ThemeProvider } from "styled-components";
 import { defaultTheme } from "../defaultTheme";
 import { useProvideChiefContext, ChiefContext } from "./chief-context";
+import { useErrorBoundary } from "use-error-boundary";
 
 export function isChiefElement(element: unknown): element is ChiefElement {
   return (element as ChiefElement).type !== undefined;
@@ -68,14 +69,16 @@ export const Chief = React.memo(function(props: {
   const { children, onChange, value, readOnly, id, theme } = props;
   const _theme = merge({}, defaultTheme, theme);
   const chiefValue = useProvideChiefContext({ readOnly, id });
-
+  const { ErrorBoundary, didCatch, error } = useErrorBoundary();
   return (
-    <Slate editor={chiefValue.editor} value={value} onChange={onChange}>
-      <ChiefContext.Provider value={chiefValue}>
-        <ThemeProvider theme={_theme}>
-          <React.Fragment>{children}</React.Fragment>
-        </ThemeProvider>
-      </ChiefContext.Provider>
-    </Slate>
+    <ErrorBoundary>
+      <Slate editor={chiefValue.editor} value={value} onChange={onChange}>
+        <ChiefContext.Provider value={chiefValue}>
+          <ThemeProvider theme={_theme}>
+            <React.Fragment>{children}</React.Fragment>
+          </ThemeProvider>
+        </ChiefContext.Provider>
+      </Slate>
+    </ErrorBoundary>
   );
 });

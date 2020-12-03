@@ -27,65 +27,60 @@ export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
 };
 
-export function useLinkAddon() {
-  function LinkAddon(props: AddonProps) {
-    useLabels(props.labels);
-    usePlugin({
-      insertText: (insertText, editor) => text => {
-        if (text && isUrl(text)) {
-          wrapLink(editor, text);
-        } else {
-          insertText(text);
-        }
-      },
-      insertData: (insertData, editor) => data => {
-        const text = data.getData("text/plain");
-        if (text && isUrl(text)) {
-          wrapLink(editor, text);
-        } else {
-          insertData(data);
-        }
-      },
-      isInline: isInline => element => {
-        // console.log("isInline, link");
-        return isLinkELement(element) ? true : isInline(element);
+export function LinkAddon(props: AddonProps) {
+  useLabels(props.labels);
+  usePlugin({
+    insertText: (insertText, editor) => text => {
+      if (text && isUrl(text)) {
+        wrapLink(editor, text);
+      } else {
+        insertText(text);
       }
-    });
+    },
+    insertData: (insertData, editor) => data => {
+      const text = data.getData("text/plain");
+      if (text && isUrl(text)) {
+        wrapLink(editor, text);
+      } else {
+        insertData(data);
+      }
+    },
+    isInline: isInline => element => {
+      // console.log("isInline, link");
+      return isLinkELement(element) ? true : isInline(element);
+    }
+  });
 
-    useRenderElement<{ url: string } & ChiefElement>({
-      typeMatch: "link",
-      renderElement: props => (
-        <ElementHoverTip
-          delayed
-          placement="bottom"
-          tip={
-            <span>
-              <a target="_blank" href={props.element.url}>
-                {props.element.url}
-              </a>
-            </span>
-          }
-        >
-          {triggerRef => (
-            <a {...props.attributes} href={props.element.url}>
-              <span ref={triggerRef}>{props.children}</span>
+  useRenderElement<{ url: string } & ChiefElement>({
+    typeMatch: "link",
+    renderElement: props => (
+      <ElementHoverTip
+        delayed
+        placement="bottom"
+        tip={
+          <span>
+            <a target="_blank" href={props.element.url}>
+              {props.element.url}
             </a>
-          )}
-        </ElementHoverTip>
-      )
-    });
-    return null;
-  }
+          </span>
+        }
+      >
+        {triggerRef => (
+          <a {...props.attributes} href={props.element.url}>
+            <span ref={triggerRef}>{props.children}</span>
+          </a>
+        )}
+      </ElementHoverTip>
+    )
+  });
+  return null;
+}
 
-  function LinkControl() {
-    useControl({
-      category: "link",
-      Component: LinkBtn
-    });
-    return null;
-  }
-
-  return [LinkAddon, LinkControl, Presenter] as const;
+export function LinkControl() {
+  return useControl({
+    category: "link",
+    Component: LinkBtn
+  });
 }
 
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {

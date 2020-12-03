@@ -49,12 +49,15 @@ export function useProvidedControls() {
   return ctx;
 }
 
-export function useControl(control: Control) {
+export function useControl<T extends React.FunctionComponent<any>>(
+  control: Control<T>
+) {
   const { injectControl, removeControl } = useProvidedControls();
   useEffect(() => {
     injectControl(control);
     return () => removeControl(control);
   }, []);
+  return null;
 }
 
 export const deselect = Transforms.deselect;

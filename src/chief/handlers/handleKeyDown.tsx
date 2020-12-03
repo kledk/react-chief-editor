@@ -9,12 +9,13 @@ export const handleKeyDown = (
 ) => {
   for (let handler of onKeyHandlers) {
     if (handler.pattern) {
-      if (isHotkey(handler.pattern, event.nativeEvent) &&
-        handler.handler(event.nativeEvent, editor)) {
+      if (
+        isHotkey(handler.pattern, event.nativeEvent) &&
+        handler.handler(event.nativeEvent, editor)
+      ) {
         return;
       }
-    }
-    else {
+    } else if (handler.pattern === null) {
       if (handler.handler(event.nativeEvent, editor)) {
         return;
       }

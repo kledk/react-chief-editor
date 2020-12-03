@@ -10,7 +10,7 @@ let originalEntries = {};
  * @param plugins
  */
 export function withChiefOnPlugIn(editor: ReactEditor, plugins: OnPlugin[]) {
-  // We basically take control over each funtion in the editor and route them
+  // We basically take control over each function in the editor and route them
   // to the appropriate addon that has requested overriding it.
   // This allows for us to use hooks that can mount and unmount.
   for (const [prop, value] of Object.entries(editor)) {

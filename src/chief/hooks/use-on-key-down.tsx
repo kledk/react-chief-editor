@@ -13,7 +13,9 @@ import { KeyHandler } from "../key-handler";
 export function useOnKeyDown(handler: KeyHandler, deps: any[] = []) {
   const chief = useChief();
   useEffect(() => {
-    chief.injectOnKeyHandler(handler);
+    if (handler.pattern !== null) {
+      chief.injectOnKeyHandler(handler);
+    }
     return () => chief.removeOnKeyHandler(handler);
   }, deps);
 }

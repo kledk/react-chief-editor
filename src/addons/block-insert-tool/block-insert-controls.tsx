@@ -15,34 +15,32 @@ export function BlockInsertControls() {
   if (controls.length > 0) {
     const grouped = groupBy(controls, "category");
     return (
-      <StyledToolBox>
-        <ToolsWrapper>
-          {Object.entries(grouped).map(([k, groupedControls]) => (
-            <React.Fragment>
-              {groupedControls.map((control, i) => {
-                if (control.Component) {
-                  return <control.Component key={i} />;
-                }
-                const renderButton = control.render;
-                return typeof renderButton === "function"
-                  ? renderButton(editor)
-                  : renderButton;
-              })}
-              <ToolDivider />
-            </React.Fragment>
-          ))}
-          <ToolDivider />
-          <ToolbarBtn
-            isActive={isNodeActive(editor, "paragraph")}
-            onMouseDown={() => {
-              RichEditor.insertBlock(editor, "paragraph");
-              ReactEditor.focus(editor);
-            }}
-          >
-            Text
-          </ToolbarBtn>
-        </ToolsWrapper>
-      </StyledToolBox>
+      <React.Fragment>
+        {Object.entries(grouped).map(([k, groupedControls]) => (
+          <React.Fragment>
+            {groupedControls.map((control, i) => {
+              if (control.Component) {
+                return <control.Component key={i} />;
+              }
+              const renderButton = control.render;
+              return typeof renderButton === "function"
+                ? renderButton(editor)
+                : renderButton;
+            })}
+            <ToolDivider />
+          </React.Fragment>
+        ))}
+        <ToolDivider />
+        <ToolbarBtn
+          isActive={isNodeActive(editor, "paragraph")}
+          onMouseDown={() => {
+            RichEditor.insertBlock(editor, "paragraph");
+            ReactEditor.focus(editor);
+          }}
+        >
+          Text
+        </ToolbarBtn>
+      </React.Fragment>
     );
   }
   return null;

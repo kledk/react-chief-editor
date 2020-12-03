@@ -12,6 +12,8 @@ import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
 import { useControlsProvider } from "../hovering-tool";
 import { BlockInsertControls } from "./block-insert-controls";
+import { ToolsWrapper } from "../../ToolsWrapper";
+import { StyledToolBox } from "../../StyledToolBox";
 
 export const BlockInsertBtn = styled(ButtonBase)`
   user-select: none;
@@ -119,7 +121,9 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
             30;
           setCoords([top, left]);
         }
-      } catch (err) {}
+      } catch (err) {
+        /*ignore*/
+      }
     }
   }, [hoveredNode]);
 
@@ -174,7 +178,11 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
             >
               <div ref={toolboxRef}>
                 <ControlsContext.Provider value={controls}>
-                  <BlockInsertControls />
+                  <StyledToolBox>
+                    <ToolsWrapper>
+                      <BlockInsertControls />
+                    </ToolsWrapper>
+                  </StyledToolBox>
                   {props.children}
                 </ControlsContext.Provider>
               </div>
