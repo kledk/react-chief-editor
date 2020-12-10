@@ -1,12 +1,41 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
-import { Element } from "slate";
 import { ParagraphElement } from "./paragraph-element";
-import { useLabels, ElementTypeMatch } from "../../chief";
+import { useLabels, ElementTypeMatch, RichEditor } from "../../chief";
 import { AddonProps } from "../../addon";
 import { iPresenter } from "../../chief/chief-presentation";
+import { useControl } from "../../chief/controls";
+import { ToolbarBtn } from "../../ToolbarBtn";
+import { isNodeActive } from "../../utils";
+import { ReactEditor, useSlate } from "slate-react";
 
 const TYPE: ElementTypeMatch = "paragraph";
+
+export function ParagraphControl(props: { children: ReactNode }) {
+  return useControl({
+    category: "text",
+    Component: () => {
+      const editor = useSlate();
+      return (
+        <ToolbarBtn
+          tooltip={{
+            label: {
+              key: `elements.paragraph.placeholder`,
+              defaultLabel: "Paragraph"
+            }
+          }}
+          isActive={isNodeActive(editor, "paragraph")}
+          onMouseDown={() => {
+            RichEditor.insertBlock(editor, "paragraph");
+            ReactEditor.focus(editor);
+          }}
+        >
+          {props.children}
+        </ToolbarBtn>
+      );
+    }
+  });
+}
 
 export function ParagraphAddon({
   showHint = true,

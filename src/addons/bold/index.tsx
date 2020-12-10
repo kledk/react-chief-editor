@@ -41,7 +41,7 @@ const Presenter: iPresenter = {
   leaf: _renderLeaf
 };
 
-export function BoldControl() {
+export function BoldControl(props: { children: React.ReactNode }) {
   return useControl({
     category: "marks",
     Component: () => {
@@ -56,7 +56,7 @@ export function BoldControl() {
           }}
           markType="bold"
         >
-          B
+          {props.children}
         </MarkBtn>
       );
     }

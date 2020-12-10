@@ -4,7 +4,7 @@ import { ElementTypeMatch } from "./chief/chief";
 
 export interface Control<T = React.FunctionComponent> {
   typeMatch?: ElementTypeMatch;
-  render?: ((editor: ReactEditor) => React.ReactNode) | React.ReactNode;
+  render?: React.ReactNode | ((editor: ReactEditor) => React.ReactNode);
   Component?: T;
   category?: string;
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { AddonProps } from "../../addon";
 import { Heading } from "./Heading";
 import { Transforms, Editor, Range, Element } from "slate";
@@ -14,28 +14,36 @@ import { useControl } from "../../chief/controls";
 
 export const headingTypes = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
-export function createHeadingBlockControl(
-  heading: typeof headingTypes[number]
-): Control {
-  return {
-    category: "headings",
-    render: editor => (
-      <ToolbarBtn
-        isActive={isNodeActive(editor, heading)}
-        onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-          ReactEditor.focus(editor);
-          RichEditor.insertBlock(editor, heading);
-        }}
-      >
-        {heading.toUpperCase()}
-      </ToolbarBtn>
-    )
-  };
-}
-
 export function HeadingControl(props: {
   heading: typeof headingTypes[number];
+  children?: ReactNode;
 }) {
+  function createHeadingBlockControl(
+    heading: typeof headingTypes[number]
+  ): Control {
+    return {
+      category: "headings",
+      render: editor => (
+        <ToolbarBtn
+          tooltip={{
+            label: {
+              key: `elements.heading.${heading}.placeholder`,
+              defaultLabel: heading
+            }
+          }}
+          isActive={isNodeActive(editor, heading)}
+          onMouseDown={(
+            _e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+          ) => {
+            ReactEditor.focus(editor);
+            RichEditor.insertBlock(editor, heading);
+          }}
+        >
+          {props.children || heading.toUpperCase()}
+        </ToolbarBtn>
+      )
+    };
+  }
   useControl(createHeadingBlockControl(props.heading));
   return null;
 }
@@ -48,7 +56,7 @@ const Presenter: iPresenter = {
   }
 };
 
-export function HeadingsAddon(props: AddonProps) {
+export function HeadingsAddon(_props: AddonProps) {
   useRenderElement({
     typeMatch: headingTypes,
     renderElement: props => <Heading {...props} />

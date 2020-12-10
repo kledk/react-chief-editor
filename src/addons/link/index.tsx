@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  ReactNode
+} from "react";
 import { useSlate, useEditor } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
@@ -71,10 +77,40 @@ export function LinkAddon(props: AddonProps) {
   return null;
 }
 
-export function LinkControl() {
+export function LinkControl(props: { children: ReactNode }) {
   return useControl({
     category: "link",
-    Component: LinkBtn
+    Component: () => {
+      {
+        const editor = useEditor();
+        const isActive = isLinkActive(editor);
+        return (
+          <ToolBtnPopup
+            shortcut={"mod+k"}
+            renderContent={setShow => (
+              <StyledToolBox>
+                <LinkPopup onClose={() => setShow(false)}></LinkPopup>
+              </StyledToolBox>
+            )}
+            renderToolBtn={(tprops, show) => (
+              <ToolbarBtn
+                tooltip={{
+                  label: {
+                    key: "elements.link",
+                    defaultLabel: "Add link"
+                  },
+                  shortcut: shortcutText("mod+k")
+                }}
+                {...tprops}
+                isActive={isActive || show}
+              >
+                {props.children}
+              </ToolbarBtn>
+            )}
+          />
+        );
+      }
+    }
   });
 }
 
@@ -84,6 +120,8 @@ const Presenter: iPresenter<{ url: string } & ChiefElement> = {
     renderElement: props => <a href={props.element.url}>{props.children}</a>
   }
 };
+
+LinkAddon.Presenter = Presenter;
 
 export const insertLink = (editor: Editor, url: string) => {
   if (editor.selection) {
@@ -217,35 +255,5 @@ function LinkPopup(props: { onClose: () => void }) {
         </ToolbarBtn>
       </div>
     </form>
-  );
-}
-
-export function LinkBtn() {
-  const editor = useEditor();
-  const isActive = isLinkActive(editor);
-  return (
-    <ToolBtnPopup
-      shortcut={"mod+k"}
-      renderContent={setShow => (
-        <StyledToolBox>
-          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
-        </StyledToolBox>
-      )}
-      renderToolBtn={(tprops, show) => (
-        <ToolbarBtn
-          tooltip={{
-            label: {
-              key: "elements.link",
-              defaultLabel: "Add link"
-            },
-            shortcut: shortcutText("mod+k")
-          }}
-          {...tprops}
-          isActive={isActive || show}
-        >
-          Link
-        </ToolbarBtn>
-      )}
-    />
   );
 }

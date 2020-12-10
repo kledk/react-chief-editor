@@ -1,45 +1,35 @@
 import React from "react";
 import groupBy from "lodash/groupBy";
-import { ReactEditor, useSlate } from "slate-react";
-import { StyledToolBox } from "../../StyledToolBox";
+import { useSlate } from "slate-react";
 import { ToolDivider } from "../../ToolDivider";
-import { ToolsWrapper } from "../../ToolsWrapper";
-import { isNodeActive } from "../../utils";
-import { RichEditor } from "../../chief/editor";
-import { ToolbarBtn } from "../../ToolbarBtn";
+
 import { useProvidedControls } from "../../chief/controls";
 
 export function BlockInsertControls() {
   const editor = useSlate();
   const { controls } = useProvidedControls();
   if (controls.length > 0) {
-    const grouped = groupBy(controls, "category");
+    const groupedControls = groupBy(controls, "category");
     return (
       <React.Fragment>
-        {Object.entries(grouped).map(([k, groupedControls]) => (
-          <React.Fragment>
-            {groupedControls.map((control, i) => {
+        {Object.entries(groupedControls).map(([type, groupedControls], i) => (
+          <React.Fragment key={`${type}${i}`}>
+            {groupedControls.map((control, ii) => {
               if (control.Component) {
-                return <control.Component key={i} />;
+                return <control.Component key={`${type}${i}${ii}`} />;
               }
-              const renderButton = control.render;
-              return typeof renderButton === "function"
-                ? renderButton(editor)
-                : renderButton;
+              const renderControl = control.render;
+              return (
+                <React.Fragment key={`${type}${i}${ii}`}>
+                  {typeof renderControl === "function"
+                    ? renderControl(editor)
+                    : renderControl}
+                </React.Fragment>
+              );
             })}
             <ToolDivider />
           </React.Fragment>
         ))}
-        <ToolDivider />
-        <ToolbarBtn
-          isActive={isNodeActive(editor, "paragraph")}
-          onMouseDown={() => {
-            RichEditor.insertBlock(editor, "paragraph");
-            ReactEditor.focus(editor);
-          }}
-        >
-          Text
-        </ToolbarBtn>
       </React.Fragment>
     );
   }

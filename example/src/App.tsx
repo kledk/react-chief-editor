@@ -36,18 +36,45 @@ import {
   TextColorAddon,
   TextColorControl,
   LinkAddon,
-  LinkControl
+  LinkControl,
+  ParagraphControl
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
+import MdiIcon from "@mdi/react";
+import {
+  mdiFormatParagraph,
+  mdiFormatHeader1,
+  mdiFormatHeader2,
+  mdiFormatHeader3,
+  mdiFormatHeader4,
+  mdiFormatHeader5,
+  mdiFormatHeader6,
+  mdiFormatListNumbered,
+  mdiFormatListBulleted,
+  mdiFormatBold,
+  mdiFormatItalic,
+  mdiFormatStrikethrough,
+  mdiFormatUnderline,
+  mdiImage,
+  mdiLink,
+  mdiFormatColorText
+} from "@mdi/js";
+
+function Icon(props: React.ComponentProps<typeof MdiIcon>) {
+  return <MdiIcon color="#2b2b2b" size={0.7} {...props}></MdiIcon>;
+}
 
 const editorLabels = {
   "marks.bold": "Fed",
   "marks.italic": "Kursiv",
   "marks.strikethrough": "Gennemstreg",
   "marks.underline": "Understreg",
-  "marks.color": "Farve",
+  "marks.textcolor": "Tekstfarve",
+  "elements.image": "Billede",
   "elements.link": "Link",
+  "elements.ordered-list": "Nummereret list",
+  "elements.unordered-list": "Punkt list",
   "elements.link.placeholder": "Indsæt eller skriv link",
   "elements.link.btn.link": "Tilføj",
   "elements.link.btn.unlink": "Fjern",
@@ -107,24 +134,30 @@ function App() {
   const [value, setValue] = useState<Node[]>([
     {
       type: "h1",
-      children: [{ text: "Dark" }]
+      children: [{ text: "1914-oversættelsen af Rackham" }]
     },
     {
       type: "paragraph",
       children: [
         {
           text:
-            "Dark er en tysksproget web-tv-serie skabt af Baran bo Odar og Jantje Friese for Netflix. Serien havde premiere på Netflix 1. december 2017. Den første sæson – på ti afsnit – blev hovedsagelig godt modtaget, med positive og negative sammenligninger med Stranger Things, en anden overnaturlig thrillerserie fra Netflix"
-        },
+            "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness."
+        }
+      ]
+    },
+    {
+      type: "paragraph",
+      children: [
         {
-          text: "red",
-          color: "red"
+          color: "#00b159",
+          text:
+            "No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?"
         }
       ]
     },
     {
       type: "h1",
-      children: [{ text: "Images" }]
+      children: [{ text: "Righteous" }]
     },
     {
       type: "image",
@@ -132,7 +165,7 @@ function App() {
       height: 420,
       align: "left",
       url:
-        "https://occ-0-1068-1723.1.nflxso.net/dnm/api/v6/9pS1daC2n6UGc3dUogvWIPMR_OU/AAAABSJBCX9UxJkkZH_NLhm0nynLxHTqy99ETHJuidWOohECj4qKD3kqC8kr4gk2anceRXPMLULS3hruYHK56hpZCSsWD1GqNO4GaWrot7bwzPHJqxfT.jpg?r=2af",
+        "https://everything-pr.com/wp-content/uploads/2010/08/Funny-Meme.jpg",
       children: [
         {
           text: "asd"
@@ -141,7 +174,7 @@ function App() {
     },
     {
       type: "h1",
-      children: [{ text: "Lists" }]
+      children: [{ text: "Extremely" }]
     },
     {
       type: "h2",
@@ -150,8 +183,8 @@ function App() {
     {
       type: "ordered-list",
       children: [
-        { type: "list-item", children: [{ text: "Item 1" }] },
-        { type: "list-item", children: [{ text: "item 2" }] }
+        { type: "list-item", children: [{ text: "Molestias" }] },
+        { type: "list-item", children: [{ text: "Minus" }] }
       ]
     },
     {
@@ -161,8 +194,8 @@ function App() {
     {
       type: "unordered-list",
       children: [
-        { type: "list-item", children: [{ text: "Item " }] },
-        { type: "list-item", children: [{ text: "item" }] }
+        { type: "list-item", children: [{ text: "Through " }] },
+        { type: "list-item", children: [{ text: "Tough Ø Å" }] }
       ]
     }
   ]);
@@ -220,41 +253,87 @@ function App() {
                 }}
               >
                 <BlockInsert>
-                  <HeadingControl heading="h1" />
-                  <HeadingControl heading="h2" />
-                  <HeadingControl heading="h3" />
-                  <HeadingControl heading="h4" />
-                  <HeadingControl heading="h5" />
-                  <HeadingControl heading="h6" />
-                  <ListControl type="ordered-list">OL</ListControl>
-                  <ListControl type="unordered-list">UL</ListControl>
-                  <ImageControl />
+                  <ParagraphControl>
+                    <Icon path={mdiFormatParagraph} />
+                  </ParagraphControl>
+                  <HeadingControl heading="h1">
+                    <Icon path={mdiFormatHeader1} />
+                  </HeadingControl>
+                  <HeadingControl heading="h2">
+                    <Icon path={mdiFormatHeader2} />
+                  </HeadingControl>
+                  <HeadingControl heading="h3">
+                    <Icon path={mdiFormatHeader3} />
+                  </HeadingControl>
+                  <HeadingControl heading="h4">
+                    <Icon path={mdiFormatHeader4} />
+                  </HeadingControl>
+                  <HeadingControl heading="h5">
+                    <Icon path={mdiFormatHeader5} />
+                  </HeadingControl>
+                  <HeadingControl heading="h6">
+                    <Icon path={mdiFormatHeader6} />
+                  </HeadingControl>
+                  <ListControl type="ordered-list">
+                    <Icon path={mdiFormatListNumbered} />
+                  </ListControl>
+                  <ListControl type="unordered-list">
+                    <Icon path={mdiFormatListBulleted} />
+                  </ListControl>
+                  <ImageControl>
+                    <Icon path={mdiImage} />
+                  </ImageControl>
                 </BlockInsert>
                 <HoverTools>
-                  <BoldControl />
-                  <ItalicControl />
-                  <StrikethroughControl />
-                  <UnderlineControl />
-                  <HeadingControl heading="h1" />
-                  <HeadingControl heading="h2" />
-                  <HeadingControl heading="h3" />
-                  <HeadingControl heading="h4" />
-                  <HeadingControl heading="h5" />
-                  <HeadingControl heading="h6" />
-                  <LinkControl />
+                  <BoldControl>
+                    <Icon path={mdiFormatBold} />
+                  </BoldControl>
+                  <ItalicControl>
+                    <Icon path={mdiFormatItalic} />
+                  </ItalicControl>
+                  <StrikethroughControl>
+                    <Icon path={mdiFormatStrikethrough} />
+                  </StrikethroughControl>
+                  <UnderlineControl>
+                    <Icon path={mdiFormatUnderline} />
+                  </UnderlineControl>
+                  <HeadingControl heading="h1">
+                    <Icon path={mdiFormatHeader1} />
+                  </HeadingControl>
+                  <HeadingControl heading="h2">
+                    <Icon path={mdiFormatHeader2} />
+                  </HeadingControl>
+                  <HeadingControl heading="h3">
+                    <Icon path={mdiFormatHeader3} />
+                  </HeadingControl>
+                  <HeadingControl heading="h4">
+                    <Icon path={mdiFormatHeader4} />
+                  </HeadingControl>
+                  <HeadingControl heading="h5">
+                    <Icon path={mdiFormatHeader5} />
+                  </HeadingControl>
+                  <HeadingControl heading="h6">
+                    <Icon path={mdiFormatHeader6} />
+                  </HeadingControl>
+                  <LinkControl>
+                    <Icon path={mdiLink} />
+                  </LinkControl>
                   <TextColorControl
                     colors={[
-                      "red",
-                      "green",
-                      "yellow",
-                      "blue",
-                      "purple",
-                      "cyan",
-                      "white",
-                      "black",
-                      "orange"
+                      "#d11141",
+                      "#00b159",
+                      "#00aedb",
+                      "#f37735",
+                      "#ffc425",
+                      "#edc951",
+                      "#eb6841",
+                      "#cc2a36",
+                      "#4f372d",
+                      "#00a0b0"
                     ]}
-                  />
+                  >
+                    <Icon path={mdiFormatColorText} />
+                  </TextColorControl>
                 </HoverTools>
                 <Editor
                   spellCheck={false}
@@ -275,10 +354,10 @@ function App() {
                 StrikethroughAddon.Presenter,
                 UnderlineAddon.Presenter,
                 HeadingsAddon.Presenter,
-                linkPresenter,
+                LinkAddon.Presenter,
                 ListsAddon.Presenter,
                 ImageAddon.Presenter,
-                textColorPresenter
+                TextColorAddon.Presenter
               ]}
             ></ChiefPresentation>
           </ContentStyle>

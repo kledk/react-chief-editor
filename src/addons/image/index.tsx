@@ -1,7 +1,7 @@
 import {} from "./image-element";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, ReactNode } from "react";
 import { AddonProps } from "../../addon";
-import { Element, Editor, Transforms } from "slate";
+import { Editor, Transforms } from "slate";
 import { ReactEditor, useSlate } from "slate-react";
 import { isNodeActive, getNodeFromSelection, findNodes } from "../../utils";
 import { RichEditor } from "../../chief/editor";
@@ -15,7 +15,6 @@ import { HistoryEditor } from "slate-history";
 import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
-import { Control } from "../../control";
 import { iPresenter } from "../../chief";
 import { useControl } from "../../chief/controls";
 
@@ -33,23 +32,27 @@ export function isImageElement(element: unknown): element is ImageElement {
   return isChiefElement(element) && element.type === "image";
 }
 
-export const imageBlockControl: Control = {
-  category: "image",
-  render: editor => (
-    <ToolbarBtn
-      isActive={isNodeActive(editor, "image")}
-      onClick={() => {
-        RichEditor.insertBlock(editor, "image");
-        ReactEditor.focus(editor);
-      }}
-    >
-      Image
-    </ToolbarBtn>
-  )
-};
-
-export function ImageControl() {
-  useControl(imageBlockControl);
+export function ImageControl(props: { children: ReactNode }) {
+  useControl({
+    category: "image",
+    render: editor => (
+      <ToolbarBtn
+        tooltip={{
+          label: {
+            key: `elements.image`,
+            defaultLabel: "Image"
+          }
+        }}
+        isActive={isNodeActive(editor, "image")}
+        onClick={() => {
+          RichEditor.insertBlock(editor, "image");
+          ReactEditor.focus(editor);
+        }}
+      >
+        {props.children}
+      </ToolbarBtn>
+    )
+  });
   return null;
 }
 

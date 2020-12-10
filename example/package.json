@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "@mdi/js": "^5.8.55",
+    "@mdi/react": "^1.4.0",
+    "@mdi/svg": "^5.8.55",
     "react": "link:../node_modules/react",
+    "react-chief-editor": "link:..",
     "react-dom": "link:../node_modules/react-dom",
-    "react-scripts": "link:../node_modules/react-scripts",
-    "react-chief-editor": "link:.."
+    "react-scripts": "link:../node_modules/react-scripts"
   },
   "scripts": {
     "start": "node ../node_modules/react-scripts/bin/react-scripts.js start",

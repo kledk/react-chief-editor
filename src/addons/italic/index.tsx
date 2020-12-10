@@ -6,35 +6,32 @@ import { useRenderLeaf } from "../../chief/hooks/use-render-leaf";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
-import { Control } from "../../control";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
 import { useControl } from "../../chief/controls";
 
 const shortcut = "mod+i";
 
-export const italicControl: Control = {
-  category: "marks",
-  render: () => {
-    return (
-      <MarkBtn
-        tooltip={{
-          label: {
-            key: "marks.italic",
-            defaultLabel: "Italic"
-          },
-          shortcut: shortcutText(shortcut)
-        }}
-        markType="italic"
-      >
-        I
-      </MarkBtn>
-    );
-  }
-};
-
-export function ItalicControl() {
-  useControl(italicControl);
+export function ItalicControl(props: { children: React.ReactNode }) {
+  useControl({
+    category: "marks",
+    render: () => {
+      return (
+        <MarkBtn
+          tooltip={{
+            label: {
+              key: "marks.italic",
+              defaultLabel: "Italic"
+            },
+            shortcut: shortcutText(shortcut)
+          }}
+          markType="italic"
+        >
+          {props.children}
+        </MarkBtn>
+      );
+    }
+  });
   return null;
 }
 

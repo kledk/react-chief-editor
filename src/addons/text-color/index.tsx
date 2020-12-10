@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { ReactNode, useCallback, useEffect, useRef } from "react";
 import { Text, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { AddonProps } from "../../addon";
@@ -29,23 +29,24 @@ export function TextColorAddon() {
   return null;
 }
 
-export function TextColorControl(
-  props: { colors: string[] } = {
-    colors: [
-      "rgb(142, 209, 252)",
-      "rgb(132, 109, 52)",
-      "rgb(42, 09, 232)",
-      "rgb(54, 209, 12)"
-    ]
-  }
-) {
+export function TextColorControl(props: {
+  colors?: string[];
+  children: ReactNode;
+}) {
   function TextColorBtn() {
     return (
       <ToolBtnPopup
         renderContent={setShow => (
           <StyledToolBox>
             <ColorSelector
-              colors={props.colors}
+              colors={
+                props.colors || [
+                  "rgb(142, 209, 252)",
+                  "rgb(132, 109, 52)",
+                  "rgb(42, 09, 232)",
+                  "rgb(54, 209, 12)"
+                ]
+              }
               onClose={() => setShow(false)}
             />
           </StyledToolBox>
@@ -54,14 +55,14 @@ export function TextColorControl(
           <ToolbarBtn
             tooltip={{
               label: {
-                key: "marks.color",
-                defaultLabel: "Color"
+                key: "marks.textcolor",
+                defaultLabel: "Textcolor"
               }
             }}
             {...tprops}
             isActive={show}
           >
-            C
+            {props.children}
           </ToolbarBtn>
         )}
       />

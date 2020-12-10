@@ -38,20 +38,26 @@ export function HoverToolControls() {
       return (
         <StyledToolBox>
           <ToolsWrapper>
-            {Object.entries(groupedControls).map(([, groupedControls]) => (
-              <React.Fragment>
-                {groupedControls.map(control => {
-                  if (control.Component) {
-                    return <control.Component />;
-                  }
-                  const renderControl = control.render;
-                  return typeof renderControl === "function"
-                    ? renderControl(editor)
-                    : renderControl;
-                })}
-                <ToolDivider />
-              </React.Fragment>
-            ))}
+            {Object.entries(groupedControls).map(
+              ([type, groupedControls], i) => (
+                <React.Fragment key={`${type}${i}`}>
+                  {groupedControls.map((control, ii) => {
+                    if (control.Component) {
+                      return <control.Component key={`${type}${i}${ii}`} />;
+                    }
+                    const renderControl = control.render;
+                    return (
+                      <React.Fragment key={`${type}${i}${ii}`}>
+                        {typeof renderControl === "function"
+                          ? renderControl(editor)
+                          : renderControl}
+                      </React.Fragment>
+                    );
+                  })}
+                  <ToolDivider />
+                </React.Fragment>
+              )
+            )}
           </ToolsWrapper>
         </StyledToolBox>
       );

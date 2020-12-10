@@ -16,6 +16,12 @@ export const createListControl = (
     const editor = useSlate();
     return (
       <ToolbarBtn
+        tooltip={{
+          label: {
+            key: `elements.${type}`,
+            defaultLabel: type
+          }
+        }}
         isActive={isNodeActive(editor, type)}
         onClick={() => {
           toggleList(editor, type);
