@@ -20,6 +20,7 @@ export * from "./addons/block-insert-tool";
 export * from "./addons/hovering-tool";
 export * from "./addons/text-color";
 export * from "./chief-editor-theme";
+export * from "./chief/controls";
 export * from "./chief/utils/saved-selection";
 export * from "./chief/utils/use-highlight-selection";
 export * from "./chief/utils/matches-type";

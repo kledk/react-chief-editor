@@ -1,10 +1,7 @@
-import React, {
-  useEffect,
-  useState,
-
-  useContext
-} from "react";
+import React, { ReactNode, useEffect, useState, useContext } from "react";
+import { DefaultTheme } from "styled-components";
 import { Control } from "../../control";
+import { defaultTheme } from "../../defaultTheme";
 
 const ControlsContext = React.createContext<ReturnType<
   typeof useProvideControlContext
@@ -49,3 +46,14 @@ export function useControl<T extends React.FunctionComponent<any>>(
   }, []);
   return null;
 }
+
+export type RenderControlProps = {
+  isActive: boolean;
+  theme: typeof defaultTheme;
+};
+export type ControlChildrenProp =
+  | ((props: RenderControlProps) => ReactNode)
+  | ReactNode;
+export type ControlProps = {
+  children: ControlChildrenProp;
+};

@@ -9,7 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../../chief/controls";
+import { ControlProps, useControl } from "../../chief/controls";
 
 const shortcut = "mod+b";
 
@@ -41,7 +41,7 @@ const Presenter: iPresenter = {
   leaf: _renderLeaf
 };
 
-export function BoldControl(props: { children: React.ReactNode }) {
+export function BoldControl(props: ControlProps) {
   return useControl({
     category: "marks",
     Component: () => {

@@ -1,9 +1,12 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { StyledToolbarBtn } from "./ui/styled-toolbar-btn";
 import Overlay from "react-overlays/Overlay";
 import { Label } from "./chief/chief";
 import { useLabels } from "./chief/hooks/use-labels";
 import { ElementHoverTip } from "./element-hover-tip";
+import { ControlProps } from "./chief/controls";
+import { useTheme } from "styled-components";
+import { defaultTheme } from "./defaultTheme";
 
 export type Ref = HTMLElement;
 
@@ -15,11 +18,13 @@ type Props = {
   };
   onMouseDown?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-} & React.ComponentProps<typeof StyledToolbarBtn>;
+} & ControlProps &
+  Omit<React.ComponentProps<typeof StyledToolbarBtn>, "children">;
 
 export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
-  const { onClick, onMouseDown, tooltip, ...otherProps } = props;
+  const { onClick, onMouseDown, tooltip, children, ...otherProps } = props;
   const [labels] = useLabels();
+  const theme = useTheme() as typeof defaultTheme;
 
   return (
     <ElementHoverTip
@@ -36,6 +41,7 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
       }
     >
       <StyledToolbarBtn
+        // @ts-ignore
         ref={ref}
         onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           if (onClick) {
@@ -45,7 +51,12 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
           onMouseDown && onMouseDown(e);
         }}
         {...otherProps}
-      />
+      >
+        {typeof children === "function"
+          ? // @ts-ignore
+            children({ isActive: props.isActive, theme })
+          : children}
+      </StyledToolbarBtn>
     </ElementHoverTip>
   );
 });

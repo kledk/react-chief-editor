@@ -37,7 +37,8 @@ import {
   TextColorControl,
   LinkAddon,
   LinkControl,
-  ParagraphControl
+  ParagraphControl,
+  RenderControlProps
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -61,8 +62,17 @@ import {
   mdiFormatColorText
 } from "@mdi/js";
 
-function Icon(props: React.ComponentProps<typeof MdiIcon>) {
-  return <MdiIcon color="#2b2b2b" size={0.7} {...props}></MdiIcon>;
+function Icon(
+  props: React.ComponentProps<typeof MdiIcon> & Partial<RenderControlProps>
+) {
+  console.log(props);
+  return (
+    <MdiIcon
+      color={props.isActive ? props.theme?.colors?.primary : "#2b2b2b"}
+      size={0.7}
+      {...props}
+    ></MdiIcon>
+  );
 }
 
 const editorLabels = {
@@ -286,7 +296,7 @@ function App() {
                 </BlockInsert>
                 <HoverTools>
                   <BoldControl>
-                    <Icon path={mdiFormatBold} />
+                    {props => <Icon path={mdiFormatBold} {...props} />}
                   </BoldControl>
                   <ItalicControl>
                     <Icon path={mdiFormatItalic} />
