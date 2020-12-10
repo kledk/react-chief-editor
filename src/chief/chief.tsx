@@ -12,6 +12,7 @@ import { ThemeProvider } from "styled-components";
 import { defaultTheme } from "../defaultTheme";
 import { useProvideChiefContext, ChiefContext } from "./chief-context";
 import { useErrorBoundary } from "use-error-boundary";
+import { SavedSelectionProvider } from "./utils/saved-selection";
 
 export function isChiefElement(element: unknown): element is ChiefElement {
   return (element as ChiefElement).type !== undefined;
@@ -74,9 +75,11 @@ export const Chief = React.memo(function(props: {
     <ErrorBoundary>
       <Slate editor={chiefValue.editor} value={value} onChange={onChange}>
         <ChiefContext.Provider value={chiefValue}>
-          <ThemeProvider theme={_theme}>
-            <React.Fragment>{children}</React.Fragment>
-          </ThemeProvider>
+          <SavedSelectionProvider>
+            <ThemeProvider theme={_theme}>
+              <React.Fragment>{children}</React.Fragment>
+            </ThemeProvider>
+          </SavedSelectionProvider>
         </ChiefContext.Provider>
       </Slate>
     </ErrorBoundary>

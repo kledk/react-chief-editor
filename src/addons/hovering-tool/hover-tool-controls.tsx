@@ -7,7 +7,7 @@ import { ToolDivider } from "../../ToolDivider";
 import { ToolsWrapper } from "../../ToolsWrapper";
 import { ChiefElement } from "../../chief/chief";
 import { matchesType } from "../../chief/utils/matches-type";
-import { useProvidedControls } from "./hovering-tool";
+import { useProvidedControls } from "../../chief/controls";
 
 export function HoverToolControls() {
   const { controls } = useProvidedControls();

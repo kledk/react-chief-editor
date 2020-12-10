@@ -1,19 +1,15 @@
 import {
-  isBlockEmpty,
-  getActiveNode,
-  useOnClickOutside,
-  getAncestor
-} from "../../utils";
+  useOnClickOutside} from "../../utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
 import { Node, Editor, Path, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
-import { useControlsProvider } from "../hovering-tool";
 import { BlockInsertControls } from "./block-insert-controls";
 import { ToolsWrapper } from "../../ToolsWrapper";
 import { StyledToolBox } from "../../StyledToolBox";
+import { useControlsProvider } from "../../chief/controls";
 
 export const BlockInsertBtn = styled(ButtonBase)`
   user-select: none;

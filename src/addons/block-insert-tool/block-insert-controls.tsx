@@ -7,7 +7,7 @@ import { ToolsWrapper } from "../../ToolsWrapper";
 import { isNodeActive } from "../../utils";
 import { RichEditor } from "../../chief/editor";
 import { ToolbarBtn } from "../../ToolbarBtn";
-import { useProvidedControls } from "../hovering-tool";
+import { useProvidedControls } from "../../chief/controls";
 
 export function BlockInsertControls() {
   const editor = useSlate();

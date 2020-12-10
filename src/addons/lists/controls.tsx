@@ -4,7 +4,7 @@ import { ReactEditor, useSlate } from "slate-react";
 import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST } from "./index";
-import { useControl } from "../hovering-tool";
+import { useControl } from "../../chief/controls";
 import { Control } from "../../control";
 
 export const createListControl = (

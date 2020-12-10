@@ -17,7 +17,7 @@ import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
 import { Control } from "../../control";
 import { iPresenter } from "../../chief";
-import { useControl } from "../hovering-tool";
+import { useControl } from "../../chief/controls";
 
 export interface ImageElement extends ChiefElement {
   type: "image";

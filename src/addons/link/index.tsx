@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import {
-  RenderElementProps,
-  ReactEditor,
-  useSlate,
-  useEditor
-} from "slate-react";
+import { useSlate, useEditor } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
-import { useControl, useHoverTool } from "../hovering-tool/hovering-tool";
+import { useControl } from "../../chief/controls";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolBox } from "../../StyledToolBox";
@@ -17,11 +12,11 @@ import { ToolbarBtn } from "../../ToolbarBtn";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 import { useLabels } from "../../chief/hooks/use-labels";
-import { Control } from "../../control";
 import { ChiefElement } from "../../chief";
 import { shortcutText } from "../../shortcut";
 import { iPresenter } from "../../chief/chief-presentation";
 import { ElementHoverTip } from "../../element-hover-tip";
+import { useSaveSelection } from "../../chief/utils/saved-selection";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -129,7 +124,7 @@ const wrapLink = (editor: Editor, url: string) => {
 function LinkPopup(props: { onClose: () => void }) {
   const editor = useSlate();
   const { selection } = editor;
-  const { saveSelection } = useHoverTool();
+  const { saveSelection } = useSaveSelection();
   useEffect(() => {
     return saveSelection(selection);
   }, []);

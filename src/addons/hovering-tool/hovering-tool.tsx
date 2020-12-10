@@ -1,67 +1,17 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useContext,
-  useCallback
-} from "react";
-import { ReactEditor, useSlate, useEditor } from "slate-react";
-import { Editor, Range, Node, Transforms, RangeRef } from "slate";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { ReactEditor, useSlate } from "slate-react";
+import { Editor, Range, Transforms } from "slate";
 import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
 import { useOnClickOutside, getNodeFromSelection } from "../../utils";
-import { useDecoration } from "../../chief/hooks/use-decoration";
-import { useRenderLeaf } from "../../chief";
 import { useChief } from "../../chief/hooks/use-chief";
-import { Control } from "../../control";
 import { HoverToolControls } from "./hover-tool-controls";
-
-const ControlsContext = React.createContext<ReturnType<
-  typeof useProvideControlContext
-> | null>(null);
-
-export function useProvideControlContext() {
-  const [controls, setControls] = useState<Control[]>([]);
-  function injectControl(control: Control) {
-    setControls(controls => [...controls, control]);
-  }
-
-  function removeControl(control: Control) {
-    setControls(it => {
-      const toSlicer = [...it];
-      toSlicer.splice(toSlicer.indexOf(control), 1);
-      return toSlicer;
-    });
-  }
-  return { controls, injectControl, removeControl };
-}
-
-export function useControlsProvider() {
-  const value = useProvideControlContext();
-  return [ControlsContext, value] as const;
-}
-
-export function useProvidedControls() {
-  const ctx = useContext(ControlsContext);
-  if (!ctx) {
-    throw new Error("No ControlsContext.Provider in scope.");
-  }
-  return ctx;
-}
-
-export function useControl<T extends React.FunctionComponent<any>>(
-  control: Control<T>
-) {
-  const { injectControl, removeControl } = useProvidedControls();
-  useEffect(() => {
-    injectControl(control);
-    return () => removeControl(control);
-  }, []);
-  return null;
-}
+import { useControlsProvider } from "../../chief/controls";
+import { useHighlightSelection } from "../../chief/utils/use-highlight-selection";
+import { useSaveSelection } from "../../chief/utils/saved-selection";
 
 export const deselect = Transforms.deselect;
-Transforms.deselect = (...args) => {
+Transforms.deselect = (..._args) => {
   // We disable the default deselect.
 };
 
@@ -71,51 +21,17 @@ const hoverToolContext = React.createContext<HoverToolContext | undefined>(
   undefined
 );
 
-function useHighlightSelection(
-  selection: Range | null | undefined,
-  style: React.CSSProperties
-) {
-  useRenderLeaf(
-    {
-      renderLeaf: props => {
-        return (
-          <span
-            style={props.leaf.highlightSelection ? style : undefined}
-            {...props.attributes}
-          >
-            {props.children}
-          </span>
-        );
-      }
-    },
-    [selection]
-  );
-
-  useDecoration(
-    {
-      decorator: ([node]) => {
-        const ranges: Range[] = [];
-        if (selection && Node.has(node, selection.anchor.path)) {
-          ranges.push({ ...selection, highlightSelection: true });
-        }
-        return ranges;
-      }
-    },
-    [selection]
-  );
-}
-
 function useProvideContext() {
   const editor = useSlate();
   const { selection } = editor;
 
-  const [savedSelection, setSaveSelection] = useState<RangeRef | null>(null);
   const isEditorFocused = ReactEditor.isFocused(editor);
   const isCollapsed = selection && Range.isCollapsed(selection);
   const isEmpty = selection && Editor.string(editor, selection) === "";
   const currentNode = getNodeFromSelection(editor, selection);
   const isVoid = Editor.isVoid(editor, currentNode);
   const isReadOnly = useChief().readOnly;
+  const { savedSelection } = useSaveSelection();
   useHighlightSelection(savedSelection?.current, {
     backgroundColor: "#969696"
   });
@@ -149,41 +65,8 @@ function useProvideContext() {
     }
   }, [isEditorFocused, isCollapsed, isEmpty, isVoid]);
 
-  const editorRef = useRef(editor);
-  editorRef.current = editor;
-
-  const saveSelection = useCallback((selection: Range | null) => {
-    if (selection) {
-      const sRef = Editor.rangeRef(editor, selection);
-      setSaveSelection(sRef);
-      return () => {
-        if (sRef.current) {
-          setTimeout(() => {
-            ReactEditor.focus(editorRef.current);
-            Transforms.select(editorRef.current, sRef.current!);
-            setSaveSelection(null);
-            sRef.unref();
-          }, 0);
-        }
-      };
-    }
-    return () => null;
-  }, []);
-
-  const perform = useCallback(
-    (fn: (selection: Range) => void) => {
-      if (savedSelection && savedSelection.current) {
-        Transforms.select(editorRef.current, savedSelection.current);
-        fn(savedSelection.current);
-      }
-    },
-    [savedSelection]
-  );
-
   const ctx = {
-    enabled,
-    saveSelection,
-    perform
+    enabled
   };
 
   return { ctx, setEnabled };

@@ -1,19 +1,17 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { Text, Transforms } from "slate";
-import { useEditor, useSlate } from "slate-react";
+import { useSlate } from "slate-react";
 import { AddonProps } from "../../addon";
 import { ChiefElement, iPresenter, useRenderLeaf } from "../../chief";
-import { Control } from "../../control";
 import { renderLeaf } from "../../leaf-renderer";
-import { MarkBtn } from "../../mark-button";
-import { shortcutText } from "../../shortcut";
 import { StyledToolBox } from "../../StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
-import { useControl, useHoverTool } from "../hovering-tool";
+import { useControl } from "../../chief/controls";
+import { useSaveSelection } from "../../chief/utils/saved-selection";
 
-export function TextColorAddon(props: AddonProps) {
+export function TextColorAddon() {
   useRenderLeaf({
     renderLeaf: props => {
       if (typeof props.leaf["color"] === "string")
@@ -89,7 +87,7 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
   const editor = useSlate();
   const { onClose, colors } = props;
   const { selection } = editor;
-  const { saveSelection } = useHoverTool();
+  const { saveSelection } = useSaveSelection();
   useEffect(() => {
     return saveSelection(selection);
   }, []);

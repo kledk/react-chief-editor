@@ -9,7 +9,7 @@ import { shortcutText } from "../../shortcut";
 import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../hovering-tool";
+import { useControl } from "../../chief/controls";
 
 const shortcut = "mod+b";
 
