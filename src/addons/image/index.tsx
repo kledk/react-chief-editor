@@ -33,27 +33,24 @@ export function isImageElement(element: unknown): element is ImageElement {
 }
 
 export function ImageControl(props: { children: ReactNode }) {
-  useControl({
-    category: "image",
-    render: editor => (
-      <ToolbarBtn
-        tooltip={{
-          label: {
-            key: `elements.image`,
-            defaultLabel: "Image"
-          }
-        }}
-        isActive={isNodeActive(editor, "image")}
-        onClick={() => {
-          RichEditor.insertBlock(editor, "image");
-          ReactEditor.focus(editor);
-        }}
-      >
-        {props.children}
-      </ToolbarBtn>
-    )
-  });
-  return null;
+  const editor = useSlate();
+  return (
+    <ToolbarBtn
+      tooltip={{
+        label: {
+          key: `elements.image`,
+          defaultLabel: "Image"
+        }
+      }}
+      isActive={isNodeActive(editor, "image")}
+      onClick={() => {
+        RichEditor.insertBlock(editor, "image");
+        ReactEditor.focus(editor);
+      }}
+    >
+      {props.children}
+    </ToolbarBtn>
+  );
 }
 
 export const isImageUrl = (url: string, extensions = ImageExtensions) => {

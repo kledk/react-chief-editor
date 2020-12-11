@@ -233,55 +233,59 @@ function App() {
               </StyledToolBox>
             </BlockInsert>
             <HoverTools>
-              <BoldControl>
-                {props => <Icon path={mdiFormatBold} {...props} />}
-              </BoldControl>
-              <ItalicControl>
-                <Icon path={mdiFormatItalic} />
-              </ItalicControl>
-              <StrikethroughControl>
-                <Icon path={mdiFormatStrikethrough} />
-              </StrikethroughControl>
-              <UnderlineControl>
-                <Icon path={mdiFormatUnderline} />
-              </UnderlineControl>
-              <HeadingControl heading="h1">
-                <Icon path={mdiFormatHeader1} />
-              </HeadingControl>
-              <HeadingControl heading="h2">
-                <Icon path={mdiFormatHeader2} />
-              </HeadingControl>
-              <HeadingControl heading="h3">
-                <Icon path={mdiFormatHeader3} />
-              </HeadingControl>
-              <HeadingControl heading="h4">
-                <Icon path={mdiFormatHeader4} />
-              </HeadingControl>
-              <HeadingControl heading="h5">
-                <Icon path={mdiFormatHeader5} />
-              </HeadingControl>
-              <HeadingControl heading="h6">
-                <Icon path={mdiFormatHeader6} />
-              </HeadingControl>
-              <LinkControl>
-                <Icon path={mdiLink} />
-              </LinkControl>
-              <TextColorControl
-                colors={[
-                  "#d11141",
-                  "#00b159",
-                  "#00aedb",
-                  "#f37735",
-                  "#ffc425",
-                  "#edc951",
-                  "#eb6841",
-                  "#cc2a36",
-                  "#4f372d",
-                  "#00a0b0"
-                ]}
-              >
-                <Icon path={mdiFormatColorText} />
-              </TextColorControl>
+              <StyledToolBox>
+                <ToolsWrapper>
+                  <BoldControl>
+                    {props => <Icon path={mdiFormatBold} {...props} />}
+                  </BoldControl>
+                  <ItalicControl>
+                    <Icon path={mdiFormatItalic} />
+                  </ItalicControl>
+                  <StrikethroughControl>
+                    <Icon path={mdiFormatStrikethrough} />
+                  </StrikethroughControl>
+                  <UnderlineControl>
+                    <Icon path={mdiFormatUnderline} />
+                  </UnderlineControl>
+                  <HeadingControl heading="h1">
+                    <Icon path={mdiFormatHeader1} />
+                  </HeadingControl>
+                  <HeadingControl heading="h2">
+                    <Icon path={mdiFormatHeader2} />
+                  </HeadingControl>
+                  <HeadingControl heading="h3">
+                    <Icon path={mdiFormatHeader3} />
+                  </HeadingControl>
+                  <HeadingControl heading="h4">
+                    <Icon path={mdiFormatHeader4} />
+                  </HeadingControl>
+                  <HeadingControl heading="h5">
+                    <Icon path={mdiFormatHeader5} />
+                  </HeadingControl>
+                  <HeadingControl heading="h6">
+                    <Icon path={mdiFormatHeader6} />
+                  </HeadingControl>
+                  <LinkControl>
+                    <Icon path={mdiLink} />
+                  </LinkControl>
+                  <TextColorControl
+                    colors={[
+                      "#d11141",
+                      "#00b159",
+                      "#00aedb",
+                      "#f37735",
+                      "#ffc425",
+                      "#edc951",
+                      "#eb6841",
+                      "#cc2a36",
+                      "#4f372d",
+                      "#00a0b0"
+                    ]}
+                  >
+                    <Icon path={mdiFormatColorText} />
+                  </TextColorControl>
+                </ToolsWrapper>
+              </StyledToolBox>
             </HoverTools>
             <Editor
               spellCheck={false}

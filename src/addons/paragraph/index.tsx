@@ -12,29 +12,24 @@ import { ReactEditor, useSlate } from "slate-react";
 const TYPE: ElementTypeMatch = "paragraph";
 
 export function ParagraphControl(props: { children: ReactNode }) {
-  return useControl({
-    category: "text",
-    Component: () => {
-      const editor = useSlate();
-      return (
-        <ToolbarBtn
-          tooltip={{
-            label: {
-              key: `elements.paragraph.placeholder`,
-              defaultLabel: "Paragraph"
-            }
-          }}
-          isActive={isNodeActive(editor, "paragraph")}
-          onMouseDown={() => {
-            RichEditor.insertBlock(editor, "paragraph");
-            ReactEditor.focus(editor);
-          }}
-        >
-          {props.children}
-        </ToolbarBtn>
-      );
-    }
-  });
+  const editor = useSlate();
+  return (
+    <ToolbarBtn
+      tooltip={{
+        label: {
+          key: `elements.paragraph.placeholder`,
+          defaultLabel: "Paragraph"
+        }
+      }}
+      isActive={isNodeActive(editor, "paragraph")}
+      onMouseDown={() => {
+        RichEditor.insertBlock(editor, "paragraph");
+        ReactEditor.focus(editor);
+      }}
+    >
+      {props.children}
+    </ToolbarBtn>
+  );
 }
 
 export function ParagraphAddon({

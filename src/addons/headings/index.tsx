@@ -18,34 +18,25 @@ export function HeadingControl(props: {
   heading: typeof headingTypes[number];
   children?: ReactNode;
 }) {
-  function createHeadingBlockControl(
-    heading: typeof headingTypes[number]
-  ): Control {
-    return {
-      category: "headings",
-      render: editor => (
-        <ToolbarBtn
-          tooltip={{
-            label: {
-              key: `elements.heading.${heading}.placeholder`,
-              defaultLabel: heading
-            }
-          }}
-          isActive={isNodeActive(editor, heading)}
-          onMouseDown={(
-            _e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-          ) => {
-            ReactEditor.focus(editor);
-            RichEditor.insertBlock(editor, heading);
-          }}
-        >
-          {props.children || heading.toUpperCase()}
-        </ToolbarBtn>
-      )
-    };
-  }
-  useControl(createHeadingBlockControl(props.heading));
-  return null;
+  const { heading, children } = props;
+  const editor = useSlate();
+  return (
+    <ToolbarBtn
+      tooltip={{
+        label: {
+          key: `elements.heading.${heading}.placeholder`,
+          defaultLabel: heading
+        }
+      }}
+      isActive={isNodeActive(editor, heading)}
+      onMouseDown={(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        ReactEditor.focus(editor);
+        RichEditor.insertBlock(editor, heading);
+      }}
+    >
+      {children || heading.toUpperCase()}
+    </ToolbarBtn>
+  );
 }
 
 const Presenter: iPresenter = {

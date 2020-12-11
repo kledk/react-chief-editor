@@ -33,45 +33,39 @@ export function TextColorControl(props: {
   colors?: string[];
   children: ReactNode;
 }) {
-  function TextColorBtn() {
-    return (
-      <ToolBtnPopup
-        renderContent={setShow => (
-          <StyledToolBox>
-            <ColorSelector
-              colors={
-                props.colors || [
-                  "rgb(142, 209, 252)",
-                  "rgb(132, 109, 52)",
-                  "rgb(42, 09, 232)",
-                  "rgb(54, 209, 12)"
-                ]
-              }
-              onClose={() => setShow(false)}
-            />
-          </StyledToolBox>
-        )}
-        renderToolBtn={(tprops, show) => (
-          <ToolbarBtn
-            tooltip={{
-              label: {
-                key: "marks.textcolor",
-                defaultLabel: "Textcolor"
-              }
-            }}
-            {...tprops}
-            isActive={show}
-          >
-            {props.children}
-          </ToolbarBtn>
-        )}
-      />
-    );
-  }
-  return useControl({
-    category: "color",
-    Component: TextColorBtn
-  });
+  return (
+    <ToolBtnPopup
+      renderContent={setShow => (
+        <StyledToolBox>
+          <ColorSelector
+            colors={
+              props.colors || [
+                "rgb(142, 209, 252)",
+                "rgb(132, 109, 52)",
+                "rgb(42, 09, 232)",
+                "rgb(54, 209, 12)"
+              ]
+            }
+            onClose={() => setShow(false)}
+          />
+        </StyledToolBox>
+      )}
+      renderToolBtn={(tprops, show) => (
+        <ToolbarBtn
+          tooltip={{
+            label: {
+              key: "marks.textcolor",
+              defaultLabel: "Textcolor"
+            }
+          }}
+          {...tprops}
+          isActive={show}
+        >
+          {props.children}
+        </ToolbarBtn>
+      )}
+    />
+  );
 }
 
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {

@@ -13,26 +13,20 @@ import { shortcutText } from "../../shortcut";
 const shortcut = "mod+u";
 
 export function UnderlineControl(props: { children: ReactNode }) {
-  useControl({
-    category: "marks",
-    render: () => {
-      return (
-        <MarkBtn
-          tooltip={{
-            label: {
-              key: "marks.underline",
-              defaultLabel: "Underline"
-            },
-            shortcut: shortcutText(shortcut)
-          }}
-          markType="underline"
-        >
-          {props.children}
-        </MarkBtn>
-      );
-    }
-  });
-  return null;
+  return (
+    <MarkBtn
+      tooltip={{
+        label: {
+          key: "marks.underline",
+          defaultLabel: "Underline"
+        },
+        shortcut: shortcutText(shortcut)
+      }}
+      markType="underline"
+    >
+      {props.children}
+    </MarkBtn>
+  );
 }
 
 const _renderLeaf: InjectedRenderLeaf = {

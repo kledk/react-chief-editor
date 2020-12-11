@@ -90,9 +90,9 @@ export function HoverTools(props: { children?: React.ReactNode }) {
           onChangeEnabled={enabled => setEnabled(enabled)}
           enabled={ctx.enabled}
         >
-          <HoverToolControls />
+          {/* <HoverToolControls /> */}
+          {props.children}
         </HoveringTool>
-        {props.children}
       </ControlsContext.Provider>
     </hoverToolContext.Provider>
   );

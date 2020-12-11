@@ -13,26 +13,20 @@ import { useControl } from "../../chief/controls";
 const shortcut = "mod+s";
 
 export function StrikethroughControl(props: { children: ReactNode }) {
-  useControl({
-    category: "marks",
-    render: () => {
-      return (
-        <MarkBtn
-          tooltip={{
-            label: {
-              key: "marks.strikethrough",
-              defaultLabel: "Strike-through"
-            },
-            shortcut: shortcutText(shortcut)
-          }}
-          markType="strikethrough"
-        >
-          {props.children}
-        </MarkBtn>
-      );
-    }
-  });
-  return null;
+  return (
+    <MarkBtn
+      tooltip={{
+        label: {
+          key: "marks.strikethrough",
+          defaultLabel: "Strike-through"
+        },
+        shortcut: shortcutText(shortcut)
+      }}
+      markType="strikethrough"
+    >
+      {props.children}
+    </MarkBtn>
+  );
 }
 
 const _renderLeaf: InjectedRenderLeaf = {

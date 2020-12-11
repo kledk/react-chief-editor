@@ -174,7 +174,6 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
               <div ref={toolboxRef}>
                 <ControlsContext.Provider value={controls}>
                   {props.children}
-                  <BlockInsertControls />
                 </ControlsContext.Provider>
               </div>
               <div ref={arrowProps.ref} style={arrowProps.style} />

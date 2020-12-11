@@ -9,7 +9,11 @@ import { shortcutText } from "../../shortcut";
 import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
-import { ControlProps, useControl } from "../../chief/controls";
+import {
+  ControlProps,
+  useControl,
+  useIsControlEligable
+} from "../../chief/controls";
 
 const shortcut = "mod+b";
 
@@ -42,25 +46,20 @@ const Presenter: iPresenter = {
 };
 
 export function BoldControl(props: ControlProps) {
-  return useControl({
-    category: "marks",
-    Component: () => {
-      return (
-        <MarkBtn
-          tooltip={{
-            label: {
-              key: "marks.bold",
-              defaultLabel: "Bold"
-            },
-            shortcut: shortcutText(shortcut)
-          }}
-          markType="bold"
-        >
-          {props.children}
-        </MarkBtn>
-      );
-    }
-  });
+  return (
+    <MarkBtn
+      tooltip={{
+        label: {
+          key: "marks.bold",
+          defaultLabel: "Bold"
+        },
+        shortcut: shortcutText(shortcut)
+      }}
+      markType="bold"
+    >
+      {props.children}
+    </MarkBtn>
+  );
 }
 
 BoldAddon.Presenter = Presenter;

@@ -5,7 +5,7 @@ import { useSlate } from "slate-react";
 import { StyledToolBox } from "../../StyledToolBox";
 import { ToolDivider } from "../../ToolDivider";
 import { ToolsWrapper } from "../../ToolsWrapper";
-import { ChiefElement } from "../../chief/chief";
+import { ChiefElement, ElementTypeMatch } from "../../chief/chief";
 import { matchesType } from "../../chief/utils/matches-type";
 import { useProvidedControls } from "../../chief/controls";
 

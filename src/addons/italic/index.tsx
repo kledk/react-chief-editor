@@ -13,26 +13,20 @@ import { useControl } from "../../chief/controls";
 const shortcut = "mod+i";
 
 export function ItalicControl(props: { children: React.ReactNode }) {
-  useControl({
-    category: "marks",
-    render: () => {
-      return (
-        <MarkBtn
-          tooltip={{
-            label: {
-              key: "marks.italic",
-              defaultLabel: "Italic"
-            },
-            shortcut: shortcutText(shortcut)
-          }}
-          markType="italic"
-        >
-          {props.children}
-        </MarkBtn>
-      );
-    }
-  });
-  return null;
+  return (
+    <MarkBtn
+      tooltip={{
+        label: {
+          key: "marks.italic",
+          defaultLabel: "Italic"
+        },
+        shortcut: shortcutText(shortcut)
+      }}
+      markType="italic"
+    >
+      {props.children}
+    </MarkBtn>
+  );
 }
 
 const _renderLeaf: InjectedRenderLeaf = {

@@ -78,40 +78,33 @@ export function LinkAddon(props: AddonProps) {
 }
 
 export function LinkControl(props: { children: ReactNode }) {
-  return useControl({
-    category: "link",
-    Component: () => {
-      {
-        const editor = useEditor();
-        const isActive = isLinkActive(editor);
-        return (
-          <ToolBtnPopup
-            shortcut={"mod+k"}
-            renderContent={setShow => (
-              <StyledToolBox>
-                <LinkPopup onClose={() => setShow(false)}></LinkPopup>
-              </StyledToolBox>
-            )}
-            renderToolBtn={(tprops, show) => (
-              <ToolbarBtn
-                tooltip={{
-                  label: {
-                    key: "elements.link",
-                    defaultLabel: "Add link"
-                  },
-                  shortcut: shortcutText("mod+k")
-                }}
-                {...tprops}
-                isActive={isActive || show}
-              >
-                {props.children}
-              </ToolbarBtn>
-            )}
-          />
-        );
-      }
-    }
-  });
+  const editor = useEditor();
+  const isActive = isLinkActive(editor);
+  return (
+    <ToolBtnPopup
+      shortcut={"mod+k"}
+      renderContent={setShow => (
+        <StyledToolBox>
+          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
+        </StyledToolBox>
+      )}
+      renderToolBtn={(tprops, show) => (
+        <ToolbarBtn
+          tooltip={{
+            label: {
+              key: "elements.link",
+              defaultLabel: "Add link"
+            },
+            shortcut: shortcutText("mod+k")
+          }}
+          {...tprops}
+          isActive={isActive || show}
+        >
+          {props.children}
+        </ToolbarBtn>
+      )}
+    />
+  );
 }
 
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {
