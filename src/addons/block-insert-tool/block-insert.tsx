@@ -1,5 +1,4 @@
-import {
-  useOnClickOutside} from "../../utils";
+import { useOnClickOutside } from "../../utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
 import { Node, Editor, Path, Transforms } from "slate";
@@ -174,12 +173,8 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
             >
               <div ref={toolboxRef}>
                 <ControlsContext.Provider value={controls}>
-                  <StyledToolBox>
-                    <ToolsWrapper>
-                      <BlockInsertControls />
-                    </ToolsWrapper>
-                  </StyledToolBox>
                   {props.children}
+                  <BlockInsertControls />
                 </ControlsContext.Provider>
               </div>
               <div ref={arrowProps.ref} style={arrowProps.style} />

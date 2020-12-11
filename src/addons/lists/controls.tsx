@@ -5,7 +5,7 @@ import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST } from "./index";
 import { useControl } from "../../chief/controls";
-import { Control } from "../../control";
+import { Control } from "../../chief/controls/control";
 
 export const createListControl = (
   type: typeof TYPE_ORDERED_LIST | typeof TYPE_UNORDERED_LIST,

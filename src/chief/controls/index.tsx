@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState, useContext } from "react";
 import { DefaultTheme } from "styled-components";
-import { Control } from "../../control";
+import { Control } from "./control";
 import { defaultTheme } from "../../defaultTheme";
 
 const ControlsContext = React.createContext<ReturnType<

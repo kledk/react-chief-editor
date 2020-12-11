@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import groupBy from "lodash/groupBy";
 import { useSlate } from "slate-react";
 import { ToolDivider } from "../../ToolDivider";

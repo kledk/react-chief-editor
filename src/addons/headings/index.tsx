@@ -8,7 +8,7 @@ import { ToolbarBtn } from "../../ToolbarBtn";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { RichEditor } from "../../chief/editor";
-import { Control } from "../../control";
+import { Control } from "../../chief/controls/control";
 import { iPresenter } from "../../chief/chief-presentation";
 import { useControl } from "../../chief/controls";
 
