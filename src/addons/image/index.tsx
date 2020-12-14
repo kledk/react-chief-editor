@@ -16,7 +16,6 @@ import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
 import { iPresenter } from "../../chief";
-import { useControl } from "../../chief/controls";
 
 export interface ImageElement extends ChiefElement {
   type: "image";

@@ -5,10 +5,6 @@ import { Node, Editor, Path, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
-import { BlockInsertControls } from "./block-insert-controls";
-import { ToolsWrapper } from "../../ToolsWrapper";
-import { StyledToolBox } from "../../StyledToolBox";
-import { useControlsProvider } from "../../chief/controls";
 
 export const BlockInsertBtn = styled(ButtonBase)`
   user-select: none;
@@ -75,7 +71,6 @@ function useHoveredNode(editor: ReactEditor) {
 
 export function BlockInsert(props: { children?: React.ReactNode }) {
   const editor = useSlate();
-  const [ControlsContext, controls] = useControlsProvider();
   const [coords, setCoords] = useState([-1000, -1000]);
   const [showMenu, setShowMenu] = useState(false);
   const toolboxRef = useRef<HTMLDivElement>(null);
@@ -171,11 +166,7 @@ export function BlockInsert(props: { children?: React.ReactNode }) {
                 }
               }}
             >
-              <div ref={toolboxRef}>
-                <ControlsContext.Provider value={controls}>
-                  {props.children}
-                </ControlsContext.Provider>
-              </div>
+              <div ref={toolboxRef}>{props.children}</div>
               <div ref={arrowProps.ref} style={arrowProps.style} />
             </div>
           )}

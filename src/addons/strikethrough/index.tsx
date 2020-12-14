@@ -8,7 +8,6 @@ import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../../chief/controls";
 
 const shortcut = "mod+s";
 

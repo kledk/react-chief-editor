@@ -7,7 +7,6 @@ import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { useLabels } from "../../chief/hooks/use-labels";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../../chief/controls";
 import { shortcutText } from "../../shortcut";
 
 const shortcut = "mod+u";

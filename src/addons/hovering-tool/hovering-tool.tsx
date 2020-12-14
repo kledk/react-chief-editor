@@ -5,8 +5,6 @@ import { Popper } from "react-popper";
 import { VirtualElement } from "@popperjs/core";
 import { useOnClickOutside, getNodeFromSelection } from "../../utils";
 import { useChief } from "../../chief/hooks/use-chief";
-import { HoverToolControls } from "./hover-tool-controls";
-import { useControlsProvider } from "../../chief/controls";
 import { useHighlightSelection } from "../../chief/utils/use-highlight-selection";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
 
@@ -82,18 +80,14 @@ export function useHoverTool() {
 
 export function HoverTools(props: { children?: React.ReactNode }) {
   const { ctx, setEnabled } = useProvideContext();
-  const [ControlsContext, controls] = useControlsProvider();
   return (
     <hoverToolContext.Provider value={ctx}>
-      <ControlsContext.Provider value={controls}>
-        <HoveringTool
-          onChangeEnabled={enabled => setEnabled(enabled)}
-          enabled={ctx.enabled}
-        >
-          {/* <HoverToolControls /> */}
-          {props.children}
-        </HoveringTool>
-      </ControlsContext.Provider>
+      <HoveringTool
+        onChangeEnabled={enabled => setEnabled(enabled)}
+        enabled={ctx.enabled}
+      >
+        {props.children}
+      </HoveringTool>
     </hoverToolContext.Provider>
   );
 }

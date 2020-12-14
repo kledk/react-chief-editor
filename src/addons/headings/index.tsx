@@ -10,7 +10,6 @@ import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { RichEditor } from "../../chief/editor";
 import { Control } from "../../chief/controls/control";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../../chief/controls";
 
 export const headingTypes = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 

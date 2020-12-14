@@ -17,14 +17,12 @@ import {
   LabelsAddon,
   // Block toolbar addon
   BlockInsert,
-  BlockInsertControls,
   // Custom addon creation
   AddonProps,
   useRenderElement,
   InputWrapper,
   usePlugin,
   // Presentation
-  ChiefPresentation,
   BoldControl,
   HeadingControl,
   ItalicControl,

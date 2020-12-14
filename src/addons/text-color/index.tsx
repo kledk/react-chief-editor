@@ -8,7 +8,6 @@ import { StyledToolBox } from "../../StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
-import { useControl } from "../../chief/controls";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
 
 export function TextColorAddon() {

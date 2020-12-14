@@ -4,7 +4,6 @@ import { ParagraphElement } from "./paragraph-element";
 import { useLabels, ElementTypeMatch, RichEditor } from "../../chief";
 import { AddonProps } from "../../addon";
 import { iPresenter } from "../../chief/chief-presentation";
-import { useControl } from "../../chief/controls";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { ReactEditor, useSlate } from "slate-react";

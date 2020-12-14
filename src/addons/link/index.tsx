@@ -9,7 +9,6 @@ import { useSlate, useEditor } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
-import { useControl } from "../../chief/controls";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
 import { StyledToolBox } from "../../StyledToolBox";
