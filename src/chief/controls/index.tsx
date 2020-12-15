@@ -1,25 +1,42 @@
-import React, { ReactNode, useEffect, useState, useContext } from "react";
+import { ReactNode } from "react";
 import { Editor as SlateEditor } from "slate";
-import { Control } from "./control";
 import { defaultTheme } from "../../defaultTheme";
 import { useSlate } from "slate-react";
-import { ChiefElement, ElementTypeMatch } from "../chief";
+import { ChiefElement, ElementTypeMatch, isChiefElement } from "../chief";
 import { matchesType } from "../utils/matches-type";
 
-export function useIsControlEligable(typeMatch?: ElementTypeMatch) {
+export function useIsControlEligable(opts: {
+  typeMatch?: ElementTypeMatch;
+  isVoid?: boolean;
+  isText?: boolean;
+  isEmpty?: boolean;
+}) {
   const editor = useSlate();
   const { selection } = editor;
   if (selection) {
     const [match] = SlateEditor.nodes(editor, {
+      at: selection,
+      voids: opts.isVoid,
       match: n => {
-        if (typeMatch && typeof n.type === "string") {
-          if (matchesType(n as ChiefElement, typeMatch)) {
+        // console.log(n && SlateEditor.isEmpty(editor, n as ChiefElement));
+        if (opts.typeMatch && typeof n.type === "string") {
+          if (matchesType(n as ChiefElement, opts.typeMatch)) {
             return true;
           }
         } else if (
-          !typeMatch &&
-          !SlateEditor.isVoid(editor, n) &&
-          typeof n.type === "string"
+          typeof opts.isVoid === "boolean" &&
+          opts.isVoid === SlateEditor.isVoid(editor, n)
+        ) {
+          return true;
+        } else if (
+          opts.isEmpty &&
+          isChiefElement(n) &&
+          SlateEditor.isEmpty(editor, n)
+        ) {
+          return true;
+        } else if (
+          opts.isText &&
+          SlateEditor.string(editor, selection).length > 0
         ) {
           return true;
         }

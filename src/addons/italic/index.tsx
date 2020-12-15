@@ -8,10 +8,18 @@ import { useLabels } from "../../chief/hooks/use-labels";
 import { shortcutText } from "../../shortcut";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 const shortcut = "mod+i";
 
-export function ItalicControl(props: { children: React.ReactNode }) {
+export function ItalicControl(props: ControlProps) {
+  if (
+    !useIsControlEligable({
+      isText: true
+    })
+  ) {
+    return null;
+  }
   return (
     <MarkBtn
       tooltip={{

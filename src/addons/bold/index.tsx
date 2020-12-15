@@ -42,6 +42,13 @@ const Presenter: iPresenter = {
 };
 
 export function BoldControl(props: ControlProps) {
+  if (
+    !useIsControlEligable({
+      isText: true
+    })
+  ) {
+    return null;
+  }
   return (
     <MarkBtn
       tooltip={{

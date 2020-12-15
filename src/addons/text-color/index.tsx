@@ -9,6 +9,7 @@ import { ToolbarBtn } from "../../ToolbarBtn";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 export function TextColorAddon() {
   useRenderLeaf({
@@ -28,10 +29,14 @@ export function TextColorAddon() {
   return null;
 }
 
-export function TextColorControl(props: {
-  colors?: string[];
-  children: ReactNode;
-}) {
+export function TextColorControl(props: { colors?: string[] } & ControlProps) {
+  if (
+    !useIsControlEligable({
+      isText: true
+    })
+  ) {
+    return null;
+  }
   return (
     <ToolBtnPopup
       renderContent={setShow => (

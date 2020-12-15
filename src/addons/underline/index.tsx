@@ -8,10 +8,19 @@ import { useLabels } from "../../chief/hooks/use-labels";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
 import { shortcutText } from "../../shortcut";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 const shortcut = "mod+u";
 
-export function UnderlineControl(props: { children: ReactNode }) {
+export function UnderlineControl(props: ControlProps) {
+  if (
+    !useIsControlEligable({
+      isText: true,
+      isEmpty: true
+    })
+  ) {
+    return null;
+  }
   return (
     <MarkBtn
       tooltip={{

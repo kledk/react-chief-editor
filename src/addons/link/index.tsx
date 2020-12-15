@@ -22,6 +22,7 @@ import { shortcutText } from "../../shortcut";
 import { iPresenter } from "../../chief/chief-presentation";
 import { ElementHoverTip } from "../../element-hover-tip";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -76,9 +77,16 @@ export function LinkAddon(props: AddonProps) {
   return null;
 }
 
-export function LinkControl(props: { children: ReactNode }) {
+export function LinkControl(props: ControlProps) {
   const editor = useEditor();
   const isActive = isLinkActive(editor);
+  if (
+    !useIsControlEligable({
+      isText: true
+    })
+  ) {
+    return null;
+  }
   return (
     <ToolBtnPopup
       shortcut={"mod+k"}

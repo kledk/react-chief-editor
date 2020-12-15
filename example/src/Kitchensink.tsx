@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Editor as SlateEditor } from "slate";
 import {
   Editor,
   Chief,
@@ -38,7 +39,8 @@ import {
   ParagraphControl,
   RenderControlProps,
   StyledToolBox,
-  ToolsWrapper
+  ToolsWrapper,
+  useOnKeyDown
 } from "react-chief-editor";
 import { Node, Element } from "slate";
 import styled, { css } from "styled-components";
@@ -66,12 +68,12 @@ import lorem from "./lorem.json";
 function Icon(
   props: React.ComponentProps<typeof MdiIcon> & Partial<RenderControlProps>
 ) {
-  console.log(props);
+  const { isActive, theme, ...otherProps } = props;
   return (
     <MdiIcon
-      color={props.isActive ? props.theme?.colors?.primary : "#2b2b2b"}
+      color={isActive ? theme?.colors?.primary : "#2b2b2b"}
       size={0.7}
-      {...props}
+      {...otherProps}
     ></MdiIcon>
   );
 }
@@ -99,23 +101,49 @@ const editorLabels = {
   "elements.heading.h6.placeholder": "Overskrift 6"
 };
 
-function ExampleCustomAddon(props: AddonProps) {
-  usePlugin({
-    isVoid: isVoid => element =>
-      Element.isElement(element) && element.type === "custom_void_element"
-        ? true
-        : isVoid(element)
+function ColumnsAddon(props: AddonProps) {
+  usePlugin({});
+
+  useOnKeyDown({
+    pattern: "enter",
+    handler: (e, editor) => {
+      const { selection } = editor;
+      if (selection) {
+        const [node] = SlateEditor.nodes(editor, {
+          at: selection,
+          match: n => n.type === "columns"
+        });
+        if (node) {
+          e.preventDefault();
+          editor.insertText("\n");
+        }
+      }
+    }
   });
 
   useRenderElement({
-    typeMatch: /custom_void_element/,
+    typeMatch: "columns",
     renderElement: (props, editor) => {
       return (
-        <div {...props.attributes}>
-          <InputWrapper>
-            <input type="text" />
-          </InputWrapper>
+        <div
+          {...props.attributes}
+          style={{ display: "flex", flexDirection: "row" }}
+        >
           {props.children}
+        </div>
+      );
+    }
+  });
+
+  useRenderElement({
+    typeMatch: "column",
+    renderElement: (props, editor) => {
+      return (
+        <div
+          style={{ flex: 1, border: "1px dashed #ccc" }}
+          {...props.attributes}
+        >
+          {React.Children.map(props.children, it => it)}
         </div>
       );
     }
@@ -126,7 +154,7 @@ function ExampleCustomAddon(props: AddonProps) {
 
 const ContentStyle = styled.div`
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
+  color: #4b4a4a;
   font-size: 18px;
   h1,
   h2,
@@ -134,7 +162,7 @@ const ContentStyle = styled.div`
   h4,
   h5,
   h6 {
-    color: white;
+    color: #202020;
   }
   a {
     color: rgb(234 66 205);
@@ -144,7 +172,7 @@ const ContentStyle = styled.div`
 function App() {
   const [value, setValue] = useState<Node[]>(lorem);
 
-  console.log(value);
+  console.log(JSON.stringify(value));
 
   return (
     <div style={{ flex: 1 }}>
@@ -174,6 +202,7 @@ function App() {
             }
           }}
         >
+          <ColumnsAddon />
           <LabelsAddon labels={editorLabels} />
           <ParagraphAddon />
           <BoldAddon />
@@ -198,34 +227,34 @@ function App() {
               <StyledToolBox>
                 <ToolsWrapper>
                   <ParagraphControl>
-                    <Icon path={mdiFormatParagraph} />
+                    {props => <Icon path={mdiFormatParagraph} {...props} />}
                   </ParagraphControl>
                   <HeadingControl heading="h1">
-                    <Icon path={mdiFormatHeader1} />
+                    {props => <Icon path={mdiFormatHeader1} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h2">
-                    <Icon path={mdiFormatHeader2} />
+                    {props => <Icon path={mdiFormatHeader2} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h3">
-                    <Icon path={mdiFormatHeader3} />
+                    {props => <Icon path={mdiFormatHeader3} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h4">
-                    <Icon path={mdiFormatHeader4} />
+                    {props => <Icon path={mdiFormatHeader4} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h5">
-                    <Icon path={mdiFormatHeader5} />
+                    {props => <Icon path={mdiFormatHeader5} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h6">
-                    <Icon path={mdiFormatHeader6} />
+                    {props => <Icon path={mdiFormatHeader6} {...props} />}
                   </HeadingControl>
                   <ListControl type="ordered-list">
-                    <Icon path={mdiFormatListNumbered} />
+                    {props => <Icon path={mdiFormatListNumbered} {...props} />}
                   </ListControl>
                   <ListControl type="unordered-list">
-                    <Icon path={mdiFormatListBulleted} />
+                    {props => <Icon path={mdiFormatListBulleted} {...props} />}
                   </ListControl>
                   <ImageControl>
-                    <Icon path={mdiImage} />
+                    {props => <Icon path={mdiImage} {...props} />}
                   </ImageControl>
                 </ToolsWrapper>
               </StyledToolBox>
@@ -237,34 +266,34 @@ function App() {
                     {props => <Icon path={mdiFormatBold} {...props} />}
                   </BoldControl>
                   <ItalicControl>
-                    <Icon path={mdiFormatItalic} />
+                    {props => <Icon path={mdiFormatItalic} {...props} />}
                   </ItalicControl>
                   <StrikethroughControl>
-                    <Icon path={mdiFormatStrikethrough} />
+                    {props => <Icon path={mdiFormatStrikethrough} {...props} />}
                   </StrikethroughControl>
                   <UnderlineControl>
-                    <Icon path={mdiFormatUnderline} />
+                    {props => <Icon path={mdiFormatUnderline} {...props} />}
                   </UnderlineControl>
                   <HeadingControl heading="h1">
-                    <Icon path={mdiFormatHeader1} />
+                    {props => <Icon path={mdiFormatHeader1} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h2">
-                    <Icon path={mdiFormatHeader2} />
+                    {props => <Icon path={mdiFormatHeader2} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h3">
-                    <Icon path={mdiFormatHeader3} />
+                    {props => <Icon path={mdiFormatHeader3} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h4">
-                    <Icon path={mdiFormatHeader4} />
+                    {props => <Icon path={mdiFormatHeader4} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h5">
-                    <Icon path={mdiFormatHeader5} />
+                    {props => <Icon path={mdiFormatHeader5} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h6">
-                    <Icon path={mdiFormatHeader6} />
+                    {props => <Icon path={mdiFormatHeader6} {...props} />}
                   </HeadingControl>
                   <LinkControl>
-                    <Icon path={mdiLink} />
+                    {props => <Icon path={mdiLink} {...props} />}
                   </LinkControl>
                   <TextColorControl
                     colors={[
@@ -280,7 +309,7 @@ function App() {
                       "#00a0b0"
                     ]}
                   >
-                    <Icon path={mdiFormatColorText} />
+                    {props => <Icon path={mdiFormatColorText} {...props} />}
                   </TextColorControl>
                 </ToolsWrapper>
               </StyledToolBox>

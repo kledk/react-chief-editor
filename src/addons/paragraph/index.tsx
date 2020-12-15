@@ -7,11 +7,20 @@ import { iPresenter } from "../../chief/chief-presentation";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { isNodeActive } from "../../utils";
 import { ReactEditor, useSlate } from "slate-react";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 const TYPE: ElementTypeMatch = "paragraph";
 
-export function ParagraphControl(props: { children: ReactNode }) {
+export function ParagraphControl(props: ControlProps) {
   const editor = useSlate();
+  if (
+    !useIsControlEligable({
+      isText: true,
+      isEmpty: true
+    })
+  ) {
+    return null;
+  }
   return (
     <ToolbarBtn
       tooltip={{

@@ -16,6 +16,7 @@ import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
 import { iPresenter } from "../../chief";
+import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 export interface ImageElement extends ChiefElement {
   type: "image";
@@ -31,8 +32,16 @@ export function isImageElement(element: unknown): element is ImageElement {
   return isChiefElement(element) && element.type === "image";
 }
 
-export function ImageControl(props: { children: ReactNode }) {
+export function ImageControl(props: ControlProps) {
   const editor = useSlate();
+  if (
+    !useIsControlEligable({
+      isText: true,
+      isEmpty: true
+    })
+  ) {
+    return null;
+  }
   return (
     <ToolbarBtn
       tooltip={{

@@ -28,7 +28,7 @@ export const ToolbarBtn = React.forwardRef<Ref, Props>((props, ref) => {
 
   return (
     <ElementHoverTip
-      placement="top"
+      placement={tooltip?.placement ?? "top"}
       tip={
         tooltip && (
           <React.Fragment>

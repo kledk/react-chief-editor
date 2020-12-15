@@ -6,7 +6,7 @@ export const uiStyle = css`
   font-family: Arial, Helvetica, sans-serif;
   font-weight: normal;
   a {
-    color: white;
+    color: white !important;
   }
   ${props => OverrideTheme("ui", props)}
 `;
