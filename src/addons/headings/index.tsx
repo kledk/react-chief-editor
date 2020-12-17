@@ -7,7 +7,6 @@ import { isNodeActive } from "../../utils";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
-import { RichEditor } from "../../chief/editor";
 import { iPresenter } from "../../chief/chief-presentation";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
@@ -39,7 +38,7 @@ export function HeadingControl(
       isActive={isNodeActive(editor, heading)}
       onMouseDown={(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         ReactEditor.focus(editor);
-        RichEditor.insertBlock(editor, heading);
+        toggleHeading(editor, heading);
       }}
     >
       {children || heading.toUpperCase()}
@@ -114,22 +113,6 @@ function insertHeader(editor: Editor, heading: string) {
     type: heading,
     children: [{ text: "" }]
   });
-}
-
-function HeadingBtn(props: { headingType: string; children: React.ReactNode }) {
-  const editor = useSlate();
-  const isActive = isHeadingType(editor, props.headingType);
-  return (
-    <ToolbarBtn
-      isActive={isActive}
-      onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-        toggleHeading(editor, props.headingType);
-      }}
-    >
-      {props.children}
-    </ToolbarBtn>
-  );
 }
 
 HeadingsAddon.Presenter = Presenter;

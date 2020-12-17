@@ -1,0 +1,61 @@
+[
+  {
+    "type": "h1",
+    "children": [
+      { "text": "redia", "color": "#1e2139", "bold": false, "underline": false }
+    ]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "Redia skaber innovative løsninger for biblioteker og virksomheder. Vores fokus er virkelige mennesker og deres behov. \nHvis vi vil skabe et bedre samfund, er det vigtigt, at vi nytænker måden vi kommunikerer på og prioriterer brugernes behov. Det er altafgørende."
+      }
+    ]
+  },
+  {
+    "type": "image",
+    "children": [{ "text": "" }],
+    "url": "https://redia.dk/wp-content/uploads/2020/01/Brandshowcase-Inspire.jpg",
+    "align": "left",
+    "width": 770,
+    "height": 526
+  },
+  {
+    "type": "paragraph",
+    "children": [{ "text": "" }]
+  },
+  {
+    "type": "image",
+    "children": [{ "text": "" }],
+    "url": "https://redia.dk/wp-content/uploads/2020/01/Brandshowcase-Butler-.jpg",
+    "align": "left",
+    "width": 771,
+    "height": 509
+  },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  {
+    "type": "h1",
+    "children": [{ "text": "Sammen skaber vi det moderne bibliotek" }]
+  },
+  {
+    "type": "paragraph",
+    "children": [
+      {
+        "text": "I udviklingen af produkter til landets biblioteker, har vi fokus på at forbinde god service og kommunikation. Derfor er produkterne designet med brugeren i centrum."
+      }
+    ]
+  },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] },
+  { "type": "paragraph", "children": [{ "text": "" }] }
+]

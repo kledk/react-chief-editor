@@ -71,6 +71,9 @@ export const Chief = React.memo(function(props: {
   const _theme = merge({}, defaultTheme, theme);
   const chiefValue = useProvideChiefContext({ readOnly, id });
   const { ErrorBoundary, didCatch, error } = useErrorBoundary();
+  if (didCatch) {
+    console.log(error);
+  }
   return (
     <ErrorBoundary>
       <Slate editor={chiefValue.editor} value={value} onChange={onChange}>

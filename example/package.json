@@ -10,7 +10,10 @@
     "react": "link:../node_modules/react",
     "react-chief-editor": "link:..",
     "react-dom": "link:../node_modules/react-dom",
-    "react-scripts": "link:../node_modules/react-scripts"
+    "react-scripts": "link:../node_modules/react-scripts",
+    "slate": "link:../node_modules/slate",
+    "slate-react": "link:../node_modules/slate-react",
+    "slate-history": "link:../node_modules/slate-history"
   },
   "scripts": {
     "start": "node ../node_modules/react-scripts/bin/react-scripts.js start",

@@ -13,31 +13,16 @@ import {
   LinkAddon
 } from "react-chief-editor";
 import styled from "styled-components";
+import { ContentStyle } from "./ContentStyle";
 import lorem from "./lorem.json";
-
-const ContentStyle = styled.div`
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
-  font-size: 18px;
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: white;
-  }
-  a {
-    color: rgb(234 66 205);
-  }
-`;
+import redia from "./redia.json";
 
 function Presentation() {
   return (
     <div style={{ flex: 1 }}>
       <ContentStyle>
         <ChiefPresentation
-          value={lorem}
+          value={redia}
           presenters={[
             ParagraphAddon.Presenter,
             BoldAddon.Presenter,
