@@ -28,12 +28,12 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.6.0",
-    "is-hotkey": "^0.1.6",
+    "is-hotkey": "^0.2.0",
     "is-url": "^1.2.4",
-    "lodash": "4.17.19",
+    "lodash": "^4.17.20",
     "react-overlays": "^4.1.1",
     "react-popper": "^2.2.4",
-    "react-resize-detector": "^5.0.6",
+    "react-resize-detector": "^5.2.0",
     "styled-components": "^5.2.1",
     "use-error-boundary": "^2.0.4"
   },

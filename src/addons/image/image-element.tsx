@@ -107,79 +107,83 @@ export const ImageBlock = (
   if (!isReplacing && element.url) {
     const src = element.url || "";
     imageHandler = (
-      <WithAttentionToolbar
-        {...renderElementProps}
-        btns={
-          <React.Fragment>
-            <StyledFocusToolBtn onMouseDown={handleDelete}>
-              Delete
-            </StyledFocusToolBtn>
-            <ToolBtnPopup
-              renderContent={() => (
-                <StyledToolBox>
-                  {/* <ToolbarBtn>Copy address</ToolbarBtn> */}
-                  {/* <ToolbarBtn>Resize</ToolbarBtn> */}
-                  <ToolbarBtn onMouseDown={toggleReplace}>Replace</ToolbarBtn>
-                  <ToolbarBtn onMouseDown={() => align("left")}>
-                    Align left
-                  </ToolbarBtn>
-                  <ToolbarBtn onMouseDown={() => align("center")}>
-                    Align center
-                  </ToolbarBtn>
-                  <ToolbarBtn onMouseDown={() => align("right")}>
-                    Align right
-                  </ToolbarBtn>
-                </StyledToolBox>
-              )}
-              renderToolBtn={tprops => (
-                <StyledFocusToolBtn {...tprops}>...</StyledFocusToolBtn>
-              )}
-            ></ToolBtnPopup>
-          </React.Fragment>
-        }
+      <div
+        style={{
+          width: 'auto',
+          position: "relative",
+          height: element.height,
+          display: "flex",
+          justifyContent:
+            props.element.align === "center"
+              ? "center"
+              : props.element.align === "left"
+              ? "flex-start"
+              : "flex-end"
+        }}
+        contentEditable={false}
+        onClick={handleClick}
       >
-        <div
-          style={{
-            position: "relative",
-            height: element.height,
-            display: "flex",
-            justifyContent:
-              props.element.align === "center"
-                ? "center"
-                : props.element.align === "left"
-                ? "flex-start"
-                : "flex-end"
-          }}
-          contentEditable={false}
-          onClick={handleClick}
+        <ReactResizeDetector
+          onResize={(w: number, h: number) => handleResize(w, h)}
         >
-          <ReactResizeDetector
-            onResize={(w: number, h: number) => handleResize(w, h)}
+          <div
+            style={{
+              resize: readOnly ? "none" : "vertical",
+              overflow: "hidden",
+              width: "auto",
+              height: element.height,
+              cursor: "pointer"
+            }}
           >
-            <div
-              style={{
-                resize: readOnly ? "none" : "both",
-                overflow: "auto",
-                width: element.width,
-                height: element.height
-              }}
+            <WithAttentionToolbar
+              {...renderElementProps}
+              btns={
+                <React.Fragment>
+                  <StyledFocusToolBtn onMouseDown={handleDelete}>
+                    Delete
+                  </StyledFocusToolBtn>
+                  <ToolBtnPopup
+                    renderContent={() => (
+                      <StyledToolBox>
+                        {/* <ToolbarBtn>Copy address</ToolbarBtn> */}
+                        {/* <ToolbarBtn>Resize</ToolbarBtn> */}
+                        <ToolbarBtn onMouseDown={toggleReplace}>
+                          Replace
+                        </ToolbarBtn>
+                        <ToolbarBtn onMouseDown={() => align("left")}>
+                          Align left
+                        </ToolbarBtn>
+                        <ToolbarBtn onMouseDown={() => align("center")}>
+                          Align center
+                        </ToolbarBtn>
+                        <ToolbarBtn onMouseDown={() => align("right")}>
+                          Align right
+                        </ToolbarBtn>
+                      </StyledToolBox>
+                    )}
+                    renderToolBtn={tprops => (
+                      <StyledFocusToolBtn {...tprops}>...</StyledFocusToolBtn>
+                    )}
+                  ></ToolBtnPopup>
+                </React.Fragment>
+              }
             >
               <img
                 draggable={false}
                 style={{
+                  filter: focused && selected ? "brightness(0.5)" : "none",
                   objectFit: "fill",
-                  width: "100%",
-                  height: "100%",
+                  height: element.height,
                   display: "block"
                 }}
                 alt={element.caption}
                 src={src}
               />
-            </div>
-          </ReactResizeDetector>
-        </div>
+            </WithAttentionToolbar>
+          </div>
+        </ReactResizeDetector>
         {children}
-      </WithAttentionToolbar>
+      </div>
     );
   } else {
     imageHandler = (
@@ -224,13 +228,7 @@ export const ImageBlock = (
   }
 
   return (
-    <div
-      style={{
-        outline: focused && selected ? "1px solid rgb(46, 170, 220)" : "none"
-      }}
-      {...attributes}
-      contentEditable={false}
-    >
+    <div {...attributes} contentEditable={false}>
       {imageHandler}
     </div>
   );
