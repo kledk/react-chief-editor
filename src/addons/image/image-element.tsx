@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Transforms } from "slate";
+import { Editor, Transforms } from "slate";
 import { useFocused, useSelected, ReactEditor, useSlate } from "slate-react";
 import { WithAttentionToolbar } from "../../ui/WithAttentionToolbar";
 import { Input, InputWrapper } from "../../InputWrapper";
@@ -109,7 +109,7 @@ export const ImageBlock = (
     imageHandler = (
       <div
         style={{
-          width: 'auto',
+          width: "auto",
           position: "relative",
           height: element.height,
           display: "flex",
@@ -139,30 +139,50 @@ export const ImageBlock = (
               {...renderElementProps}
               btns={
                 <React.Fragment>
-                  <StyledFocusToolBtn onMouseDown={handleDelete}>
-                    Delete
+                  <StyledFocusToolBtn onMouseDown={toggleReplace}>
+                    Replace
                   </StyledFocusToolBtn>
                   <ToolBtnPopup
-                    renderContent={() => (
+                    renderContent={setShow => (
                       <StyledToolBox>
                         {/* <ToolbarBtn>Copy address</ToolbarBtn> */}
                         {/* <ToolbarBtn>Resize</ToolbarBtn> */}
-                        <ToolbarBtn onMouseDown={toggleReplace}>
-                          Replace
-                        </ToolbarBtn>
-                        <ToolbarBtn onMouseDown={() => align("left")}>
+                        <ToolbarBtn
+                          onMouseDown={() => {
+                            setShow(false);
+                            align("left");
+                          }}
+                        >
                           Align left
                         </ToolbarBtn>
-                        <ToolbarBtn onMouseDown={() => align("center")}>
+                        <ToolbarBtn
+                          onMouseDown={() => {
+                            setShow(false);
+                            align("center");
+                          }}
+                        >
                           Align center
                         </ToolbarBtn>
-                        <ToolbarBtn onMouseDown={() => align("right")}>
+                        <ToolbarBtn
+                          onMouseDown={() => {
+                            setShow(false);
+                            align("right");
+                          }}
+                        >
                           Align right
+                        </ToolbarBtn>
+                        <ToolbarBtn
+                          style={{ color: "#FE292D" }}
+                          onMouseDown={handleDelete}
+                        >
+                          Delete
                         </ToolbarBtn>
                       </StyledToolBox>
                     )}
                     renderToolBtn={tprops => (
-                      <StyledFocusToolBtn {...tprops}>...</StyledFocusToolBtn>
+                      <StyledFocusToolBtn {...tprops}>
+                        <span style={{}}>⚙︎</span>
+                      </StyledFocusToolBtn>
                     )}
                   ></ToolBtnPopup>
                 </React.Fragment>

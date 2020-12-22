@@ -2,7 +2,7 @@ import { ReactEditor } from "slate-react";
 
 export type KeyHandler = {
   /** Key pattern used to trigger, eg. "mod+b"*/
-  pattern?: string | null;
+  pattern?: string | null | string[];
   /** Handler function for key trigger.*/
   handler: (
     e: KeyboardEvent,

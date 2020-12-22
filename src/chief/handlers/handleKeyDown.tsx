@@ -10,6 +10,12 @@ export const handleKeyDown = (
   for (let handler of onKeyHandlers) {
     if (handler.pattern) {
       if (
+        Array.isArray(handler.pattern) &&
+        handler.pattern.some(h => isHotkey(h, event.nativeEvent)) &&
+        handler.handler(event.nativeEvent, editor)
+      ) {
+        return;
+      } else if (
         isHotkey(handler.pattern, event.nativeEvent) &&
         handler.handler(event.nativeEvent, editor)
       ) {

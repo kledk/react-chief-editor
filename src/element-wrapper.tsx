@@ -3,17 +3,18 @@ import { RenderElementProps } from "slate-react";
 import { useFocused } from "./Focused";
 import { Show } from "./show";
 import { useChief } from "./chief/hooks/use-chief";
+import { useDropdownMenu } from "react-overlays";
 
 export function ElementWrapper(
   props: RenderElementProps & {
-    attentionChildren?: React.ReactNode;
+    renderOnFocus?: React.ReactNode;
     style?: React.CSSProperties;
   }
 ) {
   const {
     children,
     element,
-    attentionChildren,
+    renderOnFocus,
     style,
     attributes,
     ...otherProps
@@ -27,6 +28,7 @@ export function ElementWrapper(
   const handleLeave = () => {
     setInside(false);
   };
+  const { props: dropDownprops } = useDropdownMenu();
   return (
     <div
       data-slate-zero-width="z"
@@ -36,8 +38,12 @@ export function ElementWrapper(
       {...otherProps}
     >
       <Show when={!readOnly && (isFocusedWithin || inside)}>
-        <div style={{ position: "absolute", zIndex: 2, ...style }}>
-          {attentionChildren}
+        <div
+          role="menu"
+          style={{ position: "absolute", zIndex: 2, ...style }}
+          {...dropDownprops}
+        >
+          {renderOnFocus}
         </div>
       </Show>
       {children}

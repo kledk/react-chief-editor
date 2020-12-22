@@ -15,7 +15,7 @@ import { HistoryEditor } from "slate-history";
 import isUrl from "is-url";
 import { ImageExtensions } from "./ImageExtensions";
 import { ImageBlock } from "./image-element";
-import { iPresenter } from "../../chief";
+import { iPresenter, useOnKeyDown } from "../../chief";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 export interface ImageElement extends ChiefElement {
@@ -117,6 +117,24 @@ export function ImageAddon(
 ) {
   const editor = useSlate();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useOnKeyDown({
+    pattern: ["delete", "backspace"],
+    handler: (e, editor) => {
+      if (editor.selection) {
+        const element = getNodeFromSelection(
+          editor,
+          editor.selection
+        ) as ImageElement;
+        if (Editor.isVoid(editor, element)) {
+          props.onRemoved && props.onRemoved(element.url);
+          Transforms.delete(editor, {
+            at: ReactEditor.findPath(editor, element)
+          });
+        }
+      }
+    }
+  });
 
   usePlugin({
     isVoid: isVoid => element =>

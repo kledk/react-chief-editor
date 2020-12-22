@@ -19,6 +19,7 @@ import { handleKeyUp } from "./handlers/handleKeyUp";
 import { handleKeyDown } from "./handlers/handleKeyDown";
 import { handleRenderLeaf } from "./handlers/handleRenderLeaf";
 import { handleRenderElement } from "./handlers/handleRenderElement";
+import { useCorrectVoidDeleteBehavior } from "./utils/use-correct-void-delete-behavior";
 
 export const RichEditor = {
   ...ReactEditor,
@@ -57,6 +58,8 @@ export const Editor = React.memo(
       decorations
     } = useChief();
     const { children, ...otherProps } = props;
+
+    useCorrectVoidDeleteBehavior();
 
     const renderElement = useCallback(
       (props: RenderElementProps) => {

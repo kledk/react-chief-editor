@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Editor,
   Chief,
@@ -34,9 +34,20 @@ import {
   ParagraphControl,
   RenderControlProps,
   StyledToolBox,
-  ToolsWrapper
+  ToolsWrapper,
+  ChiefPresentation,
+  usePlugin,
+  useOnKeyDown,
+  getNodeFromSelection
 } from "react-chief-editor";
-import { Node, Element } from "slate";
+import {
+  Node,
+  Element,
+  Range,
+  Path,
+  Editor as SlateEditor,
+  Transforms
+} from "slate";
 import { css } from "styled-components";
 import MdiIcon from "@mdi/react";
 import {
@@ -61,6 +72,11 @@ import lorem from "./lorem.json";
 import redia from "./redia.json";
 import { ColumnsAddon } from "./ColumnsAddon";
 import { ContentStyle } from "./ContentStyle";
+import { useSlate } from "slate-react";
+
+function TestAddon() {
+  return null;
+}
 
 function Icon(
   props: React.ComponentProps<typeof MdiIcon> & Partial<RenderControlProps>
@@ -108,7 +124,21 @@ function App() {
   //   }
   // ]);
 
-  console.log(JSON.stringify(value));
+  // console.log(JSON.stringify(value));
+
+  useEffect(() => {
+    const data = window.localStorage.getItem("data");
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        setValue(parsed);
+      } catch (error) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("data", JSON.stringify(value));
+  }, [value]);
 
   return (
     <div style={{ flex: 1 }}>
@@ -138,6 +168,7 @@ function App() {
             }
           }}
         >
+          <TestAddon />
           <ColumnsAddon />
           <LabelsAddon labels={editorLabels} />
           <ParagraphAddon />
@@ -257,6 +288,25 @@ function App() {
           </div>
         </Chief>
       </ContentStyle>
+      <div style={{ flex: 1 }}>
+        <ContentStyle>
+          <ChiefPresentation
+            value={value}
+            presenters={[
+              ParagraphAddon.Presenter,
+              BoldAddon.Presenter,
+              ItalicAddon.Presenter,
+              StrikethroughAddon.Presenter,
+              UnderlineAddon.Presenter,
+              HeadingsAddon.Presenter,
+              LinkAddon.Presenter,
+              ListsAddon.Presenter,
+              ImageAddon.Presenter,
+              TextColorAddon.Presenter
+            ]}
+          ></ChiefPresentation>
+        </ContentStyle>
+      </div>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export function WithAttentionToolbar(
   return (
     <ElementWrapper
       {...renderElementProps}
-      attentionChildren={
+      renderOnFocus={
         <StyledFocusToolbar>
           <ToolsWrapper>{btns}</ToolsWrapper>
         </StyledFocusToolbar>

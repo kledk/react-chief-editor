@@ -3,9 +3,9 @@ import { StyledToolBase } from "../StyledToolBox";
 import { ButtonBase } from "./button-base";
 
 export const StyledFocusToolBtn = styled(ButtonBase)`
-  background-color: rgba(47, 47, 47, 0.67);
+  background-color: rgba(47, 47, 47, 0.85);
   &:hover {
-    background-color: rgba(67, 67, 67, 0.67);
+    background-color: rgba(67, 67, 67, 0.70);
   }
   color: white;
   border: none;
