@@ -6,6 +6,9 @@ export const StyledToolbarBtn = styled<typeof ButtonBase>(ButtonBase)<{
   isActive?: boolean;
   rounded?: boolean;
 }>`
+  @media print {
+    display: none;
+  }
   width: 100%;
   transition: all 250ms;
   background-color: white;

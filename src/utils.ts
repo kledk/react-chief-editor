@@ -34,10 +34,7 @@ export const useGlobalHover = (element: HTMLElement | null) => {
   return over;
 };
 
-export function useHover<T extends HTMLElement>(): [
-  React.RefObject<T>,
-  boolean
-] {
+export function useHover<T extends HTMLElement>() {
   const [value, setValue] = useState(false);
 
   const ref = useRef<T>(null);
@@ -62,7 +59,7 @@ export function useHover<T extends HTMLElement>(): [
     [ref.current] // Recall only if ref changes
   );
 
-  return [ref, value];
+  return [ref, value] as const;
 }
 
 export const getActiveNode = (editor: ReactEditor) => {
@@ -95,7 +92,7 @@ export const useLastFocused = (editor: ReactEditor) => {
   const [state, setState] = useState<State>({
     node: null,
     point: null,
-    selection: null
+    selection: null,
   });
   const { selection } = editor;
   const current = getActiveNodeType(editor);
@@ -136,7 +133,7 @@ export const toggleBlock = (editor: Editor, type: string) => {
   const isActive = isNodeActive(editor, type);
 
   Transforms.setNodes(editor, {
-    type: isActive ? "paragraph" : type
+    type: isActive ? "paragraph" : type,
   });
 };
 
@@ -147,7 +144,7 @@ export const isNodeActive = (editor: Editor, type: string) => {
   }
   const [match] = Editor.nodes(editor, {
     at: selection,
-    match: n => n.type === type
+    match: (n) => n.type === type,
   });
   return !!match;
 };
@@ -201,9 +198,9 @@ export const findNodes = (editor: Editor, match: (node: Node) => boolean) => {
     mode: "all",
     at: {
       anchor: Editor.start(editor, []),
-      focus: Editor.end(editor, [])
+      focus: Editor.end(editor, []),
     },
-    match
+    match,
   });
 };
 

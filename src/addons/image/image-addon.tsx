@@ -55,7 +55,7 @@ export function ImageAddon(
     },
   });
   usePlugin({
-    isVoid: registerVoidType("image", isImageElement),
+    isVoid: registerVoidType(isImageElement),
     insertData: (insertData, editor) => (data) => {
       const { files } = data;
 

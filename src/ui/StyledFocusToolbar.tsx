@@ -1,8 +1,11 @@
 import styled from "styled-components";
-import { StyledToolBase } from "../StyledToolBox";
+import { StyledToolBase } from "./StyledToolBox";
 import { ButtonBase } from "./button-base";
 
 export const StyledFocusToolBtn = styled(ButtonBase)`
+  @media print {
+    display: none;
+  }
   background-color: rgba(47, 47, 47, 0.85);
   &:hover {
     background-color: rgba(67, 67, 67, 0.70);

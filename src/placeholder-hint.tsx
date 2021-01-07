@@ -9,6 +9,9 @@ export const PlaceholderHint = styled.span<{
   display: inline-block;
   width: 100%;
   ::before {
+    @media print {
+      display: none;
+    }
     filter: brightness(40%) invert(50%) opacity(0.2) grayscale(100%);
     content: "${props =>
       props.isEmpty && props.placeholder && props.placeholder.length > 0
@@ -20,6 +23,9 @@ export const PlaceholderHint = styled.span<{
     position: absolute;
   }
   &:hover:before {
+    @media print {
+      display: none;
+    }
     content: "${props =>
       props.isEmpty && props.hoverHint && !props.placeholder
         ? props.hoverHint

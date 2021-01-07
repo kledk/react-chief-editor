@@ -5,7 +5,7 @@ import { AddonProps } from "../../addon";
 import isUrl from "is-url";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import { useOnClickOutside } from "../../utils";
-import { StyledToolBox } from "../../StyledToolBox";
+import { StyledToolBox } from "../../ui/StyledToolBox";
 import { InputWrapper, Input } from "../../InputWrapper";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
@@ -17,6 +17,7 @@ import { iPresenter } from "../../chief/chief-presentation";
 import { ElementHoverTip } from "../../element-hover-tip";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
+import { registerInlineType } from "../../chief/utils/register-inline";
 
 export const isLinkELement = (element: Element) => {
   return element.type === "link" && typeof element.url === "string";
@@ -25,14 +26,14 @@ export const isLinkELement = (element: Element) => {
 export function LinkAddon(props: AddonProps) {
   useLabels(props.labels);
   usePlugin({
-    insertText: (insertText, editor) => text => {
+    insertText: (insertText, editor) => (text) => {
       if (text && isUrl(text)) {
         wrapLink(editor, text);
       } else {
         insertText(text);
       }
     },
-    insertData: (insertData, editor) => data => {
+    insertData: (insertData, editor) => (data) => {
       const text = data.getData("text/plain");
       if (text && isUrl(text)) {
         wrapLink(editor, text);
@@ -40,15 +41,12 @@ export function LinkAddon(props: AddonProps) {
         insertData(data);
       }
     },
-    isInline: isInline => element => {
-      // console.log("isInline, link");
-      return isLinkELement(element) ? true : isInline(element);
-    }
+    isInline: registerInlineType(isLinkELement),
   });
 
   useRenderElement<{ url: string } & ChiefElement>({
     typeMatch: "link",
-    renderElement: props => (
+    renderElement: (props) => (
       <ElementHoverTip
         delayed
         placement="bottom"
@@ -60,13 +58,13 @@ export function LinkAddon(props: AddonProps) {
           </span>
         }
       >
-        {triggerRef => (
+        {(triggerRef) => (
           <a {...props.attributes} href={props.element.url}>
             <span ref={triggerRef}>{props.children}</span>
           </a>
         )}
       </ElementHoverTip>
-    )
+    ),
   });
   return null;
 }
@@ -76,7 +74,7 @@ export function LinkControl(props: ControlProps) {
   const isActive = isLinkActive(editor);
   if (
     !useIsControlEligable({
-      isText: true
+      isText: true,
     })
   ) {
     return null;
@@ -84,7 +82,7 @@ export function LinkControl(props: ControlProps) {
   return (
     <ToolBtnPopup
       shortcut="mod+k"
-      renderContent={setShow => (
+      renderContent={(setShow) => (
         <StyledToolBox>
           <LinkPopup onClose={() => setShow(false)} />
         </StyledToolBox>
@@ -94,9 +92,9 @@ export function LinkControl(props: ControlProps) {
           tooltip={{
             label: {
               key: "elements.link",
-              defaultLabel: "Add link"
+              defaultLabel: "Add link",
             },
-            shortcut: shortcutText("mod+k")
+            shortcut: shortcutText("mod+k"),
           }}
           {...tprops}
           isActive={isActive || show}
@@ -111,8 +109,8 @@ export function LinkControl(props: ControlProps) {
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {
   element: {
     typeMatch: "link",
-    renderElement: props => <a href={props.element.url}>{props.children}</a>
-  }
+    renderElement: (props) => <a href={props.element.url}>{props.children}</a>,
+  },
 };
 
 LinkAddon.Presenter = Presenter;
@@ -124,12 +122,12 @@ export const insertLink = (editor: Editor, url: string) => {
 };
 
 export const isLinkActive = (editor: Editor) => {
-  const [link] = Editor.nodes(editor, { match: n => n.type === "link" });
+  const [link] = Editor.nodes(editor, { match: (n) => n.type === "link" });
   return Boolean(link);
 };
 
 const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, { match: n => n.type === "link" });
+  Transforms.unwrapNodes(editor, { match: (n) => n.type === "link" });
 };
 
 const wrapLink = (editor: Editor, url: string) => {
@@ -142,7 +140,7 @@ const wrapLink = (editor: Editor, url: string) => {
   const link = {
     type: "link",
     url,
-    children: isCollapsed ? [{ text: url }] : []
+    children: isCollapsed ? [{ text: url }] : [],
   };
 
   if (isCollapsed) {
@@ -168,7 +166,7 @@ function LinkPopup(props: { onClose: () => void }) {
   if (selection) {
     const [_linkNode] = Editor.nodes(editor, {
       at: selection,
-      match: n => n.type === "link"
+      match: (n) => n.type === "link",
     });
     linkNode = _linkNode && _linkNode[0];
   }
@@ -206,7 +204,7 @@ function LinkPopup(props: { onClose: () => void }) {
           padding: 9,
           display: "flex",
           minWidth: 400,
-          flexDirection: "row"
+          flexDirection: "row",
         }}
       >
         <InputWrapper>
@@ -217,7 +215,7 @@ function LinkPopup(props: { onClose: () => void }) {
             }
             placeholder={getLabel({
               key: "elements.link.placeholder",
-              defaultLabel: "Paste or type your link here"
+              defaultLabel: "Paste or type your link here",
             })}
             autoFocus
           />
@@ -229,7 +227,7 @@ function LinkPopup(props: { onClose: () => void }) {
         >
           {getLabel({
             key: "elements.link.btn.link",
-            defaultLabel: "Link"
+            defaultLabel: "Link",
           })}
         </ToolbarBtn>
         <ToolbarBtn
@@ -244,7 +242,7 @@ function LinkPopup(props: { onClose: () => void }) {
         >
           {getLabel({
             key: "elements.link.btn.unlink",
-            defaultLabel: "Unlink"
+            defaultLabel: "Unlink",
           })}
         </ToolbarBtn>
       </div>

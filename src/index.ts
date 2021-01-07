@@ -29,5 +29,5 @@ export * from "./chief/utils/with-chief-on-plugIn";
 export * from "./defaultTheme";
 export * from "./ToolbarBtn";
 export * from "./InputWrapper";
-export * from "./StyledToolBox";
+export * from "./ui/StyledToolBox";
 export * from "./ToolsWrapper";

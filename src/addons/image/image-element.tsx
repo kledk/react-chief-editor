@@ -8,7 +8,7 @@ import { ImageElement } from "./index";
 import { Button } from "../../ui/button";
 import styled from "styled-components";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
-import { StyledToolBox } from "../../StyledToolBox";
+import { StyledToolBox } from "../../ui/StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { StyledFocusToolBtn } from "../../ui/StyledFocusToolbar";
 import { ChiefRenderElementProps } from "../../chief/chief";

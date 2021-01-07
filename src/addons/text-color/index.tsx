@@ -4,20 +4,20 @@ import { useSlate } from "slate-react";
 import { AddonProps } from "../../addon";
 import { ChiefElement, iPresenter, useRenderLeaf } from "../../chief";
 import { renderLeaf } from "../../leaf-renderer";
-import { StyledToolBox } from "../../StyledToolBox";
+import { StyledToolBox } from "../../ui/StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
 import {
   getActiveNode,
   getNodeFromSelection,
-  useOnClickOutside
+  useOnClickOutside,
 } from "../../utils";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
 export function TextColorAddon() {
   useRenderLeaf({
-    renderLeaf: props => {
+    renderLeaf: (props) => {
       if (typeof props.leaf["color"] === "string")
         return (
           <span
@@ -28,7 +28,7 @@ export function TextColorAddon() {
           </span>
         );
       return undefined;
-    }
+    },
   });
   return null;
 }
@@ -36,14 +36,14 @@ export function TextColorAddon() {
 export function TextColorControl(props: { colors?: string[] } & ControlProps) {
   if (
     !useIsControlEligable({
-      isText: true
+      isText: true,
     })
   ) {
     return null;
   }
   return (
     <ToolBtnPopup
-      renderContent={setShow => (
+      renderContent={(setShow) => (
         <StyledToolBox>
           <ColorSelector
             colors={
@@ -51,7 +51,7 @@ export function TextColorControl(props: { colors?: string[] } & ControlProps) {
                 "rgb(142, 209, 252)",
                 "rgb(132, 109, 52)",
                 "rgb(42, 09, 232)",
-                "rgb(54, 209, 12)"
+                "rgb(54, 209, 12)",
               ]
             }
             onClose={() => setShow(false)}
@@ -63,8 +63,8 @@ export function TextColorControl(props: { colors?: string[] } & ControlProps) {
           tooltip={{
             label: {
               key: "marks.textcolor",
-              defaultLabel: "Textcolor"
-            }
+              defaultLabel: "Textcolor",
+            },
           }}
           {...tprops}
           isActive={show}
@@ -78,11 +78,11 @@ export function TextColorControl(props: { colors?: string[] } & ControlProps) {
 
 const Presenter: iPresenter<{ url: string } & ChiefElement> = {
   leaf: {
-    renderLeaf: props =>
+    renderLeaf: (props) =>
       renderLeaf(props, "color", "span", {
-        style: { color: props.leaf["color"] }
-      })
-  }
+        style: { color: props.leaf["color"] },
+      }),
+  },
 };
 TextColorAddon.Presenter = Presenter;
 
@@ -95,7 +95,7 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
   if (selection) {
     const [_node] = Editor.nodes(editor, {
       at: selection,
-      match: n => Boolean(n["color"])
+      match: (n) => Boolean(n["color"]),
     });
     node = _node && _node[0];
   }
@@ -111,7 +111,7 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
       Transforms.setNodes(
         editor,
         { color },
-        { match: n => Text.isText(n), split: true }
+        { match: (n) => Text.isText(n), split: true }
       );
       onClose();
     },
@@ -120,52 +120,68 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
 
   return (
     <div
-      ref={wrapperRef}
       style={{
-        padding: 9,
-        display: "flex",
-        flexDirection: "row"
+        padding: 5,
       }}
     >
-      <div style={{ display: "flex" }}>
-        <div
-          onClick={() => handleChangeTextColor(undefined)}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 24,
-            height: 24,
-            border: "1px solid rgb(236 236 236)",
-            margin: 2,
-            cursor: "pointer"
-          }}
-        >
-          A
+      <div
+        ref={wrapperRef}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        <div style={{ display: "flex", flexWrap: "wrap", maxWidth: 170 }}>
+          <ToolbarBtn
+            tooltip={{
+              label: {
+                key: "color.default",
+                defaultLabel: "Default",
+              },
+            }}
+            onClick={() => handleChangeTextColor(undefined)}
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: 24,
+              height: 24,
+              border: "1px solid rgb(236 236 236)",
+              margin: 2,
+              cursor: "pointer",
+            }}
+          >
+            A
+          </ToolbarBtn>
+          {colors.map((color, i) => {
+            return (
+              <ToolbarBtn
+                tooltip={{
+                  label: {
+                    key: `color.${color}`,
+                    defaultLabel: color,
+                  },
+                }}
+                key={i}
+                onClick={() => handleChangeTextColor(color)}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  border: "1px solid rgb(236 236 236)",
+                  width: 24,
+                  height: 24,
+                  margin: 2,
+                  color: color,
+                  cursor: "pointer",
+                }}
+              >
+                A
+              </ToolbarBtn>
+            );
+          })}
         </div>
-        {colors.map((color, i) => {
-          return (
-            <div
-              key={i}
-              onClick={() => handleChangeTextColor(color)}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                border: "1px solid rgb(236 236 236)",
-                width: 24,
-                height: 24,
-                margin: 2,
-                color: color,
-                cursor: "pointer"
-              }}
-            >
-              A
-            </div>
-          );
-        })}
-      </div>
-      {/* <div style={{ display: "flex" }}>
+        {/* <div style={{ display: "flex" }}>
         {bgColors.map(color => {
           return (
             <div
@@ -181,6 +197,7 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
           );
         })}
       </div> */}
+      </div>
     </div>
   );
 }

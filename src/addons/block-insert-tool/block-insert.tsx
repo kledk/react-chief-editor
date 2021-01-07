@@ -7,6 +7,9 @@ import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
 
 export const BlockInsertBtn = styled(ButtonBase)`
+  @media print {
+    display: none;
+  }
   user-select: none;
   border: none;
   background: transparent;
