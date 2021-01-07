@@ -17,7 +17,7 @@ export const Heading = (props: ChiefRenderElementProps) => {
     h6: "Heading 6"
   };
   const [getLabel] = useLabels();
-  let placeholder = getLabel({
+  const placeholder = getLabel({
     key: `elements.heading.${props.element.type}.placeholder`,
     defaultLabel: defaultPlaceholderTexts[props.element.type]
   });

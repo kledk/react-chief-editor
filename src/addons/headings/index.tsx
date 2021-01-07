@@ -95,9 +95,13 @@ function toggleHeading(editor: Editor, heading: string) {
       type: "paragraph"
     });
   } else {
-    Transforms.setNodes(editor, {
-      type: heading
-    });
+    Transforms.setNodes(
+      editor,
+      {
+        type: heading
+      },
+      { split: true }
+    );
   }
 }
 

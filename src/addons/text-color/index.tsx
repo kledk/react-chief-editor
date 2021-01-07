@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useRef } from "react";
-import { Text, Transforms } from "slate";
+import { Editor, Node, Text, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { AddonProps } from "../../addon";
 import { ChiefElement, iPresenter, useRenderLeaf } from "../../chief";
@@ -7,7 +7,11 @@ import { renderLeaf } from "../../leaf-renderer";
 import { StyledToolBox } from "../../StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";
 import { ToolBtnPopup } from "../../ToolBtnPopup";
-import { useOnClickOutside } from "../../utils";
+import {
+  getActiveNode,
+  getNodeFromSelection,
+  useOnClickOutside
+} from "../../utils";
 import { useSaveSelection } from "../../chief/utils/saved-selection";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
 
@@ -87,6 +91,14 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
   const { onClose, colors } = props;
   const { selection } = editor;
   const { saveSelection } = useSaveSelection();
+  let node: Node | null = null;
+  if (selection) {
+    const [_node] = Editor.nodes(editor, {
+      at: selection,
+      match: n => Boolean(n["color"])
+    });
+    node = _node && _node[0];
+  }
   useEffect(() => {
     return saveSelection(selection);
   }, []);
@@ -119,26 +131,37 @@ function ColorSelector(props: { onClose: () => void; colors: string[] }) {
         <div
           onClick={() => handleChangeTextColor(undefined)}
           style={{
-            width: 18,
-            height: 18,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: 24,
+            height: 24,
+            border: "1px solid rgb(236 236 236)",
             margin: 2,
-            backgroundColor: "none",
             cursor: "pointer"
           }}
-        />
+        >
+          A
+        </div>
         {colors.map((color, i) => {
           return (
             <div
               key={i}
               onClick={() => handleChangeTextColor(color)}
               style={{
-                width: 18,
-                height: 18,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                border: "1px solid rgb(236 236 236)",
+                width: 24,
+                height: 24,
                 margin: 2,
-                backgroundColor: color,
+                color: color,
                 cursor: "pointer"
               }}
-            />
+            >
+              A
+            </div>
           );
         })}
       </div>

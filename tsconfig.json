@@ -5,13 +5,13 @@
     "declaration": true,
     "declarationDir": "dist",
     "declarationMap": true,
-    "downlevelIteration": false,
+    "downlevelIteration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "jsx": "react",
-    "lib": ["dom", "esnext", "ES2015.Generator"],
-    "module": "ES2015",
+    "lib": ["ES6", "dom", "ESNext"],
+    "jsx": "react-jsx",
+    "module": "es2015",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -25,7 +25,7 @@
     "strict": true,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "ES2015"
+    "target": "ES6"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "example"]

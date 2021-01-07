@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  ReactNode
-} from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSlate, useEditor } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
@@ -60,7 +54,7 @@ export function LinkAddon(props: AddonProps) {
         placement="bottom"
         tip={
           <span>
-            <a target="_blank" href={props.element.url}>
+            <a rel="noreferrer" target="_blank" href={props.element.url}>
               {props.element.url}
             </a>
           </span>
@@ -89,10 +83,10 @@ export function LinkControl(props: ControlProps) {
   }
   return (
     <ToolBtnPopup
-      shortcut={"mod+k"}
+      shortcut="mod+k"
       renderContent={setShow => (
         <StyledToolBox>
-          <LinkPopup onClose={() => setShow(false)}></LinkPopup>
+          <LinkPopup onClose={() => setShow(false)} />
         </StyledToolBox>
       )}
       renderToolBtn={(tprops, show) => (
