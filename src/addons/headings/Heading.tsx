@@ -14,12 +14,12 @@ export const Heading = (props: ChiefRenderElementProps) => {
     h3: "Heading 3",
     h4: "Heading 4",
     h5: "Heading 5",
-    h6: "Heading 6"
+    h6: "Heading 6",
   };
   const [getLabel] = useLabels();
   const placeholder = getLabel({
     key: `elements.heading.${props.element.type}.placeholder`,
-    defaultLabel: defaultPlaceholderTexts[props.element.type]
+    defaultLabel: defaultPlaceholderTexts[props.element.type],
   });
 
   return React.createElement(

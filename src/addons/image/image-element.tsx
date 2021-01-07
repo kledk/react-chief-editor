@@ -189,7 +189,7 @@ export const ImageBlock = (
               }
             >
               <img
-                draggable={false}
+                // draggable={false}
                 style={{
                   filter: focused && selected ? "brightness(0.5)" : "none",
                   objectFit: "fill",
