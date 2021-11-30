@@ -6,7 +6,7 @@ import {
   useRenderElement,
   usePlugin,
   useOnKeyDown
-} from "react-chief-editor";
+} from "../../src/index";
 
 // Custom addon creation
 

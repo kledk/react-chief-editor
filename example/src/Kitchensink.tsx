@@ -38,15 +38,15 @@ import {
   ChiefPresentation,
   usePlugin,
   useOnKeyDown,
-  getNodeFromSelection
-} from "react-chief-editor";
+  getNodeFromSelection,
+} from "../../src/index";
 import {
   Node,
   Element,
   Range,
   Path,
   Editor as SlateEditor,
-  Transforms
+  Transforms,
 } from "slate";
 import { css } from "styled-components";
 import MdiIcon from "@mdi/react";
@@ -66,7 +66,7 @@ import {
   mdiFormatUnderline,
   mdiImage,
   mdiLink,
-  mdiFormatColorText
+  mdiFormatColorText,
 } from "@mdi/js";
 import lorem from "./lorem.json";
 import redia from "./redia.json";
@@ -111,7 +111,7 @@ const editorLabels = {
   "elements.heading.h3.placeholder": "Overskrift 3",
   "elements.heading.h4.placeholder": "Overskrift 4",
   "elements.heading.h5.placeholder": "Overskrift 5",
-  "elements.heading.h6.placeholder": "Overskrift 6"
+  "elements.heading.h6.placeholder": "Overskrift 6",
 };
 
 function App() {
@@ -145,7 +145,7 @@ function App() {
       <ContentStyle>
         <Chief
           value={value}
-          onChange={value => setValue(value)}
+          onChange={(value) => setValue(value)}
           theme={{
             overrides: {
               // StyledToolbarBtn: css`
@@ -165,7 +165,7 @@ function App() {
               // ui: css`
               //   /* font-family: monospace; */
               // `
-            }
+            },
           }}
         >
           <TestAddon />
@@ -187,41 +187,45 @@ function App() {
           <TextColorAddon />
           <div
             style={{
-              marginLeft: 40
+              marginLeft: 40,
             }}
           >
             <BlockInsert>
               <StyledToolBox>
                 <ToolsWrapper>
                   <ParagraphControl>
-                    {props => <Icon path={mdiFormatParagraph} {...props} />}
+                    {(props) => <Icon path={mdiFormatParagraph} {...props} />}
                   </ParagraphControl>
                   <HeadingControl heading="h1">
-                    {props => <Icon path={mdiFormatHeader1} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader1} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h2">
-                    {props => <Icon path={mdiFormatHeader2} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader2} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h3">
-                    {props => <Icon path={mdiFormatHeader3} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader3} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h4">
-                    {props => <Icon path={mdiFormatHeader4} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader4} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h5">
-                    {props => <Icon path={mdiFormatHeader5} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader5} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h6">
-                    {props => <Icon path={mdiFormatHeader6} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader6} {...props} />}
                   </HeadingControl>
                   <ListControl type="ordered-list">
-                    {props => <Icon path={mdiFormatListNumbered} {...props} />}
+                    {(props) => (
+                      <Icon path={mdiFormatListNumbered} {...props} />
+                    )}
                   </ListControl>
                   <ListControl type="unordered-list">
-                    {props => <Icon path={mdiFormatListBulleted} {...props} />}
+                    {(props) => (
+                      <Icon path={mdiFormatListBulleted} {...props} />
+                    )}
                   </ListControl>
                   <ImageControl>
-                    {props => <Icon path={mdiImage} {...props} />}
+                    {(props) => <Icon path={mdiImage} {...props} />}
                   </ImageControl>
                 </ToolsWrapper>
               </StyledToolBox>
@@ -230,37 +234,39 @@ function App() {
               <StyledToolBox>
                 <ToolsWrapper>
                   <BoldControl>
-                    {props => <Icon path={mdiFormatBold} {...props} />}
+                    {(props) => <Icon path={mdiFormatBold} {...props} />}
                   </BoldControl>
                   <ItalicControl>
-                    {props => <Icon path={mdiFormatItalic} {...props} />}
+                    {(props) => <Icon path={mdiFormatItalic} {...props} />}
                   </ItalicControl>
                   <StrikethroughControl>
-                    {props => <Icon path={mdiFormatStrikethrough} {...props} />}
+                    {(props) => (
+                      <Icon path={mdiFormatStrikethrough} {...props} />
+                    )}
                   </StrikethroughControl>
                   <UnderlineControl>
-                    {props => <Icon path={mdiFormatUnderline} {...props} />}
+                    {(props) => <Icon path={mdiFormatUnderline} {...props} />}
                   </UnderlineControl>
                   <HeadingControl heading="h1">
-                    {props => <Icon path={mdiFormatHeader1} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader1} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h2">
-                    {props => <Icon path={mdiFormatHeader2} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader2} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h3">
-                    {props => <Icon path={mdiFormatHeader3} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader3} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h4">
-                    {props => <Icon path={mdiFormatHeader4} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader4} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h5">
-                    {props => <Icon path={mdiFormatHeader5} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader5} {...props} />}
                   </HeadingControl>
                   <HeadingControl heading="h6">
-                    {props => <Icon path={mdiFormatHeader6} {...props} />}
+                    {(props) => <Icon path={mdiFormatHeader6} {...props} />}
                   </HeadingControl>
                   <LinkControl>
-                    {props => <Icon path={mdiLink} {...props} />}
+                    {(props) => <Icon path={mdiLink} {...props} />}
                   </LinkControl>
                   <TextColorControl
                     colors={[
@@ -273,10 +279,10 @@ function App() {
                       "#237777",
                       "#376c6c",
                       "#63a5a5",
-                      "#9d5961"
+                      "#9d5961",
                     ]}
                   >
-                    {props => <Icon path={mdiFormatColorText} {...props} />}
+                    {(props) => <Icon path={mdiFormatColorText} {...props} />}
                   </TextColorControl>
                 </ToolsWrapper>
               </StyledToolBox>
@@ -302,7 +308,7 @@ function App() {
               LinkAddon.Presenter,
               ListsAddon.Presenter,
               ImageAddon.Presenter,
-              TextColorAddon.Presenter
+              TextColorAddon.Presenter,
             ]}
           ></ChiefPresentation>
         </ContentStyle>
