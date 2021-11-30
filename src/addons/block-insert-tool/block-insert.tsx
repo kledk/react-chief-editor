@@ -1,10 +1,11 @@
 import { useOnClickOutside } from "../../utils";
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useSlate, ReactEditor } from "slate-react";
-import { Node, Editor, Path, Transforms } from "slate";
+import { Node, Editor, Transforms } from "slate";
 import { Manager, Reference, Popper } from "react-popper";
 import styled from "styled-components";
 import { ButtonBase } from "../../ui/button-base";
+import { useHoveredNode } from "./use-hovered-node";
 
 export const BlockInsertBtn = styled(ButtonBase)`
   @media print {
@@ -41,36 +42,6 @@ export const BlockInsertBtn = styled(ButtonBase)`
     }
   }
 `;
-
-function useHoveredNode(editor: ReactEditor) {
-  const [node, setNode] = useState<{ node: Node; path: Path } | null>(null);
-  useEffect(() => {
-    try {
-      const [rootNode] = Editor.node(editor, {
-        anchor: Editor.start(editor, []),
-        focus: Editor.end(editor, [])
-      });
-      if (rootNode && Node.isNode(rootNode)) {
-        const firstDOMPoint = ReactEditor.toDOMNode(editor, rootNode);
-        firstDOMPoint.addEventListener("mousemove", e => {
-          if (ReactEditor.hasDOMNode(editor, e.target as globalThis.Node)) {
-            const node = ReactEditor.toSlateNode(
-              editor,
-              e.target as globalThis.Node
-            );
-            const path = ReactEditor.findPath(editor, node);
-            setNode({ node, path });
-          } else {
-            setNode(null);
-          }
-        });
-      }
-    } catch (err) {
-      setNode(null);
-    }
-  }, [editor]);
-  return node;
-}
 
 export function BlockInsert(props: { children?: React.ReactNode }) {
   const editor = useSlate();

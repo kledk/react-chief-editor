@@ -1,7 +1,16 @@
+//@ts-nocheck
 import { useEffect, useCallback, useState, useRef } from "react";
-import { Editor, Point, Node, Transforms, Location } from "slate";
+import {
+  Editor,
+  Point,
+  Node,
+  Transforms,
+  Location,
+  Element,
+  Range,
+} from "slate";
 import { ReactEditor } from "slate-react";
-import { Range } from "slate";
+import { ChiefEditor } from "./typings";
 
 export const isInside = (rect: ClientRect, x: number, y: number) => {
   return (
@@ -62,7 +71,7 @@ export function useHover<T extends HTMLElement>() {
   return [ref, value] as const;
 }
 
-export const getActiveNode = (editor: ReactEditor) => {
+export const getActiveNode = (editor: Editor) => {
   if (editor.selection) {
     const [, path] = Editor.node(editor, editor.selection);
     if (path.length) {
@@ -73,9 +82,9 @@ export const getActiveNode = (editor: ReactEditor) => {
   return null;
 };
 
-export const getActiveNodeType = (editor: ReactEditor) => {
+export const getActiveNodeType = (editor: Editor) => {
   const block = getActiveNode(editor);
-  return block ? block.type : null;
+  return Element.isElement(block) ? block.type : null;
 };
 
 export const clone = (value: any) => {
@@ -88,7 +97,7 @@ interface State {
   selection: Range | null;
 }
 
-export const useLastFocused = (editor: ReactEditor) => {
+export const useLastFocused = (editor: ChiefEditor) => {
   const [state, setState] = useState<State>({
     node: null,
     point: null,
@@ -144,20 +153,24 @@ export const isNodeActive = (editor: Editor, type: string) => {
   }
   const [match] = Editor.nodes(editor, {
     at: selection,
-    match: (n) => n.type === type,
+    match: (n) => Element.isElement(n) && n.type === type,
   });
   return !!match;
 };
 
 export function useOnClickOutside(
-  ref: React.MutableRefObject<any>,
+  ref: React.RefObject<HTMLElement | null>,
   handler: (event: MouseEvent | TouchEvent) => void
 ) {
   useEffect(
     () => {
       const listener = (event: MouseEvent | TouchEvent) => {
         // Do nothing if clicking ref's element or descendent elements
-        if (!ref.current || ref.current.contains(event.target)) {
+        if (
+          !ref.current ||
+          (event.target &&
+            ref.current.contains(event.target as globalThis.Node))
+        ) {
           return;
         }
 
@@ -204,7 +217,7 @@ export const findNodes = (editor: Editor, match: (node: Node) => boolean) => {
   });
 };
 
-export const getAncestor = (editor: ReactEditor, node: Node, level = 1) => {
+export const getAncestor = (editor: Editor, node: Node, level = 1) => {
   let parent: Node | null = null;
   let count = 0;
   while (node && count !== level) {

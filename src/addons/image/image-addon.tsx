@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Editor, Transforms } from "slate";
+import { Editor, Element, Transforms } from "slate";
 import { HistoryEditor } from "slate-history";
 import { useSlate, ReactEditor } from "slate-react";
 import { isDefined, isFilled } from "ts-is-present";
@@ -17,13 +17,16 @@ import { FileUpload } from "../../FileUpload";
 import { findNodes } from "../../utils";
 import { ImageBlock } from "./image-element";
 
-const insertImage = (editor: ReactEditor, url: string) => {
+const insertImage = (editor: Editor, url: string) => {
   const image = { type: "image", url, children: [{ text: "" }] };
   Transforms.insertNodes(editor, image);
 };
 
 function getAllImageNodes(editor: Editor) {
-  const [...images] = findNodes(editor, (n) => n.type === "image");
+  const [...images] = findNodes(
+    editor,
+    (n) => Element.isElement(n) && n.type === "image"
+  );
   return images.map(([node]) => node) as ImageElement[];
 }
 

@@ -15,8 +15,8 @@ export function ToolBtnPopup(props: {
   ) => React.ReactNode;
 }) {
   const [show, setShow] = useState(false);
-  const toolWindow = useRef(null);
-  useOnClickOutside(toolWindow, e => {
+  const toolWindow = useRef<HTMLDivElement>(null);
+  useOnClickOutside(toolWindow, (e) => {
     if (!e.defaultPrevented) {
       setShow(false);
     }
@@ -29,7 +29,7 @@ export function ToolBtnPopup(props: {
   };
   useOnKeyDown({
     pattern: props.shortcut,
-    handler: () => setShow(!show)
+    handler: () => setShow(!show),
   });
   return (
     <Manager>
@@ -38,10 +38,10 @@ export function ToolBtnPopup(props: {
           props.renderToolBtn(
             {
               ref,
-              onMouseDown: e => {
+              onMouseDown: (e) => {
                 e.preventDefault();
                 setShow(!show);
-              }
+              },
             },
             show
           )
@@ -53,9 +53,9 @@ export function ToolBtnPopup(props: {
           {
             name: "offset",
             options: {
-              offset: [-100, 10]
-            }
-          }
+              offset: [-100, 10],
+            },
+          },
         ]}
       >
         {({ ref, style, placement, arrowProps }) => (

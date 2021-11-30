@@ -10,13 +10,14 @@ import { ReactEditor } from "slate-react";
 import { InjectedRenderLeaf } from "../../chief";
 import { iPresenter } from "../../chief/chief-presentation";
 import { ControlProps, useIsControlEligable } from "../../chief/controls";
+import { Editor } from "slate";
 
 const shortcut = "mod+b";
 
-const action = (editor: ReactEditor) => toggleFormat(editor, "bold");
+const action = (editor: Editor) => toggleFormat(editor, "bold");
 
 const _renderLeaf: InjectedRenderLeaf = {
-  renderLeaf: props => renderLeaf(props, "bold", "strong")
+  renderLeaf: (props) => renderLeaf(props, "bold", "strong"),
 };
 
 export function BoldAddon(props: AddonProps) {
@@ -32,19 +33,19 @@ export function BoldAddon(props: AddonProps) {
       event.preventDefault();
       action(editor);
       return true;
-    }
+    },
   });
   return null;
 }
 
 const Presenter: iPresenter = {
-  leaf: _renderLeaf
+  leaf: _renderLeaf,
 };
 
 export function BoldControl(props: ControlProps) {
   if (
     !useIsControlEligable({
-      isText: true
+      isText: true,
     })
   ) {
     return null;
@@ -54,9 +55,9 @@ export function BoldControl(props: ControlProps) {
       tooltip={{
         label: {
           key: "marks.bold",
-          defaultLabel: "Bold"
+          defaultLabel: "Bold",
         },
-        shortcut: shortcutText(shortcut)
+        shortcut: shortcutText(shortcut),
       }}
       markType="bold"
     >

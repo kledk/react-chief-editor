@@ -2,9 +2,10 @@ import React from "react";
 import { ReactEditor } from "slate-react";
 import { KeyHandler } from "../key-handler";
 import isHotkey from "is-hotkey";
+import { ChiefEditor } from "../../typings";
 export const handleKeyDown = (
   event: React.KeyboardEvent<HTMLDivElement>,
-  editor: ReactEditor,
+  editor: ChiefEditor,
   onKeyHandlers: KeyHandler[]
 ) => {
   for (let handler of onKeyHandlers) {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { Editor as SlateEditor } from "slate";
 import {

@@ -5,7 +5,7 @@ import {
   RenderElementProps,
   Slate
 } from "slate-react";
-import { Node, Element, NodeEntry, Range } from "slate";
+import { Node, Element, NodeEntry, Range, Descendant } from "slate";
 import merge from "lodash/merge";
 import { ChiefEditorTheme } from "../chief-editor-theme";
 import { ThemeProvider } from "styled-components";
@@ -60,7 +60,7 @@ export type InjectedDecorator = {
 };
 
 export const Chief = React.memo(function(props: {
-  value: Node[];
+  value: Descendant[];
   onChange: (value: Node[]) => void;
   children: React.ReactNode;
   readOnly?: boolean;

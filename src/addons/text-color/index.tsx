@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { ReactNode, useCallback, useEffect, useRef } from "react";
 import { Editor, Node, Text, Transforms } from "slate";
 import { useSlate } from "slate-react";

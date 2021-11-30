@@ -1,4 +1,4 @@
-import { Editor, Transforms, Node } from "slate";
+import { Editor, Transforms, Node, Element } from "slate";
 
 export const toggleElement = (editor: Editor, type: string) => {
   const isActive = isElementActive(editor, type);
@@ -9,7 +9,7 @@ export const toggleElement = (editor: Editor, type: string) => {
   Transforms.setNodes(editor, {
     type: isActive ? "paragraph" : type,
     autoFocus: true,
-    at: selection.focus
+    at: selection.focus,
   });
 };
 
@@ -20,7 +20,7 @@ export const isElementActive = (editor: Editor, type: string) => {
   }
   const [match] = Editor.nodes(editor, {
     at: selection,
-    match: n => n.type === type
+    match: (n) => Element.isElement(n) && n.type === type,
   });
   return !!match;
 };

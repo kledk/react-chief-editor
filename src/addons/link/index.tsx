@@ -1,5 +1,6 @@
+//@ts-nocheck
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useSlate, useEditor } from "slate-react";
+import { useSlate, useSlateStatic } from "slate-react";
 import { Element, Editor, Transforms, Range, Node } from "slate";
 import { AddonProps } from "../../addon";
 import isUrl from "is-url";
@@ -70,7 +71,7 @@ export function LinkAddon(props: AddonProps) {
 }
 
 export function LinkControl(props: ControlProps) {
-  const editor = useEditor();
+  const editor = useSlateStatic();
   const isActive = isLinkActive(editor);
   if (
     !useIsControlEligable({
@@ -122,12 +123,16 @@ export const insertLink = (editor: Editor, url: string) => {
 };
 
 export const isLinkActive = (editor: Editor) => {
-  const [link] = Editor.nodes(editor, { match: (n) => n.type === "link" });
+  const [link] = Editor.nodes(editor, {
+    match: (n) => Element.isElement(n) && n.type === "link",
+  });
   return Boolean(link);
 };
 
 const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, { match: (n) => n.type === "link" });
+  Transforms.unwrapNodes(editor, {
+    match: (n) => Element.isElement(n) && n.type === "link",
+  });
 };
 
 const wrapLink = (editor: Editor, url: string) => {
@@ -166,7 +171,7 @@ function LinkPopup(props: { onClose: () => void }) {
   if (selection) {
     const [_linkNode] = Editor.nodes(editor, {
       at: selection,
-      match: (n) => n.type === "link",
+      match: (n) => Element.isElement(n) && n.type === "link",
     });
     linkNode = _linkNode && _linkNode[0];
   }

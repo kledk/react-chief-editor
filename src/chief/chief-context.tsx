@@ -7,8 +7,9 @@ import {
   InjectedRenderLeaf,
   InjectedRenderElement,
   InjectedLabels,
-  InjectedDecorator
+  InjectedDecorator,
 } from "./chief";
+import { ChiefEditor } from "../typings";
 interface ChiefRenderCore {
   injectRenderLeaf: (irl: InjectedRenderLeaf) => void;
   removeRenderLeaf: (irl: InjectedRenderLeaf) => void;
@@ -24,11 +25,11 @@ export function useChiefRenderCore() {
     []
   );
   function injectRenderLeaf(irl: InjectedRenderLeaf) {
-    setRenderLeafs(it => [...it, irl]);
+    setRenderLeafs((it) => [...it, irl]);
   }
 
   function removeRenderLeaf(irl: InjectedRenderLeaf) {
-    setRenderLeafs(it => {
+    setRenderLeafs((it) => {
       const toSlicer = [...it];
       toSlicer.splice(toSlicer.indexOf(irl), 1);
       return toSlicer;
@@ -36,11 +37,11 @@ export function useChiefRenderCore() {
   }
 
   function injectRenderElement(ire: InjectedRenderElement) {
-    setRenderElements(it => [...it, ire]);
+    setRenderElements((it) => [...it, ire]);
   }
 
   function removeRenderElement(ire: InjectedRenderElement) {
-    setRenderElements(it => {
+    setRenderElements((it) => {
       const toSlicer = [...it];
       toSlicer.splice(it.indexOf(ire), 1);
       return toSlicer;
@@ -53,12 +54,12 @@ export function useChiefRenderCore() {
     removeRenderLeaf,
     renderElements,
     injectRenderElement,
-    removeRenderElement
+    removeRenderElement,
   };
 }
 
 export interface ChiefContextValue extends ChiefRenderCore {
-  editor: ReactEditor;
+  editor: ChiefEditor;
   readOnly: boolean;
   setReadOnly: (readOnly: boolean) => void;
   id: string;
@@ -89,11 +90,11 @@ export function useProvideChiefContext(props: {
   const { current: id } = useRef(props.id || `chiefeditor${count++}`);
 
   function injectPlugin(plugin: OnPlugin) {
-    setInjectedPlugins(plugins => [...plugins, plugin]);
+    setInjectedPlugins((plugins) => [...plugins, plugin]);
   }
 
   function removePlugin(plugin: OnPlugin) {
-    setInjectedPlugins(it => {
+    setInjectedPlugins((it) => {
       const toSlicer = [...it];
       toSlicer.splice(toSlicer.indexOf(plugin), 1);
       return toSlicer;
@@ -101,7 +102,7 @@ export function useProvideChiefContext(props: {
   }
 
   function injectOnKeyHandler(keyHandler: KeyHandler) {
-    setOnKeyHandlers(it =>
+    setOnKeyHandlers((it) =>
       [...it, keyHandler].sort((a, b) =>
         a.priority === b.priority ? 0 : a.priority === "low" ? 1 : -1
       )
@@ -109,7 +110,7 @@ export function useProvideChiefContext(props: {
   }
 
   function removeOnKeyHandler(keyHandler: KeyHandler) {
-    setOnKeyHandlers(it => {
+    setOnKeyHandlers((it) => {
       const toSlicer = [...it];
       toSlicer.splice(it.indexOf(keyHandler), 1);
       return toSlicer;
@@ -117,7 +118,7 @@ export function useProvideChiefContext(props: {
   }
 
   function injectDecoration(decorator: InjectedDecorator) {
-    setDecorations(it =>
+    setDecorations((it) =>
       [...it, decorator].sort((a, b) =>
         a.priority === b.priority ? 0 : a.priority === "low" ? 1 : -1
       )
@@ -125,7 +126,7 @@ export function useProvideChiefContext(props: {
   }
 
   function removeDecoration(decorator: InjectedDecorator) {
-    setDecorations(it => {
+    setDecorations((it) => {
       const toSlicer = [...it];
       toSlicer.splice(it.indexOf(decorator), 1);
       return toSlicer;
@@ -133,7 +134,7 @@ export function useProvideChiefContext(props: {
   }
 
   function injectLabels(labels: InjectedLabels) {
-    setInjectedLabels(it => ({ ...it, ...labels }));
+    setInjectedLabels((it) => ({ ...it, ...labels }));
   }
 
   const value: ChiefContextValue = {
@@ -152,7 +153,7 @@ export function useProvideChiefContext(props: {
     injectLabels,
     decorations,
     injectDecoration,
-    removeDecoration
+    removeDecoration,
   };
 
   return value;

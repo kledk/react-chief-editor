@@ -1,4 +1,4 @@
-import { Editor, Transforms, Range } from "slate";
+import { Editor, Transforms, Range, Element } from "slate";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 
 export function ResetToParagraphAddon() {
@@ -7,7 +7,8 @@ export function ResetToParagraphAddon() {
       const { selection } = editor;
       if (selection && Range.isCollapsed(selection)) {
         const [parent, path] = Editor.parent(editor, selection);
-        const isParagraph = parent.type === "paragraph";
+        const isParagraph =
+          Element.isElement(parent) && parent.type === "paragraph";
         if (
           path.length === 1 &&
           !isParagraph &&
@@ -18,7 +19,7 @@ export function ResetToParagraphAddon() {
         }
       }
       return deleteBackward(...args);
-    }
+    },
   });
   return null;
 }

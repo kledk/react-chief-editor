@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { toggleList } from "./transforms";
 import { ChiefElement, InjectedRenderElement } from "../../chief/chief";
 import { useRenderElement } from "../../chief/hooks/use-render-element";
@@ -19,7 +20,7 @@ export const TYPE_ORDERED_LIST = "ordered-list";
 export const LIST_TYPES = [
   TYPE_LIST_ITEM,
   TYPE_UNORDERED_LIST,
-  TYPE_ORDERED_LIST
+  TYPE_ORDERED_LIST,
 ];
 
 type ListElement = {} & ChiefElement;
@@ -63,7 +64,7 @@ const Li = styled.li``;
 
 const _renderElement: InjectedRenderElement = {
   typeMatch: LIST_TYPES,
-  renderElement: props => {
+  renderElement: (props) => {
     switch (props.element.type) {
       case TYPE_UNORDERED_LIST:
         return renderElement(props, props.element.type, Ul);
@@ -72,20 +73,21 @@ const _renderElement: InjectedRenderElement = {
       default:
         return renderElement(props, TYPE_LIST_ITEM, Li);
     }
-  }
+  },
 };
 
 const Presenter: iPresenter = {
-  element: _renderElement
+  element: _renderElement,
 };
 
 export function ListsAddon(props: AddonProps) {
   usePlugin({
     normalizeNode: (normalizeNode, editor) => ([node, path]) => {
-      if (node.type === TYPE_LIST_ITEM) {
+      if (Element.isElement(node) && node.type === TYPE_LIST_ITEM) {
         const [parent] = Editor.parent(editor, path);
         if (
           parent &&
+          Element.isElement(parent) &&
           ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
             parent.type as string
           )
@@ -94,7 +96,7 @@ export function ListsAddon(props: AddonProps) {
         }
       }
       return normalizeNode([node, path]);
-    }
+    },
   });
 
   useRenderElement<ListElement>(_renderElement);
@@ -110,9 +112,10 @@ export function ListsAddon(props: AddonProps) {
 
       if (
         !ancestor ||
-        ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
-          ancestor!.type as string
-        )
+        (Element.isElement(ancestor) &&
+          ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+            ancestor!.type as string
+          ))
       ) {
         return false;
       }
@@ -121,7 +124,7 @@ export function ListsAddon(props: AddonProps) {
         Editor.withoutNormalizing(editor, () => {
           Transforms.insertNodes(editor, {
             type: TYPE_LIST_ITEM,
-            children: [{ text: "" }]
+            children: [{ text: "" }],
           });
         });
       } else {
@@ -132,11 +135,15 @@ export function ListsAddon(props: AddonProps) {
         const list = getAncestor(editor, active, 1) as Element;
         const listParent = getAncestor(editor, active, 2);
 
-        if (listParent && listParent.children[0].type === TYPE_LIST_ITEM) {
+        if (
+          listParent &&
+          Element.isElementList(listParent.children) &&
+          listParent.children[0].type === TYPE_LIST_ITEM
+        ) {
           //2. If nested then unwrap and move left
           Transforms.unwrapNodes(editor, {
-            match: n => n.type === list.type,
-            split: true
+            match: (n) => Element.isElement(n) && n.type === list.type,
+            split: true,
           });
         } else {
           //3. At top level so cannot unwrap, insert new paragraph and break from list
@@ -145,7 +152,7 @@ export function ListsAddon(props: AddonProps) {
       }
 
       return true;
-    }
+    },
   });
   useOnKeyDown({
     pattern: "tab",
@@ -158,9 +165,10 @@ export function ListsAddon(props: AddonProps) {
       let ancestor = getAncestor(editor, element, 1);
       if (
         !ancestor ||
-        ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
-          ancestor!.type as string
-        )
+        (Element.isElement(ancestor) &&
+          ![TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(
+            ancestor!.type as string
+          ))
       ) {
         return false;
       }
@@ -177,7 +185,7 @@ export function ListsAddon(props: AddonProps) {
           );
           destination[destination.length - 1]++;
           Transforms.moveNodes(editor, {
-            to: destination
+            to: destination,
           });
         } else {
           // 3b. otherwise, wrap the item in a new list and nest in parent
@@ -186,7 +194,7 @@ export function ListsAddon(props: AddonProps) {
         return true;
       }
       return false;
-    }
+    },
   });
   useOnKeyDown({
     pattern: "shift+tab",
@@ -209,11 +217,11 @@ export function ListsAddon(props: AddonProps) {
       if (e.shiftKey) {
         let ancestor = getAncestor(editor, element, 2);
         // 1. tab+shift = move left to grandparent list if nested
-        if (ancestor?.children.find(child => child.type === TYPE_LIST_ITEM)) {
+        if (ancestor?.children.find((child) => child.type === TYPE_LIST_ITEM)) {
           Transforms.liftNodes(editor);
         } else {
           const options = {
-            at: ReactEditor.findPath(editor, element)
+            at: ReactEditor.findPath(editor, element),
           };
           // 2. tab+shift = unwrap and move to below parent if no grandparent list
           if (element?.children.length == 1) {
@@ -226,7 +234,7 @@ export function ListsAddon(props: AddonProps) {
         return true;
       }
       return false;
-    }
+    },
   });
   return null;
 }

@@ -1,11 +1,15 @@
 import React from "react";
-import { useFocused, useSelected, useEditor } from "slate-react";
+import {
+  useFocused,
+  useSelected,
+  useSlateStatic,
+} from "slate-react";
 import { PlaceholderHint } from "../../placeholder-hint";
 import { Editor } from "slate";
 import { useLabels, ChiefRenderElementProps } from "../../chief";
 
 export const Heading = (props: ChiefRenderElementProps) => {
-  const editor = useEditor();
+  const editor = useSlateStatic();
   const isFocused = useFocused();
   const isSelected = useSelected();
   const defaultPlaceholderTexts = {

@@ -1,5 +1,6 @@
 import { ReactEditor } from "slate-react";
 import { OnPlugin } from "../../addon";
+import { ChiefEditor } from "../../typings";
 
 // Use this to save the originals of the editor functions
 let originalEntries = {};
@@ -9,7 +10,7 @@ let originalEntries = {};
  * @param editor
  * @param plugins
  */
-export function withChiefOnPlugIn(editor: ReactEditor, plugins: OnPlugin[]) {
+export function withChiefOnPlugIn(editor: ChiefEditor, plugins: OnPlugin[]) {
   // We basically take control over each function in the editor and route them
   // to the appropriate addon that has requested overriding it.
   // This allows for us to use hooks that can mount and unmount.

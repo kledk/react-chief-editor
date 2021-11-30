@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ReactNode } from "react";
 import { Editor as SlateEditor } from "slate";
 import { defaultTheme } from "../../defaultTheme";

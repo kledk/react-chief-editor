@@ -1,12 +1,10 @@
 import React from "react";
-import {
-  Editor as SlateEditor,
-  Location
-} from "slate";
+import { Editor as SlateEditor, Location } from "slate";
 import { ReactEditor } from "slate-react";
+import { ChiefEditor } from "../../typings";
 export const handleKeyUp = (
   event: React.KeyboardEvent<HTMLDivElement>,
-  editor: ReactEditor
+  editor: ChiefEditor
 ) => {
   const { selection } = editor;
   if (!selection) {

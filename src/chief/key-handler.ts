@@ -1,4 +1,4 @@
-import { ReactEditor } from "slate-react";
+import { Editor } from "slate";
 
 export type KeyHandler = {
   /** Key pattern used to trigger, eg. "mod+b"*/
@@ -6,7 +6,7 @@ export type KeyHandler = {
   /** Handler function for key trigger.*/
   handler: (
     e: KeyboardEvent,
-    editor: ReactEditor
+    editor: Editor
   ) => boolean | undefined | void;
   priority?: "high" | "low";
 };

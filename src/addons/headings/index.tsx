@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { AddonProps } from "../../addon";
 import { Heading } from "./Heading";
 import { Transforms, Editor, Range, Element } from "slate";
@@ -22,7 +22,7 @@ export function HeadingControl(
   if (
     !useIsControlEligable({
       isText: true,
-      isEmpty: true
+      isEmpty: true,
     })
   ) {
     return null;
@@ -32,8 +32,8 @@ export function HeadingControl(
       tooltip={{
         label: {
           key: `elements.heading.${heading}.placeholder`,
-          defaultLabel: heading
-        }
+          defaultLabel: heading,
+        },
       }}
       isActive={isNodeActive(editor, heading)}
       onMouseDown={(_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -49,15 +49,15 @@ export function HeadingControl(
 const Presenter: iPresenter = {
   element: {
     typeMatch: headingTypes,
-    renderElement: props =>
-      React.createElement(props.element.type, null, props.children)
-  }
+    renderElement: (props) =>
+      React.createElement(props.element.type, null, props.children),
+  },
 };
 
 export function HeadingsAddon(_props: AddonProps) {
   useRenderElement({
     typeMatch: headingTypes,
-    renderElement: props => <Heading {...props} />
+    renderElement: (props) => <Heading {...props} />,
   });
   useOnKeyDown({
     pattern: "Enter",
@@ -65,8 +65,8 @@ export function HeadingsAddon(_props: AddonProps) {
       const { selection } = editor;
       if (selection && Range.isCollapsed(selection)) {
         const [match] = Editor.nodes(editor, {
-          match: n =>
-            typeof n.type === "string" && Boolean(n.type?.match(/(h[1-6])/))
+          match: (n) =>
+            Element.isElement(n) && Boolean(n.type?.match(/(h[1-6])/)),
         });
         if (match) {
           event.preventDefault();
@@ -76,14 +76,14 @@ export function HeadingsAddon(_props: AddonProps) {
           } else {
             Transforms.insertNodes(editor, {
               type: "paragraph",
-              children: [{ text: "" }]
+              children: [{ text: "" }],
             });
           }
           return true;
         }
       }
       return false;
-    }
+    },
   });
   return null;
 }
@@ -92,13 +92,13 @@ function toggleHeading(editor: Editor, heading: string) {
   const isHeaderOfType = isHeadingType(editor, heading);
   if (isHeaderOfType) {
     Transforms.setNodes(editor, {
-      type: "paragraph"
+      type: "paragraph",
     });
   } else {
     Transforms.setNodes(
       editor,
       {
-        type: heading
+        type: heading,
       },
       { split: true }
     );
@@ -107,7 +107,7 @@ function toggleHeading(editor: Editor, heading: string) {
 
 export const isHeadingType = (editor: Editor, header: string) => {
   const [match] = Editor.nodes(editor, {
-    match: n => n.type === header
+    match: (n) => Element.isElement(n) && n.type === header,
   });
   return Boolean(match);
 };
@@ -115,7 +115,7 @@ export const isHeadingType = (editor: Editor, header: string) => {
 function insertHeader(editor: Editor, heading: string) {
   Transforms.insertNodes(editor, {
     type: heading,
-    children: [{ text: "" }]
+    children: [{ text: "" }],
   });
 }
 

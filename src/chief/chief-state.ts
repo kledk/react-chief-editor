@@ -1,6 +1,7 @@
 import { ReactEditor, useSlate } from "slate-react";
 import { Point, Editor, Range, Node } from "slate";
 import { ChiefElement, isChiefElement } from "./chief";
+import { ChiefEditor } from "../typings";
 
 interface ChiefState {
   editor: ReactEditor;
@@ -13,7 +14,7 @@ interface ChiefState {
   isSelectionExpanded: boolean;
 }
 
-export function getState(editor: ReactEditor): ChiefState {
+export function getState(editor: ChiefEditor): ChiefState {
   const { selection } = editor;
   const point = selection ? selection.focus : undefined;
   const [element] = point ? Editor.parent(editor, point) : [];
@@ -46,6 +47,6 @@ export function getState(editor: ReactEditor): ChiefState {
     selection,
     isElementEmpty,
     isSelectionExpanded,
-    isSelectionCollapsed
+    isSelectionCollapsed,
   };
 }

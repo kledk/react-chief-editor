@@ -1,13 +1,13 @@
-import { ReactEditor } from "slate-react";
+import { Editor } from "slate";
 import {
   InjectedLabels
 } from "./chief/chief";
 
 type OnPluginMap = {
-  [key in keyof ReactEditor]?: (
-    fn: ReactEditor[key],
-    editor: ReactEditor
-  ) => ReactEditor[key];
+  [key in keyof Editor]?: (
+    fn: Editor[key],
+    editor: Editor
+  ) => Editor[key];
 };
 
 type KnownKeys<T> = {

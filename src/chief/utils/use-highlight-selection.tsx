@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React from "react";
 import { Range, Node } from "slate";
 import { useDecoration } from "../hooks/use-decoration";
