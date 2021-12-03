@@ -5,7 +5,7 @@ import { usePlugin } from "../hooks/use-plugin";
 export function useCorrectVoidDeleteBehavior() {
   const editor = useSlate();
   usePlugin({
-    insertBreak: insertBreak => () => {
+    insertBreak: (insertBreak) => () => {
       if (!editor.selection || !Range.isCollapsed(editor.selection))
         return insertBreak();
 
@@ -14,18 +14,19 @@ export function useCorrectVoidDeleteBehavior() {
       if (SlateEditor.isVoid(editor, selectedNode)) {
         SlateEditor.insertNode(editor, {
           type: "paragraph",
-          children: [{ text: "" }]
+          children: [{ text: "" }],
         });
         return;
       }
 
       insertBreak();
     },
-    deleteBackward: deleteBackward => unit => {
+    deleteBackward: (deleteBackward) => (unit) => {
       if (
         !editor.selection ||
         !Range.isCollapsed(editor.selection) ||
-        editor.selection.anchor.offset !== 0
+        editor.selection.anchor.offset !== 0 ||
+        !Path.hasPrevious(Path.parent(editor.selection.anchor.path))
       )
         return deleteBackward(unit);
       const prevNodePath = Path.previous(
@@ -36,6 +37,6 @@ export function useCorrectVoidDeleteBehavior() {
         return Transforms.removeNodes(editor);
       }
       deleteBackward(unit);
-    }
+    },
   });
 }

@@ -192,8 +192,9 @@ export const ImageBlock = (
                 // draggable={false}
                 style={{
                   filter: focused && selected ? "brightness(0.5)" : "none",
-                  objectFit: "fill",
+                  objectFit: "cover",
                   height: element.height,
+                  width: "100%",
                   display: "block"
                 }}
                 alt={element.caption}

@@ -1,9 +1,13 @@
-//@ts-nocheck
 import React, { ReactNode, useCallback, useEffect, useRef } from "react";
-import { Editor, Node, Text, Transforms } from "slate";
+import { Editor, Element, Node, Path, Text, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { AddonProps } from "../../addon";
-import { ChiefElement, iPresenter, useRenderLeaf } from "../../chief";
+import {
+  ChiefElement,
+  iPresenter,
+  usePlugin,
+  useRenderLeaf,
+} from "../../chief";
 import { renderLeaf } from "../../leaf-renderer";
 import { StyledToolBox } from "../../ui/StyledToolBox";
 import { ToolbarBtn } from "../../ToolbarBtn";

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { ReactEditor, Editable } from "slate-react";
 import { OnPlugin } from "../addon";
 import { KeyHandler } from "./key-handler";
-import { createEditor } from "./utils/create-editor";
+import { useCreateEditor } from "./utils/create-editor";
 import {
   InjectedRenderLeaf,
   InjectedRenderElement,
@@ -85,7 +85,7 @@ export function useProvideChiefContext(props: {
   const [injectedLabels, setInjectedLabels] = useState<InjectedLabels>({});
   const [onKeyHandlers, setOnKeyHandlers] = useState<KeyHandler[]>([]);
   const [decorations, setDecorations] = useState<InjectedDecorator[]>([]);
-  const editor = createEditor(injectedPlugins);
+  const editor = useCreateEditor(injectedPlugins);
   const [readOnly, setReadOnly] = useState(Boolean(props.readOnly));
   const { current: id } = useRef(props.id || `chiefeditor${count++}`);
 

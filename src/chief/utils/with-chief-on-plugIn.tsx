@@ -19,15 +19,16 @@ export function withChiefOnPlugIn(editor: ChiefEditor, plugins: OnPlugin[]) {
       if (!(prop in originalEntries)) {
         originalEntries[prop] = value;
       }
-      editor[prop] = (...args: any[]) => {
+      const fn = (...args: any[]) => {
         let editorFn = originalEntries[prop];
         for (const plugin of plugins) {
           if (plugin && prop in plugin) {
-            editorFn = plugin && plugin[prop](editorFn, editor);
+            editorFn = plugin[prop](editorFn, editor);
           }
         }
         return editorFn(...args);
       };
+      editor[prop] = fn;
     }
   }
 

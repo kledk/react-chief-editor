@@ -31,10 +31,10 @@ function useProvideContext() {
   const isReadOnly = useChief().readOnly;
   const { savedSelection } = useSaveSelection();
   useHighlightSelection(savedSelection?.current, {
-    backgroundColor: "#969696"
+    backgroundColor: "#969696",
   });
 
-  // console.log({
+  // ""({
   //   isEditorFocused,
   //   selection,
   //   isCollapsed,
@@ -64,7 +64,7 @@ function useProvideContext() {
   }, [isEditorFocused, isCollapsed, isEmpty, isVoid]);
 
   const ctx = {
-    enabled
+    enabled,
   };
 
   return { ctx, setEnabled };
@@ -83,7 +83,7 @@ export function HoverTools(props: { children?: React.ReactNode }) {
   return (
     <hoverToolContext.Provider value={ctx}>
       <HoveringTool
-        onChangeEnabled={enabled => setEnabled(enabled)}
+        onChangeEnabled={(enabled) => setEnabled(enabled)}
         enabled={ctx.enabled}
       >
         {props.children}
@@ -120,11 +120,11 @@ export const HoveringTool = (
       bottom: 0,
       right: 0,
       width: 1,
-      height: 1
-    })
+      height: 1,
+    }),
   });
 
-  useOnClickOutside(toolRef, e => {
+  useOnClickOutside(toolRef, (e) => {
     if (currentNode) {
       const domNode = ReactEditor.toDOMNode(editor, currentNode);
       if (e.target && domNode.contains(e.target as globalThis.Node)) {
@@ -141,7 +141,7 @@ export const HoveringTool = (
         try {
           const domNode = ReactEditor.toDOMNode(editor, currentNode);
           _setV({
-            getBoundingClientRect: () => domNode.getBoundingClientRect()
+            getBoundingClientRect: () => domNode.getBoundingClientRect(),
           });
         } catch (err) {
           console.log(err);
@@ -153,7 +153,7 @@ export const HoveringTool = (
             const domRange = domSelection.getRangeAt(0);
             if (domRange && deltaOffset !== -1) {
               _setV({
-                getBoundingClientRect: () => domRange.getBoundingClientRect()
+                getBoundingClientRect: () => domRange.getBoundingClientRect(),
               });
             }
           }
@@ -174,9 +174,9 @@ export const HoveringTool = (
         {
           name: "offset",
           options: {
-            offset: [0, 10]
-          }
-        }
+            offset: [0, 10],
+          },
+        },
       ]}
       placement="top-end"
       referenceElement={_v}

@@ -16,9 +16,7 @@ export function useIsControlEligable(opts: {
   const { selection } = editor;
   if (selection) {
     const [match] = SlateEditor.nodes(editor, {
-      match: n => {
-        console.log(n)
-        // console.log(n && SlateEditor.isEmpty(editor, n as ChiefElement));
+      match: (n) => {
         if (opts.typeMatch && typeof n.type === "string") {
           if (matchesType(n as ChiefElement, opts.typeMatch)) {
             return true;
@@ -41,9 +39,8 @@ export function useIsControlEligable(opts: {
           return true;
         }
         return false;
-      }
+      },
     });
-    console.log(match)
     return Boolean(match);
   }
   return false;

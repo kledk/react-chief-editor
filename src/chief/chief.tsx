@@ -3,7 +3,7 @@ import {
   RenderLeafProps,
   ReactEditor,
   RenderElementProps,
-  Slate
+  Slate,
 } from "slate-react";
 import { Node, Element, NodeEntry, Range, Descendant } from "slate";
 import merge from "lodash/merge";
@@ -59,9 +59,9 @@ export type InjectedDecorator = {
   priority?: "high" | "low";
 };
 
-export const Chief = React.memo(function(props: {
+export const Chief = React.memo(function (props: {
   value: Descendant[];
-  onChange: (value: Node[]) => void;
+  onChange: (value: Descendant[]) => void;
   children: React.ReactNode;
   readOnly?: boolean;
   id?: string;

@@ -20,6 +20,8 @@ export * from "./addons/block-tab";
 export * from "./addons/block-insert-tool";
 export * from "./addons/hovering-tool";
 export * from "./addons/text-color";
+export * from "./addons/enforce-layout";
+export * from "./addons/poster-block";
 export * from "./chief-editor-theme";
 export * from "./chief/controls";
 export * from "./chief/utils/saved-selection";

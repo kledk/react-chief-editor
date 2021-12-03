@@ -1,6 +1,9 @@
 import styled from "styled-components";
 
 export const ContentStyle = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   font-family: "Source Sans Pro", sans-serif;
   color: #4b4a4a;
   font-size: 18px;

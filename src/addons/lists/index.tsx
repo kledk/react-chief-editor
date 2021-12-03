@@ -5,7 +5,7 @@ import { useRenderElement } from "../../chief/hooks/use-render-element";
 import { useOnKeyDown } from "../../chief/hooks/use-on-key-down";
 import { usePlugin } from "../../chief/hooks/use-plugin";
 import { renderElement } from "../../element-renderer";
-import { Editor, Transforms, Element, Range } from "slate";
+import { Editor, Transforms, Element, Range, Node } from "slate";
 import { ReactEditor } from "slate-react";
 import { isElementEmpty } from "../../element-utils";
 import { getState } from "../../chief/chief-state";
@@ -93,6 +93,34 @@ export function ListsAddon(props: AddonProps) {
           )
         ) {
           Transforms.setNodes(editor, { type: "paragraph" }, { at: path });
+          return;
+        }
+      }
+      if (
+        Element.isElement(node) &&
+        [TYPE_ORDERED_LIST, TYPE_UNORDERED_LIST].includes(node.type)
+      ) {
+        for (const [child, childPath] of Node.children(editor, path)) {
+          console.log(child);
+          if (Element.isElement(child)) {
+            if (child.type !== TYPE_LIST_ITEM) {
+              Transforms.setNodes(
+                editor,
+                { type: TYPE_LIST_ITEM, children: [{ text: "" }] },
+                { at: childPath }
+              );
+              return;
+            } else {
+              if (!child.children) {
+                Transforms.setNodes(
+                  editor,
+                  { type: TYPE_LIST_ITEM, children: [{ text: "" }] },
+                  { at: childPath }
+                );
+                return;
+              }
+            }
+          }
         }
       }
       return normalizeNode([node, path]);

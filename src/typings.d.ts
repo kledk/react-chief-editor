@@ -1,4 +1,4 @@
-import { BaseEditor } from "slate";
+import { BaseEditor, BaseText, BaseElement } from "slate";
 import { ReactEditor } from "slate-react";
 import { HistoryEditor } from "slate-history";
 
@@ -24,11 +24,12 @@ declare module "*.svg" {
 export type ChiefEditor = BaseEditor & ReactEditor & HistoryEditor;
 
 type CustomText = { text: string };
+type CustomElement = { type: string; children: CustomText[], [x: string]: any };
 
 declare module "slate" {
   interface CustomTypes {
     Editor: ChiefEditor;
-    Element: { type: string; children: CustomText[], [x: string]: any };
+    Element: CustomElement;
     Text: CustomText;
   }
 }

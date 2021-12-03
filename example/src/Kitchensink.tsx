@@ -47,6 +47,7 @@ import {
   Path,
   Editor as SlateEditor,
   Transforms,
+  Descendant,
 } from "slate";
 import { css } from "styled-components";
 import MdiIcon from "@mdi/react";
@@ -116,7 +117,7 @@ const editorLabels = {
 
 function App() {
   // const [value, setValue] = useState<Node[]>(lorem);
-  const [value, setValue] = useState<Node[]>(redia);
+  const [value, setValue] = useState<Descendant[]>(redia);
   // const [value, setValue] = useState<Node[]>([
   //   {
   //     type: "paragraph",
@@ -124,7 +125,7 @@ function App() {
   //   }
   // ]);
 
-  // console.log(JSON.stringify(value));
+  // ""(JSON.stringify(value));
 
   useEffect(() => {
     const data = window.localStorage.getItem("data");
@@ -168,8 +169,6 @@ function App() {
             },
           }}
         >
-          <TestAddon />
-          <ColumnsAddon />
           <LabelsAddon labels={editorLabels} />
           <ParagraphAddon />
           <BoldAddon />
@@ -178,12 +177,10 @@ function App() {
           <StrikethroughAddon />
           <HeadingsAddon />
           <ImageAddon />
-          <ResetToParagraphAddon />
           <PreventNewlineAddon />
           <PreventNewlineAddon />
           <LinkAddon />
           <ListsAddon />
-          <BlockTabAddon />
           <TextColorAddon />
           <div
             style={{
