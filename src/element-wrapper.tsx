@@ -28,7 +28,7 @@ export function ElementWrapper(
   const handleLeave = () => {
     setInside(false);
   };
-  const { props: dropDownprops } = useDropdownMenu();
+  const [ dropDownprops ] = useDropdownMenu();
   return (
     <div
       data-slate-zero-width="z"
