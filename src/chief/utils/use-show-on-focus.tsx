@@ -5,14 +5,13 @@ import { useChief } from "../hooks/use-chief";
 import { useDropdownMenu } from "react-overlays";
 import { Element } from "slate";
 
-
 export function useShowOnFocus(
   element: Element,
-  when: { isFocusedWithin?: boolean; isFocused?: boolean; isInside?: boolean; }
+  when: { isFocusedWithin?: boolean; isFocused?: boolean; isInside?: boolean }
 ) {
   const { isFocusedWithin, isFocused } = useFocused(element);
   const [inside, setInside] = useState(false);
-  const { readOnly,  } = useChief();
+  const { readOnly } = useChief();
   const handleEnter = () => {
     !readOnly && setInside(true);
   };
@@ -24,9 +23,12 @@ export function useShowOnFocus(
     onMouseEnter: handleEnter,
     onMouseLeave: handleLeave,
   };
-  const { props: dropDownprops } = useDropdownMenu();
+  const [dropDownprops] = useDropdownMenu({show: true, usePopper: false});
+
   const {
-    isFocused: whenIsFocused, isFocusedWithin: whenIsFocusedWithin, isInside: whenIsInside,
+    isFocused: whenIsFocused,
+    isFocusedWithin: whenIsFocusedWithin,
+    isInside: whenIsInside,
   } = when;
   const show = useMemo(() => {
     if (typeof whenIsFocused === "boolean" && isFocused) {
@@ -48,13 +50,14 @@ export function useShowOnFocus(
     inside,
   ]);
   const ShouldShow = useMemo(
-    () => (props: { children: ReactNode; style?: CSSProperties; }) => {
+    () => (props: { children: ReactNode; style?: CSSProperties }) => {
       const { children, style } = props;
       return (
         <Show when={show}>
           <div
             contentEditable={false}
             role="menu"
+            {...dropDownprops}
             style={{
               position: "absolute",
               zIndex: 2,
@@ -62,7 +65,6 @@ export function useShowOnFocus(
               marginRight: 5,
               ...style,
             }}
-            {...dropDownprops}
           >
             {children}
           </div>
