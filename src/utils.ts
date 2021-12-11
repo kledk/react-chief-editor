@@ -71,6 +71,14 @@ export function useHover<T extends HTMLElement>() {
   return [ref, value] as const;
 }
 
+export const getNode = <T extends Node>(editor: Editor, path: Path) => {
+  try {
+    return Node.get(editor, path) as T;
+  } catch (err) {
+    return null;
+  }
+};
+
 export const getActiveNode = (editor: Editor) => {
   if (editor.selection) {
     const [, path] = Editor.node(editor, editor.selection);

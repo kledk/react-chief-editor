@@ -10,6 +10,9 @@ export const StyledFocusToolBtn = styled(ButtonBase)`
   &:hover {
     background-color: rgba(67, 67, 67, 0.70);
   }
+  &:focus {
+    background-color: rgba(67, 67, 67, 0.40);
+  }
   color: white;
   border: none;
   &:first-child {

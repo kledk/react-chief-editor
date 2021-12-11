@@ -1,74 +1,103 @@
+import { useEffect } from "react";
 import {
   BaseElement,
+  Descendant,
   Editor,
   Element,
   Node,
   Path,
   Range,
+  Text,
   Transforms,
 } from "slate";
+import { useSlate, useSlateStatic } from "slate-react";
+import element from "slate-react/dist/components/element";
 import { useOnKeyDown, usePlugin } from "../../chief";
-import { getActiveNode } from "../../utils";
+import { getActiveNode, getNode } from "../../utils";
 
 export type EnforcedLayout = {
-  type: string;
-  children?: EnforcedLayout[];
+  path: Path;
+  element: { type: string };
 };
 
 export function EnforceLayoutAddon(props: { layout: EnforcedLayout[] }) {
   const { layout } = props;
+  const editor = useSlate();
+  
+  useEffect(() => Editor.normalize(editor, { force: true }), [layout]);
   usePlugin({
-    normalizeNode: (normalizeNode, editor) => ([node, path]) => {
-      if (path.length === 0) {
-        layout.forEach((block, index) => {
-          if (editor.children.length < index + 1) {
-            const node = {
-              type: block.type,
-              children: [{ text: "" }],
-            };
-            Transforms.insertNodes(editor, node, {
-              at: path.concat(editor.children.length - 1),
-            });
-          }
-        });
-
-        for (const [child, childPath] of Node.children(editor, path)) {
-          const slateIndex = childPath[0];
-          const enforceType = (type: string) => {
-            if (Element.isElement(child) && child.type !== type) {
-              const newProperties: Partial<Element> = { type };
-              Transforms.setNodes<Element>(editor, newProperties, {
-                at: childPath,
-              });
-            }
-          };
-          const deleteNode = () => {
-            if (Element.isElement(child)) {
+    normalizeNode: (normalizeNode, editor) => ([currentNode, currentPath]) => {
+      const endCurrentNormalizationPass = layout.some(
+        ({ path, element }, index, layout) => {
+          // console.log(path, currentPath);
+          for (const [child, childPath] of Node.nodes(editor)) {
+            if (
+              Element.isElement(child) &&
+              !layout.some((it) => Path.equals(it.path, childPath))
+            ) {
+              console.log("delete", child);
               Transforms.delete(editor, {
                 at: childPath,
               });
+              return true;
             }
-          };
-
-          if (layout[slateIndex]) {
-            enforceType(layout[slateIndex].type);
-          } else {
-            deleteNode();
           }
+          console.log(path);
+          const node = getNode(editor, path);
+          if (node) {
+            if (Element.isElement(node) && node.type !== element.type) {
+              console.log("set", element);
+              Transforms.setNodes(
+                editor,
+                { ...element },
+                {
+                  at: path,
+                }
+              );
+              return true;
+            }
+          }
+          if (Text.isText(node)) {
+            console.log("insert", element);
+            Transforms.insertNodes(
+              editor,
+              { ...element, children: [{ text: "" }] },
+              {
+                at: path,
+              }
+            );
+            return true;
+          }
+          if (node === null) {
+            Transforms.insertNodes(
+              editor,
+              { ...element, children: [{ text: "" }] },
+              {
+                at: path,
+              }
+            );
+            return true;
+          }
+
+          return false;
         }
+      );
+
+      if (endCurrentNormalizationPass) {
+        return;
       }
 
-      return normalizeNode([node, path]);
+      return normalizeNode([currentNode, currentPath]);
     },
     deleteForward: (deleteForward) => (unit) => {
       deleteForward(unit);
     },
     deleteBackward: (deleteBackward, editor) => (unit) => {
       const { selection } = editor;
-      console.log(unit);
+      // console.log(unit);
       if (selection) {
         const [node, path] = Editor.node(editor, selection);
-        console.log(path);
+        // console.log(path);
       }
       deleteBackward(unit);
     },
@@ -78,22 +107,41 @@ export function EnforceLayoutAddon(props: { layout: EnforcedLayout[] }) {
     },
     apply: (apply) => (op) => {
       console.log(op.type, "path" in op ? op.path : "", op);
-      if (
-        !["merge_node", "insert_node", "split_node", "remove_node"].includes(
-          op.type
-        )
-      ) {
-        apply(op);
-      } else if (op.type === "insert_node" && op.path.length > 1) {
-        apply(op);
-      } else if (op.type === "merge_node" && op.path.length > 1) {
-        apply(op);
-      } else if (op.type === "split_node" && op.path.length > 1) {
-        apply(op);
-      } else if (op.type === "remove_node" && op.path.length > 1) {
+
+      const isNormalizing = Editor.isNormalizing(editor);
+      if (isNormalizing) {
+        console.log("apply, is normalizing");
         apply(op);
       } else {
-        console.log("Ignored operation", op.type);
+        if (
+          !["merge_node", "insert_node", "split_node", "remove_node"].includes(
+            op.type
+          )
+        ) {
+          apply(op);
+        } else if (
+          op.type === "insert_node" &&
+          layout.some((it) => Path.equals(it.path, op.path))
+        ) {
+          apply(op);
+        } else if (
+          op.type === "merge_node" &&
+          !layout.some((it) => Path.equals(it.path, op.path))
+        ) {
+          apply(op);
+        } else if (
+          op.type === "split_node" &&
+          !layout.some((it) => Path.equals(it.path, op.path))
+        ) {
+          apply(op);
+        } else if (
+          op.type === "remove_node" &&
+          !layout.some((it) => Path.equals(it.path, op.path))
+        ) {
+          apply(op);
+        } else {
+          console.log("Ignored operation", op.type);
+        }
       }
     },
   });

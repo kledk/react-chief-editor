@@ -39,7 +39,7 @@ export type InjectedRenderLeaf = {
 
 export type InjectedRenderElement<T extends ChiefElement = ChiefElement> = {
   typeMatch?: ElementTypeMatch;
-  Component?: React.FunctionComponent<ChiefRenderElementProps>;
+  Component?: React.FunctionComponent<ChiefRenderElementProps<T>>;
   renderElement?:
     | JSX.Element
     | ((

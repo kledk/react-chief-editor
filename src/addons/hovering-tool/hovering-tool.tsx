@@ -114,6 +114,7 @@ export const HoveringTool = (
 
   const toolRef = useRef(null);
   const [_v, _setV] = useState<VirtualElement>({
+    //@ts-ignore
     getBoundingClientRect: () => ({
       top: -1000,
       left: -1000,
